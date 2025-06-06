@@ -2,7 +2,6 @@ from os import system, makedirs
 import os.path as op
 from snapserve.main import app
 import json
-from decouple import config
 
 
 openapi_bin = "node node_modules/openapi-typescript-codegen/bin/index.js"
@@ -33,4 +32,4 @@ def build(build_path):
 
 
 if __name__ == "__main__":
-    build(op.join(config("build_path"), "api"))
+    build(op.join(op.dirname(__file__), "..", "..", "build", "api"))

@@ -3,9 +3,13 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Element:
-    component: str
-    props: dict[str, str] = field(default_factory=dict)  # Component properties
+    type: str
     style: dict[str, str] = field(default_factory=dict)  # Element CSS style
+
+@dataclass
+class ImageElement(Element):
+    type: str = "image"
+    src: str = ""
 
 @dataclass
 class Board:

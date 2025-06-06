@@ -1,0 +1,33 @@
+{
+  "name": "snapcheck-front",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "api": "python ../python/snapserve/build.py; rm -rf ./src/api; cp -r ../build/api/client ./src/api; cp ./openapi_defaults/api_openapi.ts ./src/api/core/OpenAPI.ts; cp ./openapi_defaults/api_request.ts ./src/api/core/request.ts; sed -i 's/static//g' ./src/api/services/*"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.5.1",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "openapi-typescript-codegen": "^0.29.0",
+    "sass": "^1.89.1",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5"
+  }
+}

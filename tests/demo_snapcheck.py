@@ -1,3 +1,4 @@
+from snapcheck.qc.board import ImageElement
 from snapcheck.qc.cati import CATIVisit
 from snapcheck.qc import QualityControl, Board, Element
 from snapcheck.qc.io import load_quality_control
@@ -34,8 +35,8 @@ board1 = Board(
     intended_notes=[note1.id],
     style={"background-color": "lightblue"},
     elements=[
-        Element(component="text", props={"content": "Hello, World!"}, style={"font-size": "16px"}),
-        Element(component="image", props={"src": "image1.png"}, style={"width": "100px", "height": "100px"})
+        ImageElement(src="input_dwi.png"),
+        # Element(component="image", props={"src": "image1.png"}, style={"width": "100px", "height": "100px"})
     ]
 )
 

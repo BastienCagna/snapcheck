@@ -5,6 +5,7 @@ pixi.lock
 .pixi/
 .local/
 .vscode/
-front/node_modules
-
 .env
+
+
+build/
