@@ -1,6 +1,6 @@
 [project]
 name = "snapcheck"
-version = "0.0.1"
+version = "0.1.0"
 authors = [{ name = "BrainVISA team", email = "contact@brainvisa.info" }]
 description = "Control the quality of analysis performed on many neuroimaging data"
 readme = "README.md"
@@ -38,11 +38,16 @@ channels = [
 ]
 platforms = ["linux-64"]
 
-[tool.pixi.pypi-dependencies]
-
 [tool.pixi.tasks]
 
 [tool.pixi.dependencies]
 populse-db = ">=3"
 soma-python = ">5"
 pyqtwebengine = "<6"
+fastapi = ">=0.115.12,<0.116"
+
+[tool.pixi.pypi-dependencies]
+snapcheck = { path = ".", editable = true }
+
+[tool.setuptools.packages.find]
+where = ["python"]

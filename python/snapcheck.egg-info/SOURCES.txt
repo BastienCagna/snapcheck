@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+python/snapcheck/__init__.py
+python/snapcheck/__main__.py
+python/snapcheck/schema.py
+python/snapcheck.egg-info/PKG-INFO
+python/snapcheck.egg-info/SOURCES.txt
+python/snapcheck.egg-info/dependency_links.txt
+python/snapcheck.egg-info/requires.txt
+python/snapcheck.egg-info/top_level.txt
+python/snapcheck/static/index.html
+python/snapclient/__init__.py
