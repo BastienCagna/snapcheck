@@ -35,13 +35,16 @@ board1 = Board(
     intended_notes=[note1.id],
     style={"background-color": "lightblue"},
     elements=[
-        ImageElement(src="input_dwi.png"),
+        ImageElement(title="Input DWI (b=0)", src="input_dwi.png"),
+        ImageElement(title="Masks on FA", src="MANY_FA_and_bundles_masks.png"),
         # Element(component="image", props={"src": "image1.png"}, style={"width": "100px", "height": "100px"})
     ]
 )
 
 qc = QualityControl(
-    data_coordinates=visit,
+    title="Demo Quality Control",
+    description="This is a demo quality control for a CATI visit",
+    metadata=visit.__dict__,
     notes=[note1],
     boards=[board1]
 )

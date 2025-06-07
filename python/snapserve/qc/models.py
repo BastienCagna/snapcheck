@@ -15,18 +15,24 @@ class NoteModel(BaseModel):
     comment: str|None
 
 class ElementModel(BaseModel):
-    component: str
-    props: dict[str, str]
-    style: dict[str, str]
+    type: str
+    style: dict[str, str] = {}  # Element CSS style
+    title: str | None = None  # Optional title for the element, e.g., "Input DWI (b=0)"
+
+class ImageElementModel(ElementModel):
+    type: str = "image"
+    src: str = ""  # Source of the image file, e.g., "input_dwi.png"
 
 class BoardModel(BaseModel):
     title: str
     description: str
     intended_notes: List[str]  # List of note IDs that this board intends to use
     style: dict[str, str]
-    elements:List[ElementModel]
+    elements:List[ImageElementModel]
 
 class QualityControlModel(BaseModel):
-    data_coordinates: dict
+    title: str | None = None
+    description: str | None = None
+    metadata: dict
     notes: List[NoteModel] = []
     boards: List[BoardModel] = []

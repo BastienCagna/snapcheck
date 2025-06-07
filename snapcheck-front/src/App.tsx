@@ -15,7 +15,7 @@ function App() {
             setQc(qc);
             setError(null);
         }).catch((error) => {
-            setError("Failed to load QC File: " + error.message);
+            setError("Failed to load QC File");
         });
     };
 

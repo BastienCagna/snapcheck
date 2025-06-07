@@ -10,7 +10,7 @@ const ImageComponent: React.FC<{
     useEffect(() => {
         const fetchImage = async () => {
             try {
-                await qcService.qcGetImage();//src);
+                await qcService.qcGetImage(src);
             } catch (error) {
                 console.error('Error fetching image:', error);
             }
@@ -18,7 +18,7 @@ const ImageComponent: React.FC<{
 
         fetchImage();
     }, [src]);
-    return <img src={`http://127.0.0.1:8000/qc/image`} alt={src} style={style} />;
+    return <img src={`http://127.0.0.1:8000/qc/image/` + src} alt={src} style={style} />;
 };
 
 export default ImageComponent;

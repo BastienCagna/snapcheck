@@ -2,6 +2,7 @@ import React from 'react';
 import './sidebar.css';
 import type { QualityControlModel } from '../../api';
 import Button from '../lib/button';
+import NoteInput from './components/noteinput';
 
 
 const DictionaryTable: React.FC<{ dictionary: Record<string, string | number> }> = ({ dictionary }) => {
@@ -28,8 +29,31 @@ const Sidebar: React.FC<{
     return (
         <div className="sidebar">
             <Button onClick={onLoadRequest}>Load</Button>
-            <DictionaryTable dictionary={qc?.data_coordinates || {}} />
-        </div>
+            <Button onClick={() => { }}>Save</Button>
+            <Button onClick={() => { }}>Export</Button>
+
+            <h2>{qc?.title}</h2>
+            <h3>Metadata</h3>
+            <DictionaryTable dictionary={qc?.metadata || {}} />
+
+            <h3>Boards</h3>
+            {
+                qc?.boards?.length ? (
+                    <ul>
+                        {qc.boards.map((board, index) => (
+                            <li key={index}>
+                                <strong>{board.title}</strong>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className='default-text'>No boards available.</p>
+                )
+            }
+
+            <h3>Notes</h3>
+            {qc?.notes?.map((note) => (<NoteInput key={note.name} note={note} />))}
+        </div >
     );
 };
 

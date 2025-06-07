@@ -11,7 +11,6 @@ const BoardView: React.FC<{ qc: QualityControlModel }> = ({ qc }) => {
     }
     return (
         <div className="board-view">
-            <h2>Board View</h2>
             {qc.boards.length === 0 && <p className='default-text'>No boards available.</p>}
             <Board board={qc.boards[0]} />
         </div>

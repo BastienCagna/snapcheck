@@ -37,6 +37,8 @@ const Board: React.FC<{ board: BoardModel }> = ({ board }) => {
 
     return (
         <div className="board">
+            <h2>{board.title}</h2>
+            {board.description && <p>{board.description}</p>}
             {boardElements.map((element, index) => (
                 <div key={index} className="board-element">
                     {renderElement(element)}

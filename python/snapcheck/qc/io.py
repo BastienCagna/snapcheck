@@ -8,7 +8,9 @@ import json
 
 @dataclass
 class QualityControl:
-    data_coordinates: Any # A value used to identify where data commes from
+    title: str|None = None
+    description: str|None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     notes: List[Note] = field(default_factory=list)
     boards: List[Board] = field(default_factory=list)
 
@@ -48,7 +50,7 @@ def load_quality_control(path: str) -> QualityControl:
 
     # Convert the loaded data back into a QualityControl object
     qc = QualityControl(
-        data_coordinates=data['data_coordinates'],
+        metadata=data['metadata'],
         notes=[Note(**note) for note in data['notes']],
         boards=[Board(**board) for board in data['boards']]
     )

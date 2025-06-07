@@ -28,7 +28,8 @@ class MainWindow(QMainWindow):
         self.browser.setUrl(QUrl(url))
 
         self.browser.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        self.browser.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True)
+        # self.browser.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True) # Already set by default
+        self.browser.settings().setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
 
         # Set the central widget
         central_widget = QWidget()

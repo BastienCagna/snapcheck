@@ -7,5 +7,7 @@ pixi.lock
 .vscode/
 .env
 
+__pycache__/
+
 
 build/

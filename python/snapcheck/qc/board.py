@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 @dataclass
 class Element:
     type: str
+    title: str|None = None
     style: dict[str, str] = field(default_factory=dict)  # Element CSS style
 
 @dataclass
