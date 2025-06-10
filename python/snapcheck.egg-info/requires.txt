@@ -1,4 +1,0 @@
-
-[doc]
-sphinx>=1.0
-sphinx-rtd-theme

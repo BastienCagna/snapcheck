@@ -1,3 +1,0 @@
-snapcheck
-snapclient
-snapserve
