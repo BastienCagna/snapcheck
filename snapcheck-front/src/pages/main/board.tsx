@@ -2,7 +2,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import type { BoardModel } from '../../api';
 
 
-const ImageComponent = React.lazy(() => import('../elements/image'));
+const ImageComponent = React.lazy(() => import('../../components/elements/image'));
 
 const renderElement = (element: any) => {
     // const { type, src, style } = element;

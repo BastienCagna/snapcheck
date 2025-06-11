@@ -7,9 +7,11 @@ import sys
 import subprocess
 import time
 import atexit
-from PyQt5.QtWidgets import QSplashScreen
+import PyQt5.QtWidgets as qw
+from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QPixmap
 import os.path as op
+import requests
 
 ASSETS_PATH = op.abspath(op.join(op.dirname(__file__), "assets"))
 SPLASH_PATH = op.join(ASSETS_PATH, "splash.jpg")
@@ -18,17 +20,44 @@ FRONT_PATH = op.abspath(op.join(op.dirname(__file__), "..", "..", "snapcheck-fro
 DEFAULT_PORT = 3000
 DEFAULT_URL = "127.0.0.1"
 
+
+class BottomBar(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setContentsMargins(0, 0, 0, 0)
+        self.setStyleSheet("background-color: #333; color: #ccc; font-size: 10px;")
+        self.setFixedHeight(20)
+
+        # Create a bottom bar
+        layout = qw.QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
+        layout.setSpacing(5)  # Add spacing between widgets
+
+        # Add a "Setting" button
+        config_button = qw.QPushButton("Settings")
+        layout.addWidget(config_button)
+
+        # Add a connection status label
+        connection_status = qw.QLabel("Status: Connected to localhost")
+        layout.addWidget(connection_status)
+
+        # Align items to the left and use the smallest space necessary
+        layout.addStretch()  # Add a stretchable space to push items to the left
+        self.setLayout(layout)
+
+
 class MainWindow(QMainWindow):
     def __init__(self, url: str):
         super().__init__()
         self.setWindowTitle("SnapCheck")
+        self.setStyleSheet("background-color: #333; color: #ccc;")
 
         # Create a QWebEngineView to display the web page
         self.browser = QWebEngineView()
         self.browser.setUrl(QUrl(url))
 
+        # Change some settings to avoid CORS issues
         self.browser.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        # self.browser.settings().setAttribute(QWebEngineSettings.LocalContentCanAccessFileUrls, True) # Already set by default
         self.browser.settings().setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
 
         # Set the central widget
@@ -37,6 +66,12 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
         layout.setSpacing(0)  # Remove spacing between widgets
         layout.addWidget(self.browser)
+
+        # Add the bottom status bar
+        self.bottom_bar = BottomBar()
+        layout.addWidget(self.bottom_bar)
+        layout.setStretch(0, 1)
+
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
@@ -73,7 +108,7 @@ def main():
 
     # Create a splash screen
     splash_pix = QPixmap(SPLASH_PATH)  # Replace with your splash image path
-    splash = QSplashScreen(splash_pix)
+    splash = qw.QSplashScreen(splash_pix)
 
     splash.show()
 
@@ -84,22 +119,20 @@ def main():
     # Close the server when exiting the program
     atexit.register(lambda: stop_vite_server(process, port))
 
-    time.sleep(0.4) # Waiting 250ms seems to be enough for the server to start
     # Wait for the Vite server to be ready
-    # print('Waiting for the Vite server to start', end="")
-    # for _ in range(100):
-    #     try:
-    #         response = requests.get(url)
-    #     except requests.exceptions.ConnectionError:
-    #         response = None
-    #     print('.', end='', flush=True)
-    #     if response and response.status_code == 200:
-    #         # Server is ready
-    #         break
-    #     time.sleep(0.25)
-    # else:
-    #     print(f"Server dind't start in time.")
-    #     sys.exit(1)
+    for i in range(100):
+        try:
+            response = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            response = None
+        print('.', end='', flush=True)
+        if response and response.status_code == 200:
+            # Server is ready
+            break
+        time.sleep(0.2)
+    else:
+        print(f"Server dind't start in time.")
+        sys.exit(1)
 
     window = MainWindow(url)
     splash.finish(window)

@@ -1,0 +1,60 @@
+.sidebar
+    background-color: #111
+    height: 100vh
+    width: 100%
+    overflow-y: auto
+    overflow-x: hidden
+    padding: 0px 2px
+
+    .sidebar-header
+        padding: 0.5rem
+
+    .sidebar-menu
+        margin: 0
+        padding: 1px
+        width: 100%
+        display: flex
+        flex-direction: row
+        align-items: center
+        overflow: hidden
+
+        .sidebar-menu-item
+            display: flex
+            justify-content: center
+            align-items: center
+            width: 38px
+            margin: 2px
+            height: 38px
+            cursor: pointer
+            border-radius: 4px
+            font-weight: bold
+            color: #d4d4d4
+
+            &:hover
+                background-color: #e0e0e0
+
+    .sidebar-content
+        h3
+            font-size: 1rem
+
+        h4
+            font-size: 0.92rem
+
+        h5
+            font-size: 0.85rem
+
+        h6
+            font-size: 0.8rem
+
+        p
+            font-size: 0.8rem
+
+.qc-control-panel
+    ul.board-list
+        display: flex
+        flex-direction: row
+        flex-wrap: wrap
+        padding: 0.5rem
+
+        li
+            list-style: none

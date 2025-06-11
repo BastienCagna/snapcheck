@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { QcService } from './api/services/QcService';
 import './App.css'
 import type { QualityControlModel } from './api';
-import Sidebar from './components/main/sidebar';
-import MainContent from './components/main/main';
+import Sidebar from './pages/main/sidebar/sidebar';
+import MainContent from './pages/main/main';
 
 function App() {
     const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,9 @@ function App() {
 
     return (
         <div className='app'>
-            <div className='sidebar-container'><Sidebar qc={qc} onLoadRequest={load} /></div>
+            <div className='sidebar-container'>
+                <Sidebar qc={qc} onLoadRequest={load} />
+            </div>
             <div className="main-container">
                 <MainContent qc={qc} error={error} />
             </div>

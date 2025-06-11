@@ -11,6 +11,10 @@
     "api": "python ../python/snapserve/build.py; rm -rf ./src/api; cp -r ../build/api/client ./src/api; cp ./openapi_defaults/api_openapi.ts ./src/api/core/OpenAPI.ts; cp ./openapi_defaults/api_request.ts ./src/api/core/request.ts; sed -i 's/static//g' ./src/api/services/*"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
     "axios": "^1.9.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

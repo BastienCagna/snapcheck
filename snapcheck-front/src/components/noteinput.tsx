@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import type { NoteModel } from '../../../api/models/NoteModel';
-import type { NoteScaleModel } from '../../../api/models/NoteScaleModel';
+import type { NoteModel } from '../api/models/NoteModel';
+import type { NoteScaleModel } from '../api/models/NoteScaleModel';
 
 
 interface NoteInputProps {
@@ -22,8 +22,10 @@ const NoteInput: React.FC<NoteInputProps> = ({ note }) => {
     const name = note.name || 'Unnamed (#' + note.id + ')';
     return (
         <div>
-            <label>
-                {name}
+            <div>
+                <label>{name}</label>
+            </div>
+            <div style={{ display: 'flex', gap: '1rem' }}>
                 <select value={selectedValue || ''} onChange={handleSelectChange}>
                     <option value="" disabled>
                         Select a value
@@ -35,8 +37,6 @@ const NoteInput: React.FC<NoteInputProps> = ({ note }) => {
                             </option>
                         ))}
                 </select>
-            </label>
-            <div>
                 <input
                     type="text"
                     placeholder="Add a comment"
