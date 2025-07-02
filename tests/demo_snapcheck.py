@@ -1,7 +1,6 @@
 from snapcheck.qc.board import ImageElement
 from snapcheck.qc.cati import CATIVisit
 from snapcheck.qc import QualityControl, Board, Element
-from snapcheck.qc.io import load_quality_control
 from snapcheck.qc.note import Note, NoteScale, NoteScaleItem
 
 
@@ -65,8 +64,8 @@ preproc_board = Board(
     description="Vérifiez la b=0 et le bon alignement de la FA sur l'espace modèle MNI.",
     intended_notes=[b0_note, mni_registration_note],
     elements=[
-        ImageElement(title="Input DWI (b=0)", src="input_dwi.png"),
-        ImageElement(title="FA & MNI", src="FA_and_MNI_template.gif"),
+        ImageElement(title="Input DWI (b=0)", src="./.local/demo_sources/input_dwi.png"),
+        ImageElement(title="FA & MNI", src=".local/demo_sources/FA_and_MNI_template.gif"),
     ]
 )
 
@@ -96,10 +95,20 @@ cst_board = Board(
     description="Vérifiez la qualité des masques et la répartition des fibres du bundle CST.",
     intended_notes=bundles_notes,
     elements=[
-        ImageElement(title="Masques du faisceau sur la FA (espace MNI)", src="bundles_on_subject_FA_MNI_axial.png"),
-        ImageElement(src="bundles_on_subject_FA_MNI_coronal.png"),
-        ImageElement(title="Tract Orientation Maps", src="bundles_TOM.png"),
-        ImageElement(title="Tractographie", src="tractography.gif")
+        ImageElement(title="Masques du faisceau sur la FA (espace MNI)", src=".local/demo_sources/bundles_on_subject_FA_MNI_axial.png"),
+        ImageElement(src=".local/demo_sources/bundles_on_subject_FA_MNI_coronal.png"),
+        ImageElement(title="Tract Orientation Maps", src=".local/demo_sources/bundles_TOM.png"),
+        ImageElement(title="Tractographie", src=".local/demo_sources/tractography.gif")
+    ]
+)
+
+dev_board = Board(
+    title="Développement",
+    description="Board de développement pour tester des éléments.",
+    intended_notes=[],
+    elements=[
+        ImageElement(title="Image de test", src=".local/demo_sources/test_image.png"),
+        Element(title="Texte de test", content="Ceci est un texte de test pour le board de développement.")
     ]
 )
 
@@ -125,8 +134,8 @@ metrics_board = Board(
     description="Vérifiez la qualité des cartes de métriques.",
     intended_notes=[fa_note, md_note],
     elements=[
-        ImageElement(title="Carte de FA", src="CST_FA_and_bundles_masks.png"),
-        ImageElement(title="Carte de MD", src="CST_MD_and_bundles_masks.png")
+        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png"),
+        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png")
     ]
 )
 
@@ -141,7 +150,8 @@ qc = QualityControl(
     boards=[preproc_board, cst_board, metrics_board],
 )
 
-f = ".local/demo_snapcheck.json"
+f = ".local/demo.snpk"
+# qc.to_json(f)
 qc.save(f)
 
 # qc_r = load_quality_control(f)

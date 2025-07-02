@@ -1,13 +1,20 @@
 
 from dataclasses import dataclass, field
 from typing import Any, List
-from snapcheck.qc.board import Board
+from snapcheck.core.io import temporarly_change_directory
+from snapcheck.core.objects import BSCObject
+from snapcheck.qc.board import Board, FileElement
 from snapcheck.qc.note import Note
 import json
+from warnings import warn
+import tempfile
+import os.path as op
+from os import mkdir, rename
+import shutil
 
 
 @dataclass
-class QualityControl:
+class QualityControl(BSCObject):
     title: str|None = None
     description: str|None = None
     metadata: dict[str, Any] = field(default_factory=dict)
@@ -33,21 +40,46 @@ class QualityControl:
                 continue
             note.scale.check()
 
-
-    def to_json(self, path: str) -> None:
-        """ Save as JSON file"""
+    def to_dict(self, validate=False) -> None:
+        """ Return the object as dict (optionally after validation) """
         # Validate before saving
-        self._validate()
+        if validate:
+            self._validate()
+        return super().to_dict()
 
-        # Write the QualityControl object to a JSON file
-        with open(path, 'w') as f:
-            json.dump(self, f, default=lambda o: o.__dict__, indent=4)
+    def to_json(self, path: str):
+        warn(
+            "Using to_json() method on QualityControl object will only save metadata.\n" + \
+            "To also save the boards content, use the save() method"
+        )
+        return super().to_json()
 
-    def save(self, path: str) -> None:
-        """ Save the QualityControl
-            This method allows to use an other default serialization method in future.
-        """
-        self.to_json(path)
+    def save(self, path: str):
+        # Create the content directory
+        fname = op.basename(path).split('.')[-2]
+        tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_")
+        content_path = op.join(tmp_dir.name, "content")
+        mkdir(content_path)
+        js_f = op.join(tmp_dir.name, fname + ".json")
+
+        # List all elements
+        elements = [element for board in self.boards for element in board.elements if isinstance(element, FileElement)]
+        source_tracker = {}
+        with temporarly_change_directory(tmp_dir.name):
+            # Copy each source file and change its path in each elements
+            for el in elements:
+                el.export_to_local("./content", source_tracker)
+
+        # Save the JSON file
+        super().to_json(js_f)
+
+        # Compress all together
+        # TODO: make directly the archive with the proper name
+        # Create the archive directly with the desired file name and extension
+        base_name, ext = op.splitext(path)
+        archive_path = shutil.make_archive(base_name=base_name, format='zip', root_dir=tmp_dir.name)
+        # If the extension is not .snapqc, rename the archive
+        rename(archive_path, path)
 
 
 def load_quality_control(path: str) -> QualityControl:
