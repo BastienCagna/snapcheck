@@ -9,8 +9,9 @@ import json
 from warnings import warn
 import tempfile
 import os.path as op
-from os import mkdir, rename
+from os import mkdir, rename, listdir
 import shutil
+import zipfile
 
 
 @dataclass
@@ -40,12 +41,33 @@ class QualityControl(BSCObject):
                 continue
             note.scale.check()
 
-    def to_dict(self, validate=False) -> None:
+    def to_dict(self, validate=False, factorize=True) -> None:
         """ Return the object as dict (optionally after validation) """
         # Validate before saving
         if validate:
             self._validate()
-        return super().to_dict()
+
+        data = super().to_dict()
+
+        if not factorize:
+            return data
+
+        # List all the scale to save them and use references in notes
+        scales = {}
+        ser_scales = {}
+        for real_note, ser_note in zip(self.notes, data["notes"]):
+            if real_note is not None and real_note.scale not in scales:
+                id = len(scales)
+                scales[real_note.scale] = id
+                ser_scales[id] = ser_note["scale"]
+            else:
+                id = scales[real_note.scale]
+            ser_note["scale"] = id
+
+        # List all the notes to use references (ids) in boards
+        data["_scales"] = scales
+
+        return data
 
     def to_json(self, path: str):
         warn(
@@ -84,34 +106,47 @@ class QualityControl(BSCObject):
 
 def load_quality_control(path: str) -> QualityControl:
     """ Load a QualityControl object from a JSON file """
+    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_load_")
+    with zipfile.ZipFile(path, 'r') as zip_ref:
+        zip_ref.extractall(tmp_dir.name)
+
+    # Find the JSON file at the root of the archive
+    json_files = [f for f in listdir(tmp_dir.name) if f.endswith('.json')]
+    if not json_files:
+        raise FileNotFoundError("No JSON file found at the root of the archive.")
+    json_path = op.join(tmp_dir.name, json_files[0])
+    path = json_path
+
     with open(path, 'r') as f:
         data = json.load(f)
 
-    notes = [Note(**note) for note in data['notes']]
 
-    # Rehydrate the boards with their intended notes
-    boards = []
-    for board in data['boards']:
-        bdata = board
-        bnotes = []
-        for note_id in bdata.pop('intended_notes', []):
-            # Find the note by ID
-            for note in notes:
-                if note.id == note_id:
-                    bnotes.append(note)
-                    break
-            else:
-                raise ValueError(f"Note with ID '{note_id}' not found in loaded notes.")
-        bdata['intended_notes'] = bnotes
-        boards.append(Board(**bdata ))
+    # notes = [Note(**note) for note in data['notes']]
+
+    # # Rehydrate the boards with their intended notes
+    # boards = []
+    # for board in data['boards']:
+    #     bdata = board
+    #     bnotes = []
+    #     for note_id in bdata.pop('intended_notes', []):
+    #         # Find the note by ID
+    #         for note in notes:
+    #             if note.id == note_id:
+    #                 bnotes.append(note)
+    #                 break
+    #         else:
+    #             raise ValueError(f"Note with ID '{note_id}' not found in loaded notes.")
+    #     bdata['intended_notes'] = bnotes
+    #     boards.append(Board(**bdata ))
 
     # Convert the loaded data back into a QualityControl object
-    qc = QualityControl(
-        metadata=data['metadata'],
-        notes=notes,
-        boards=boards
-    )
+    # qc = QualityControl(
+    #     metadata=data['metadata'],
+    #     notes=notes,
+    #     boards=boards
+    # )
 
+    qc = QualityControl.from_dict(data)
     # Validate the loaded object
     qc._validate()
 

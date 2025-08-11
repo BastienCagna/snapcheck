@@ -7,7 +7,7 @@ import os.path as op
 
 router = APIRouter()
 
-qc = load_quality_control(op.join(op.dirname(__file__), "..", "..", "..", ".local/demo_snapcheck.json"))
+qc = load_quality_control(op.join(op.dirname(__file__), "..", "..", "..", ".local/demo.snpk"))
 
 @router.get("/", response_model=QualityControlModel)
 def get_full_qc():
