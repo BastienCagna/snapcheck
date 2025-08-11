@@ -8,21 +8,22 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { type Tab, Tabs } from '../../../components/lib/tabs/tabs';
 import DictionaryTable from '../../../components/lib/table/dictTable';
-import type { QualityControlModel } from '../../../api';
+import type { NoteModel, QualityControlModel, BoardModel } from '../../../api';
 
 
 
 const QCControl: React.FC<{
     qc: QualityControlModel | null;
-    onBoardChange?: (boardId: string) => void;
-}> = ({ qc }) => {
+    onBoardChange?: (idx: number) => void;
+    onNoteChanged?: (note: NoteModel) => void;
+}> = ({ qc, onBoardChange, onNoteChanged }) => {
     return <div className="qc-control-panel">
         {
             qc?.boards?.length ? (
                 <ul className='board-list'>
-                    {qc.boards.map((board, index) => (
+                    {qc.boards.map((board: BoardModel, index) => (
                         <li key={index}>
-                            <Button>{board.title}</Button>
+                            <Button onClick={() => { if (onBoardChange) onBoardChange(index) }}>{board.title}</Button>
                         </li>
                     ))}
                 </ul>
@@ -32,18 +33,20 @@ const QCControl: React.FC<{
         }
 
         <h3>Notes</h3>
-        {qc?.notes?.map((note) => (<NoteInput key={note.name} note={note} />))}
+        {qc?.notes?.map((note, index) => (<NoteInput key={index} note={note} onChange={(note)=>{if(onNoteChanged) onNoteChanged(note)}} />))}
     </div>
 }
 
 const Sidebar: React.FC<{
     qc: QualityControlModel | null;
+    hasChanged: boolean;
     onLoadRequest?: () => void;
-    onBoardChange?: (boardId: string) => void;
-}> = ({ qc, onLoadRequest, onBoardChange }) => {
+    onBoardChange?: (boardId: number) => void;
+    onNoteChanged?: (note: NoteModel) => void;
+}> = ({ qc, hasChanged, onLoadRequest, onBoardChange, onNoteChanged }) => {
     const menuItems: Tab[] = [
         { title: <FileCopyIcon />, content: <><h3>Coucou</h3></> },
-        { title: <EditNoteIcon />, content: <QCControl qc={qc} onBoardChange={(idx) => { onBoardChange && onBoardChange(idx) }} /> },
+        { title: <EditNoteIcon />, content: <QCControl qc={qc} onBoardChange={(idx) => { onBoardChange && onBoardChange(idx) }} onNoteChanged={(note) => { if (onNoteChanged) onNoteChanged(note) }} /> },
         { title: <ViewListIcon />, content: <DictionaryTable dictionary={qc?.metadata || {}} /> },
     ];
 
@@ -51,7 +54,9 @@ const Sidebar: React.FC<{
         <div className="sidebar">
             <div className='sidebar-header'>
                 <Button onClick={onLoadRequest}>Load</Button>
-                <Button onClick={() => { }}>Save</Button>
+                <Button onClick={onLoadRequest}>Reload</Button>
+                <Button onClick={() => { }} disabled={!hasChanged}>Save</Button>
+                <Button onClick={() => { }} disabled={!hasChanged}>Save As...</Button>
                 <Button onClick={() => { }}>Export</Button>
                 <h2>{qc?.title || 'Untitled'}</h2>
             </div>

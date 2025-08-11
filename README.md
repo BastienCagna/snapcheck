@@ -3,14 +3,24 @@ QC tool for neuroimaging pipelines
 
 ## Install
 ```
-pip install git+https://github.com/populse/soma-base@6.0
-pip install git+https://github.com/populse/populse_db@3.0
-pip install git+https://github.com/brainvisa/snapcheck
+pixi shell
+cd snapcheck-front/
+npm install
+cd ../
+```
+SASS file smus tbe compiled (ex: using SASS live Compiler is VSCode)
+
+Building the javascript API for the frontend:
+```shell
+cd snapcheck-front/
+npm run api
+cd ../
 ```
 
 ## Test
 
 ```
-python -m snapcheck /path/to/database create
-python -m snapcheck /path/to/database
+pixi run client
+
+python python/snapclient/main.py
 ```

@@ -14,10 +14,9 @@ def get_full_qc():
     return qc.__dict__
 
 
-@router.get("/image/{src}", response_class=FileResponse)
+@router.get("/image/{src:path}", response_class=FileResponse)
 def get_image(src: str):
-    print(f"request image: {src}")
-    image_path = op.join(".local/demo_snapcheck", src)  # Assumes 'src' is passed directly as a valid path segment
+    image_path = op.join(qc._dir.name, src)
     if not op.exists(image_path):
         raise HTTPException(status_code=404, detail="Image not found")
     return FileResponse(image_path, media_type="image/png")

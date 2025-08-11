@@ -1,6 +1,7 @@
 from snapcheck.qc.board import ImageElement
 from snapcheck.qc.cati import CATIVisit
 from snapcheck.qc import QualityControl, Board, Element
+from snapcheck.qc.io import load_quality_control
 from snapcheck.qc.note import Note, NoteScale, NoteScaleItem
 
 
@@ -154,4 +155,4 @@ f = ".local/demo.snpk"
 # qc.to_json(f)
 qc.save(f)
 
-# qc_r = load_quality_control(f)
+qc_r = load_quality_control(f)

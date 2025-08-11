@@ -4,7 +4,7 @@ import json
 
 from collections import deque
 from copy import deepcopy
-from .io import globalDynamicLoader, serialize
+from .io import globalDynamicLoader, resolve_references, serialize
 from .callback import Callback
 
 BACKUP_DEQUE_SIZE = 40
@@ -63,7 +63,23 @@ class Serializable:
 
     @classmethod
     def from_dict(cls, data: dict):
+        all_attributes = globalDynamicLoader.get_all_attributes(cls).keys()
+
+        # Inflate all objects
         obj = globalDynamicLoader.inflate(data)
+        if "_is_loading" in all_attributes:
+            obj._is_loading = True
+
+        # Resolve references
+        obj = resolve_references(obj)
+
+        # saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
+        # for attr in all_attributes:
+        #     if attr not in saved_attributes:
+        #         del obj[attr]          
+
+        if hasattr(obj, "_is_loading"):
+            obj._is_loading = False
 
         return obj
 

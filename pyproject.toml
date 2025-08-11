@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = [{ name = "BrainVISA team", email = "contact@brainvisa.info" }]
 description = "Control the quality of analysis performed on many neuroimaging data"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 license = { text = "CeCILL-B" }
 classifiers = [
     "Intended Audience :: Developers",
@@ -13,9 +13,6 @@ classifiers = [
     "Environment :: Console",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Natural Language :: English",
 ]
@@ -39,12 +36,13 @@ channels = [
 platforms = ["linux-64"]
 
 [tool.pixi.tasks]
+client="python python/snapclient/main.py"
 
 [tool.pixi.dependencies]
-populse-db = ">=3"
-soma-python = ">5"
 pyqtwebengine = "<6"
 fastapi = ">=0.115.12,<0.116"
+nodejs = ">=24.4.1,<24.5"
+requests = ">=2.32.4,<3"
 
 [tool.pixi.pypi-dependencies]
 snapcheck = { path = ".", editable = true }

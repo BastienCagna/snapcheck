@@ -109,20 +109,66 @@ class DynamicLoader:
         # New instance of the object without calling __init__()
         obj = cls.__new__(cls)
 
-        # The set all the attribute from dict data
-        all_attributes = self.get_all_attributes(cls).keys()
-        saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
-        for attr in saved_attributes:
-            if attr in data:
-                val = data[attr]
-            else:
-                val = None
-                warn(f'No value for "{cls.__name__}.{attr}" in serialized data. Setting it to None.')
+        # Then set all the attribute from dict data
+        cls_attributes = self.get_all_attributes(cls).keys()
+        all_attributes = set(list(cls_attributes) + list(data.keys()))
+        # saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
+
+        if "_is_loading" in all_attributes:
+            obj._is_loading = True
+
+        for attr in all_attributes:
+            if attr == "_is_loading" or attr == "has_changed":
+                continue
+            val = data[attr] if attr in data else None
             obj.__setattr__(attr, self.inflate(val))
 
-        if hasattr(obj, "_loading"):
-            obj.__setattr__("_loading", False)
+        if hasattr(obj, "_is_loading"):
+            obj._is_loading = False
 
         return obj
+    
+
+def resolve_references(data, ref_data=None):
+    """Replace any string starting by "@." by the target value. 
+    
+        Objects must already inflated to avoid unwanted duplicates
+    """
+    if ref_data is None:
+        ref_data = data
+
+    if isinstance(data, list):
+        return list(resolve_references(item, ref_data) for item in data)
+    elif isinstance(data, tuple):
+        return tuple(resolve_references(item, ref_data) for item in data)
+    elif isinstance(data, dict):
+        return {k: resolve_references(item, ref_data) for k, item in data.items()}
+    elif hasattr(data, "__dict__"):
+        for attr, value in data.__dict__.items():
+            setattr(data, attr, resolve_references(value, ref_data))
+        return data
+    # Resolve references
+    elif isinstance(data, str) and data.startswith("@."):
+        # It's a reference: "@.<attribute.subattribute>(#<index>)"
+        # Parse the reference address
+        if "#" in data:
+            splt = data.split('#')
+            addr = splt[0]
+            index = int(splt[1])
+        else:
+            addr = data
+            index = None
+        attrs = addr[2:].split(".")
+        # Find the target data and inflate
+        # FIXME: what append when the target is already inflated ?
+        data = ref_data
+        for attr in attrs:
+            data = getattr(ref_data, attr)
+        if index is not None:
+            data = data[index]
+        return resolve_references(data, ref_data)
+    return data
+
+
 
 globalDynamicLoader = DynamicLoader()

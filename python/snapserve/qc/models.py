@@ -2,9 +2,14 @@ from typing import List
 from pydantic import BaseModel
 
 
+class NoteScaleItem(BaseModel):
+    name: str
+    value: int
+    description: str
+
 class NoteScaleModel(BaseModel):
     description: str
-    notes: dict[int, str]
+    notes: List[NoteScaleItem]
 
 class NoteModel(BaseModel):
     id: str

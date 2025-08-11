@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type { QualityControlModel } from "../../api";
+import type { BoardModel, QualityControlModel } from "../../api";
 import Board from "./board";
 import "./main.css"
 import { useRef } from "react";
 
-const BoardView: React.FC<{ qc: QualityControlModel }> = ({ qc }) => {
+const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
@@ -60,7 +60,7 @@ const BoardView: React.FC<{ qc: QualityControlModel }> = ({ qc }) => {
         };
     }, []);
 
-    if (!qc || !qc.boards || qc.boards.length === 0) {
+    if (!board) {
         return <div className="vertical-center">
             <p className='default-text'>No boards available.</p>
         </div>
@@ -75,8 +75,7 @@ const BoardView: React.FC<{ qc: QualityControlModel }> = ({ qc }) => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
-            {qc.boards.length === 0 && <p className='default-text'>No boards available.</p>}
-            <Board board={qc.boards[0]} />
+            <Board board={board} />
         </div>
     );
 };
@@ -84,8 +83,10 @@ const BoardView: React.FC<{ qc: QualityControlModel }> = ({ qc }) => {
 
 const MainContent: React.FC<{
     qc: QualityControlModel | null;
+    boardIndex?: number;
     error: string | null;
-}> = ({ qc, error }) => {
+}> = ({ qc, error, boardIndex }) => {
+
     if (!qc && !error) {
         return <div className="vertical-center">
             <p className='default-text'>Nothing to show.</p>
@@ -97,7 +98,9 @@ const MainContent: React.FC<{
         </div>
     }
 
-    return <BoardView qc={qc!} />
+    return <BoardView 
+            board={qc && qc.boards && boardIndex != undefined && qc.boards?.length >= boardIndex ? qc.boards[boardIndex] : null} 
+        />
 }
 
 export default MainContent;

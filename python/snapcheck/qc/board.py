@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Union
+from snapcheck.core.objects import Serializable
 from snapcheck.qc.note import Note
 import shutil
 import os.path as op
@@ -57,7 +58,7 @@ class ImageElement(FileElement):
     type: str = "image"
 
 @dataclass
-class Board:
+class Board(Serializable):
     title: str
     description: str = ""
 
@@ -67,12 +68,12 @@ class Board:
 
     elements: list[Element] = field(default_factory=list)  # Graphical elements of the board
 
-    @property
-    def __dict__(self):
-        return {
-            "title": self.title,
-            "description": self.description,
-            "style": self.style,
-            "elements": [element.__dict__ for element in self.elements],
-            'intended_notes': [note.id for note in self.intended_notes]
-        }
+    # @property
+    # def __dict__(self):
+    #     return {
+    #         "title": self.title,
+    #         "description": self.description,
+    #         "style": self.style,
+    #         "elements": [element.__dict__ for element in self.elements],
+    #         'intended_notes': [note.id for note in self.intended_notes]
+    #     }

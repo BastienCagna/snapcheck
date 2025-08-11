@@ -22,6 +22,8 @@ class QualityControl(BSCObject):
     notes: List[Note] = field(default_factory=list)
     boards: List[Board] = field(default_factory=list)
 
+    _dir: tempfile.TemporaryDirectory|None = None
+
     def _validate(self):
         """
         Check if the QualityControl object is valid.
@@ -54,18 +56,34 @@ class QualityControl(BSCObject):
 
         # List all the scale to save them and use references in notes
         scales = {}
-        ser_scales = {}
+        ser_scales = []
         for real_note, ser_note in zip(self.notes, data["notes"]):
-            if real_note is not None and real_note.scale not in scales:
-                id = len(scales)
-                scales[real_note.scale] = id
-                ser_scales[id] = ser_note["scale"]
+            if real_note is None or real_note.scale is None:
+                continue
+            if len(scales) == 0 or real_note.scale not in scales.values():
+                id = f"@._scales#{len(scales)}"
+                scales[id] = real_note.scale
+                ser_scales.append(ser_note["scale"])
             else:
-                id = scales[real_note.scale]
+                for id, scale in scales.items():
+                    if scale == real_note.scale:
+                        break
+                else:
+                    raise KeyError(f"Cannot found scale {scale}")
             ser_note["scale"] = id
 
+        # Replace intended_notes of each board to their references
+        for item in data["boards"]:
+            ref_intended_notes = []
+            for note_id in item["intended_notes"]:
+                for n, note in enumerate(data["notes"]):
+                    if note["id"] == note_id:
+                        ref_intended_notes.append(f"@.notes#{n}")
+                        break
+            item["intended_notes"] = ref_intended_notes                        
+
         # List all the notes to use references (ids) in boards
-        data["_scales"] = scales
+        data["_scales"] = ser_scales
 
         return data
 
@@ -103,10 +121,15 @@ class QualityControl(BSCObject):
         # If the extension is not .snapqc, rename the archive
         rename(archive_path, path)
 
+    def close(self):
+        """Remove temporary directory if set. """
+        if self._dir:
+            self._dir.cleanup()
+
 
 def load_quality_control(path: str) -> QualityControl:
     """ Load a QualityControl object from a JSON file """
-    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_load_")
+    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_load_", delete=False)
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(tmp_dir.name)
 
@@ -119,8 +142,6 @@ def load_quality_control(path: str) -> QualityControl:
 
     with open(path, 'r') as f:
         data = json.load(f)
-
-
     # notes = [Note(**note) for note in data['notes']]
 
     # # Rehydrate the boards with their intended notes
@@ -147,6 +168,9 @@ def load_quality_control(path: str) -> QualityControl:
     # )
 
     qc = QualityControl.from_dict(data)
+    del qc._scales
+    qc._dir = tmp_dir
+
     # Validate the loaded object
     qc._validate()
 
