@@ -62,11 +62,17 @@ class Serializable:
         json.dump(data, open(path, 'w'), indent=indent)
 
     @classmethod
-    def from_dict(cls, data: dict):
+    def from_dict(cls, data: dict, decompress=True):
         all_attributes = globalDynamicLoader.get_all_attributes(cls).keys()
 
         # Inflate all objects
         obj = globalDynamicLoader.inflate(data)
+        if callable(obj.__post_init__):
+            obj.__post_init__()
+
+        if not decompress:
+            return obj
+
         if "_is_loading" in all_attributes:
             obj._is_loading = True
 
@@ -76,7 +82,7 @@ class Serializable:
         # saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
         # for attr in all_attributes:
         #     if attr not in saved_attributes:
-        #         del obj[attr]          
+        #         del obj[attr]
 
         if hasattr(obj, "_is_loading"):
             obj._is_loading = False

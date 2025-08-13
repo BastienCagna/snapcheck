@@ -1,0 +1,41 @@
+
+.btn
+    background-color: #2c2c2c
+    color: white
+    border: 1px solid #444343
+    border-radius: 0.2em
+    padding: 0.5em
+    margin: 0.1em
+    cursor: pointer
+    font-size: 0.9rem
+
+.btn:hover
+    background-color: #424242
+    transition: background-color 0.2s ease
+
+.btn[disabled]
+    background-color: #3c3c3c
+    color: #7a7a7a
+
+.inline-toggle
+    align-items: center
+    cursor: pointer
+    user-select: none
+
+    .toggle-label
+        padding: 0.2rem 0.5rem
+        font-size: 0.9rem
+        color: #d4d4d4
+        background-color: #444343
+
+        &:first-child
+            border-top-left-radius: 0.5rem
+            border-bottom-left-radius: 0.5rem
+
+        &:last-child
+            border-top-right-radius: 0.5rem
+            border-bottom-right-radius: 0.5rem
+
+        &.active
+            background-color: #6a6a6a
+            color: #ffffff

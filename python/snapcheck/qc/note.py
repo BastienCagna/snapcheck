@@ -6,6 +6,7 @@ class NoteScaleItem:
     name: str = ""
     value: int = 0
     description: str = ""
+    color: str|None = None
 
 
 @dataclass

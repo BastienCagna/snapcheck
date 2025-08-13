@@ -85,7 +85,8 @@ const MainContent: React.FC<{
     qc: QualityControlModel | null;
     boardIndex?: number;
     error: string | null;
-}> = ({ qc, error, boardIndex }) => {
+    onBoardChange?: (index: number) => void;
+}> = ({ qc, error, boardIndex, onBoardChange }) => {
 
     if (!qc && !error) {
         return <div className="vertical-center">
@@ -98,9 +99,24 @@ const MainContent: React.FC<{
         </div>
     }
 
-    return <BoardView 
-            board={qc && qc.boards && boardIndex != undefined && qc.boards?.length >= boardIndex ? qc.boards[boardIndex] : null} 
+    return <div>
+        <div className="main-header">
+            {
+                qc?.boards?.length && (
+                    <ul className='board-list'>
+                        {qc.boards.map((board: BoardModel, index) => (
+                            <li key={index} onClick={() => onBoardChange && onBoardChange(index)} className={boardIndex === index ? 'active' : ''}>
+                                {board.title}
+                            </li>
+                        ))}
+                    </ul>
+                )
+            }
+        </div>
+        <BoardView
+            board={qc && qc.boards && boardIndex != undefined && qc.boards?.length >= boardIndex ? qc.boards[boardIndex] : null}
         />
+    </div>
 }
 
 export default MainContent;

@@ -13,26 +13,33 @@ visit = CATIVisit(
     visit="M0"
 )
 
+colors = [
+    "#330C00",
+    "#5f3c00",
+    "#5A5400",
+    "#364900",
+    "#003002"
+]
 
 generic_scale = NoteScale(
     description="Notation générique",
     notes=[
-        NoteScaleItem(name="Mauvais", value=0, description="Incontestablement inexploitable"),
-        NoteScaleItem(name="Limite", value=1, description="Défauts notables. Utilisation peu recommandée."),
-        NoteScaleItem(name="Presque ok", value=2, description="Défauts mineurs. Utilisation recommandée avec précautions."),
-        NoteScaleItem(name="Ok", value=3, description="Standard. Utilisation approuvée sans réserve."),
-        NoteScaleItem(name="Excellent", value=4, description="Aucun défaut. Mieux que la moyenne."),
+        NoteScaleItem(name="Mauvais", value=0, description="Incontestablement inexploitable", color=colors[0]),
+        NoteScaleItem(name="Limite", value=1, description="Défauts notables. Utilisation peu recommandée.", color=colors[1]),
+        NoteScaleItem(name="Presque ok", value=2, description="Défauts mineurs. Utilisation recommandée avec précautions.", color=colors[2]),
+        NoteScaleItem(name="Ok", value=3, description="Standard. Utilisation approuvée sans réserve.", color=colors[3]),
+        NoteScaleItem(name="Excellent", value=4, description="Aucun défaut. Mieux que la moyenne.", color=colors[4]),
     ]
 )
 
 fibre_scale = NoteScale(
     description="Répartition des fibres",
     notes=[
-        NoteScaleItem(name="KO", value=0, description="Donnée manquante ou inexploitable."),
-        NoteScaleItem(name="Mauvaise", value=1, description="Au moins une des zones ne contient aucune fibre (ou très peu)."),
-        NoteScaleItem(name="Limite", value=2, description="Au moins quelques fibres présentes dans toutes les zones."),
-        NoteScaleItem(name="Bien", value=3, description="Toutes les zones présentnt un nombre nombre concéquent de fibres."),
-        NoteScaleItem(name="Excellente", value=4, description="Répartition très homogène."),
+        NoteScaleItem(name="KO", value=0, description="Donnée manquante ou inexploitable.", color=colors[0]),
+        NoteScaleItem(name="Mauvaise", value=1, description="Au moins une des zones ne contient aucune fibre (ou très peu).", color=colors[1]),
+        NoteScaleItem(name="Limite", value=2, description="Au moins quelques fibres présentes dans toutes les zones.", color=colors[2]),
+        NoteScaleItem(name="Bien", value=3, description="Toutes les zones présentnt un nombre nombre concéquent de fibres.", color=colors[3]),
+        NoteScaleItem(name="Excellente", value=4, description="Répartition très homogène.", color=colors[4]),
     ]
 )
 
@@ -99,7 +106,7 @@ cst_board = Board(
         ImageElement(title="Masques du faisceau sur la FA (espace MNI)", src=".local/demo_sources/bundles_on_subject_FA_MNI_axial.png"),
         ImageElement(src=".local/demo_sources/bundles_on_subject_FA_MNI_coronal.png"),
         ImageElement(title="Tract Orientation Maps", src=".local/demo_sources/bundles_TOM.png"),
-        ImageElement(title="Tractographie", src=".local/demo_sources/tractography.gif")
+        ImageElement(title="Tractographie", src=".local/demo_sources/tractography_all.gif")
     ]
 )
 

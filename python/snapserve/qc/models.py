@@ -6,6 +6,7 @@ class NoteScaleItem(BaseModel):
     name: str
     value: int
     description: str
+    color: str | None = None
 
 class NoteScaleModel(BaseModel):
     description: str
@@ -31,7 +32,7 @@ class ImageElementModel(ElementModel):
 class BoardModel(BaseModel):
     title: str
     description: str
-    intended_notes: List[str]  # List of note IDs that this board intends to use
+    intended_notes: List[NoteModel]
     style: dict[str, str]
     elements:List[ImageElementModel]
 
@@ -41,3 +42,8 @@ class QualityControlModel(BaseModel):
     metadata: dict
     notes: List[NoteModel] = []
     boards: List[BoardModel] = []
+
+    has_changed: bool = False
+    filename: str | None = None
+    is_cancellable: bool = False
+    is_redoable: bool = False

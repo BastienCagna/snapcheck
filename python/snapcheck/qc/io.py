@@ -23,6 +23,7 @@ class QualityControl(BSCObject):
     boards: List[Board] = field(default_factory=list)
 
     _dir: tempfile.TemporaryDirectory|None = None
+    _path: str|None = None
 
     def _validate(self):
         """
@@ -43,7 +44,7 @@ class QualityControl(BSCObject):
                 continue
             note.scale.check()
 
-    def to_dict(self, validate=False, factorize=True) -> None:
+    def to_dict(self, validate=False, compress=True) -> None:
         """ Return the object as dict (optionally after validation) """
         # Validate before saving
         if validate:
@@ -51,7 +52,7 @@ class QualityControl(BSCObject):
 
         data = super().to_dict()
 
-        if not factorize:
+        if not compress:
             return data
 
         # List all the scale to save them and use references in notes
@@ -75,12 +76,13 @@ class QualityControl(BSCObject):
         # Replace intended_notes of each board to their references
         for item in data["boards"]:
             ref_intended_notes = []
-            for note_id in item["intended_notes"]:
+            for note in item["intended_notes"]:
+                note_id = note["id"]
                 for n, note in enumerate(data["notes"]):
                     if note["id"] == note_id:
                         ref_intended_notes.append(f"@.notes#{n}")
                         break
-            item["intended_notes"] = ref_intended_notes                        
+            item["intended_notes"] = ref_intended_notes
 
         # List all the notes to use references (ids) in boards
         data["_scales"] = ser_scales
@@ -102,6 +104,7 @@ class QualityControl(BSCObject):
         mkdir(content_path)
         js_f = op.join(tmp_dir.name, fname + ".json")
 
+
         # List all elements
         elements = [element for board in self.boards for element in board.elements if isinstance(element, FileElement)]
         source_tracker = {}
@@ -120,12 +123,22 @@ class QualityControl(BSCObject):
         archive_path = shutil.make_archive(base_name=base_name, format='zip', root_dir=tmp_dir.name)
         # If the extension is not .snapqc, rename the archive
         rename(archive_path, path)
+        self._path = path
 
     def close(self):
         """Remove temporary directory if set. """
         if self._dir:
             self._dir.cleanup()
 
+
+    def update_note(self, note: Note):
+        with self.changing():
+            for i, n in enumerate(self.notes):
+                if n.id == note.id:
+                    self.notes[i] = note
+                    break
+            else:
+                raise ValueError(f"Note with ID '{note.id}' not found.")
 
 def load_quality_control(path: str) -> QualityControl:
     """ Load a QualityControl object from a JSON file """
@@ -138,36 +151,13 @@ def load_quality_control(path: str) -> QualityControl:
     if not json_files:
         raise FileNotFoundError("No JSON file found at the root of the archive.")
     json_path = op.join(tmp_dir.name, json_files[0])
-    path = json_path
+    js_path = json_path
 
-    with open(path, 'r') as f:
+    with open(js_path, 'r') as f:
         data = json.load(f)
-    # notes = [Note(**note) for note in data['notes']]
-
-    # # Rehydrate the boards with their intended notes
-    # boards = []
-    # for board in data['boards']:
-    #     bdata = board
-    #     bnotes = []
-    #     for note_id in bdata.pop('intended_notes', []):
-    #         # Find the note by ID
-    #         for note in notes:
-    #             if note.id == note_id:
-    #                 bnotes.append(note)
-    #                 break
-    #         else:
-    #             raise ValueError(f"Note with ID '{note_id}' not found in loaded notes.")
-    #     bdata['intended_notes'] = bnotes
-    #     boards.append(Board(**bdata ))
-
-    # Convert the loaded data back into a QualityControl object
-    # qc = QualityControl(
-    #     metadata=data['metadata'],
-    #     notes=notes,
-    #     boards=boards
-    # )
 
     qc = QualityControl.from_dict(data)
+    qc._path = path
     del qc._scales
     qc._dir = tmp_dir
 
