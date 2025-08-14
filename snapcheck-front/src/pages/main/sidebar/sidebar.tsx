@@ -23,6 +23,26 @@ function boardHasNote(board: BoardModel, note: NoteModel) {
     return false;
 }
 
+const FilesControl: React.FC<{
+    qc: QualityControlModel | null;
+}> = ({ qc }) => {
+    const [currentPath, setCurrentPath] = React.useState<string | null>(null);
+
+    return <div className="files-control-panel">
+        <div className="panel-header">
+            <h3>Files</h3>
+            <div>
+            </div>
+        </div>
+        <FilesBrowser
+            path={currentPath}
+            onPathChange={(p) => setCurrentPath(p)}
+            onFileSelect={(f) => console.log(f)}
+            extensions={[".snpk"]}
+        />
+    </div>
+}
+
 const QCControl: React.FC<{
     qc: QualityControlModel | null;
     board: BoardModel | null;
@@ -54,20 +74,6 @@ const QCControl: React.FC<{
     </div>
 }
 
-const FilesControl: React.FC<{
-    qc: QualityControlModel | null;
-}> = ({ qc }) => {
-    const [currentPath, setCurrentPath] = React.useState<string | null>(null);
-
-    return <div className="files-control-panel">
-        <div className="panel-header">
-            <h3>Files</h3>
-            <div>
-            </div>
-        </div>
-        <FilesBrowser path={currentPath} onPathChange={(p) => setCurrentPath(p)} onFileSelect={(f) => console.log(f)} />
-    </div>
-}
 
 const MetadataControl: React.FC<{
     qc: QualityControlModel | null;

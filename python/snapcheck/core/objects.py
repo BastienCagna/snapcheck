@@ -4,6 +4,8 @@ import json
 
 from collections import deque
 from copy import deepcopy
+
+import yaml
 from .io import globalDynamicLoader, resolve_references, serialize
 from .callback import Callback
 
@@ -51,11 +53,11 @@ class Serializable:
     """
     id = uuid4()
 
-    def to_dict(self) -> dict:
+    def to_dict(self, validate=False) -> dict:
         return serialize(self)
 
     def to_json(self, path: str, indent=4) -> None:
-        """ Save the QualityControl
+        """ Serialize as JSON content
             This method allows to use an other default serialization method in future.
         """
         data = self.to_dict(validate=True)
@@ -67,7 +69,7 @@ class Serializable:
 
         # Inflate all objects
         obj = globalDynamicLoader.inflate(data)
-        if callable(obj.__post_init__):
+        if hasattr(obj, "__post_init__") and callable(obj.__post_init__):
             obj.__post_init__()
 
         if not decompress:
@@ -88,6 +90,12 @@ class Serializable:
             obj._is_loading = False
 
         return obj
+
+    @classmethod
+    def from_json(cls, path: str) -> "Serializable":
+        with open(path, 'r') as f:
+            data = json.load(f)
+        return cls.from_dict(data)
 
 
 class Backupable:
