@@ -101,6 +101,7 @@ const MainContent: React.FC<{
 
     return <div>
         <div className="main-header">
+            <span>{qc?.title}</span>
             {
                 qc?.boards?.length && (
                     <ul className='board-list'>

@@ -1,5 +1,4 @@
 import React from 'react';
-import './sidebar.css';
 import Button from '../../../components/lib/button';
 import NoteInput from '../../../components/specials/noteinput/noteinput';
 
@@ -11,6 +10,8 @@ import DictionaryTable from '../../../components/lib/table/dictTable';
 import type { NoteModel, QualityControlModel, BoardModel } from '../../../api';
 import InlineToggle from '../../../components/lib/inlineToggle';
 import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
+import FilesBrowser from '../../../components/files/browser/browser';
+import './sidebar.css';
 
 
 function boardHasNote(board: BoardModel, note: NoteModel) {
@@ -56,6 +57,7 @@ const QCControl: React.FC<{
 const FilesControl: React.FC<{
     qc: QualityControlModel | null;
 }> = ({ qc }) => {
+    const [currentPath, setCurrentPath] = React.useState<string | null>(null);
 
     return <div className="files-control-panel">
         <div className="panel-header">
@@ -63,9 +65,7 @@ const FilesControl: React.FC<{
             <div>
             </div>
         </div>
-        <div className="">
-            <p className='default'>Not Implemented.</p>
-        </div>
+        <FilesBrowser path={currentPath} onPathChange={(p) => setCurrentPath(p)} onFileSelect={(f) => console.log(f)} />
     </div>
 }
 

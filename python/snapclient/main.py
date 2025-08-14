@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 import sys
 import subprocess
 import time
@@ -12,6 +12,7 @@ from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QPixmap
 import os.path as op
 import requests
+from snapclient.titlebar import CustomTitleBar
 
 ASSETS_PATH = op.abspath(op.join(op.dirname(__file__), "assets"))
 SPLASH_PATH = op.join(ASSETS_PATH, "splash.jpg")
@@ -51,6 +52,10 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("SnapCheck")
         self.setStyleSheet("background-color: #333; color: #ccc;")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.title_bar = CustomTitleBar(self)
 
         # Create a QWebEngineView to display the web page
         self.browser = QWebEngineView()
@@ -65,12 +70,15 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
         layout.setSpacing(0)  # Remove spacing between widgets
+        layout.addWidget(self.title_bar)
+        layout.setStretchFactor(self.title_bar, 0)  #  Do not extend the title bar
         layout.addWidget(self.browser)
+        layout.setStretchFactor(self.browser, 1)
 
-        # Add the bottom status bar
-        self.bottom_bar = BottomBar()
-        layout.addWidget(self.bottom_bar)
-        layout.setStretch(0, 1)
+        # # Add the bottom status bar
+        # self.bottom_bar = BottomBar()
+        # layout.addWidget(self.bottom_bar)
+        # layout.setStretch(0, 1)
 
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
