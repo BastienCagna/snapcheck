@@ -1,6 +1,16 @@
 import { createContext, useCallback, useContext, useReducer } from 'react';
-import type { DefaultProps } from '../core/types';
+import type { DefaultProps } from './types';
 import { QcService, type BoardModel, type QualityControlModel } from '../api';
+
+/*
+    TODO
+    ====
+
+    Transform to AppContext and AppState
+
+    Store several QC. Each one with its own state (current board, loading, ...)
+    Add settings
+*/
 
 type QCState = {
     qc: QualityControlModel | null;

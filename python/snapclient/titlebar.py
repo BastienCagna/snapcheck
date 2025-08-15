@@ -95,10 +95,10 @@ class CustomTitleBar(QWidget):
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             window = self.window()
-            if window.isFullScreen():
+            if window.showMaximized():
                 window.showNormal()
             else:
-                window.showFullScreen()
+                window.showMaximized()
             event.accept()
 
     def eventFilter(self, obj, event):
@@ -114,8 +114,8 @@ class CustomTitleBar(QWidget):
                 geo = window.geometry()
                 screen_geo = screen.availableGeometry()
                 margin = 30  # pixels tolerance
-                if not self.window().isFullScreen() and abs(geo.top() - screen_geo.top()) <= margin:
-                    window.showFullScreen()
+                if not self.window().isMaximized() and abs(geo.top() - screen_geo.top()) <= margin:
+                    window.showMaximized()
                 # elif window.isFullScreen():
                 #     window.showNormal()
                 #     # Move window slightly down to avoid snapping back to fullscreen

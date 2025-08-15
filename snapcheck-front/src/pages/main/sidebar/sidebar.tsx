@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Button from '../../../components/lib/button';
 import NoteInput from '../../../components/specials/noteinput/noteinput';
 
@@ -12,7 +12,7 @@ import InlineToggle from '../../../components/lib/inlineToggle';
 import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
-import { useQC } from '../../../contexts/QCContext';
+import { useQC } from '../../../core/QCContext';
 
 
 function boardHasNote(board: BoardModel, note: NoteModel) {
@@ -100,9 +100,25 @@ const Sidebar: React.FC<{}> = ({ }) => {
         { title: <ViewListIcon />, content: <MetadataControl qc={qc} /> },
     ];
 
+    const [conn, setConn] = useState<string>("initializing...")
+    const connect = async () => {
+        if (window.qt && window.qt.webChannelTransport) {
+            new QWebChannel(window.qt.webChannelTransport, function (channel) {
+                setConn('QWebChannel initialized successfully');
+            });
+        } else {
+            setConn("QWebChannel transport not available");
+        }
+    }
+
+    useEffect(() => {
+        connect();
+    }, []);
+
     return (
         <div className="sidebar">
             <div className='sidebar-header'>
+                <p>{conn}</p>
             </div>
             <div className='sidebar-content'>
                 <Tabs tabs={menuItems} />

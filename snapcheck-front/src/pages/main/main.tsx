@@ -3,7 +3,7 @@ import type { BoardModel, QualityControlModel } from "../../api";
 import Board from "./board";
 import "./main.css"
 import { useRef } from "react";
-import { useQC } from "../../contexts/QCContext";
+import { useQC } from "../../core/QCContext";
 
 const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
     const boardViewRef = useRef<HTMLDivElement>(null);

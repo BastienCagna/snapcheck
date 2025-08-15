@@ -1,14 +1,16 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-
+import pkg_resources
+from PyQt5.QtCore import QTimer
 from PyQt5.QtCore import QUrl, Qt
 import sys
 import subprocess
 import time
 import atexit
 import PyQt5.QtWidgets as qw
-from PyQt5.QtWebChannel import QWebChannel
+from PyQt5.QtCore import QObject, pyqtSlot
 from PyQt5.QtGui import QPixmap
 import os.path as op
 import requests
@@ -46,6 +48,18 @@ class BottomBar(QWidget):
         layout.addStretch()  # Add a stretchable space to push items to the left
         self.setLayout(layout)
 
+class WebBridge(QObject):
+    """A class to expose some python method to the javascript"""
+
+    def __init__(self, main_window):
+        super().__init__()
+        self.main_window = main_window
+
+    @pyqtSlot()
+    def closeApplication(self):
+        """Ferme l'application depuis le web"""
+        self.main_window.close()
+
 
 class MainWindow(QMainWindow):
     def __init__(self, url: str):
@@ -59,6 +73,12 @@ class MainWindow(QMainWindow):
 
         # Create a QWebEngineView to display the web page
         self.browser = QWebEngineView()
+        # Prepare communication between web page and MainWindow
+        self.web_bridge = WebBridge(self)
+        self.channel = QWebChannel()
+        self.channel.registerObject("pybridge", self.web_bridge)
+        self.browser.page().setWebChannel(self.channel)
+        # Then, load the url
         self.browser.setUrl(QUrl(url))
 
         # Change some settings to avoid CORS issues

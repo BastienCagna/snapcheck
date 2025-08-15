@@ -3,7 +3,7 @@ import './App.css'
 import Sidebar from './pages/main/sidebar/sidebar';
 import MainContent from './pages/main/main';
 import Toolbar from './pages/main/toolbar/toolbar';
-import { QCProvider } from './contexts/QCContext';
+import { QCProvider } from './core/QCContext';
 
 function App() {
     const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ function App() {
                         <Sidebar />
                     </div>
                     <div className="main-container">
-                        <MainContent error={error} />
+                        <MainContent />
                     </div>
                 </div>
             </QCProvider>
