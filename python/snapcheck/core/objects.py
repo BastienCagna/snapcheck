@@ -142,7 +142,8 @@ class Backupable:
             raise e
         else:
             self._backups.append(backup)
-            self.has_changed()
+            if hasattr(self, 'has_changed') and not isinstance(self.has_changed, Callback):
+                self.has_changed()
 
 
 class BSCObject(Backupable, Serializable, Changeable):

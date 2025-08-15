@@ -1,16 +1,15 @@
 import type { QualityControlModel } from "../../../api";
 import Button from "../../../components/lib/button";
+import { useQC } from "../../../contexts/QCContext";
 import "./toolbar.css";
 
 const Toolbar: React.FC<{
-    qc: QualityControlModel | null;
-    onLoadRequest?: () => void;
-}> = ({ qc, onLoadRequest }) => {
-
+}> = () => {
+    const { qc, loadQC } = useQC();
     return (
         <div className="toolbar">
             <div>
-                {!qc ? <Button onClick={onLoadRequest}>Load</Button> : <Button onClick={onLoadRequest}>Reload</Button>}
+                {!qc ? <Button onClick={loadQC}>Load</Button> : <Button onClick={loadQC}>Reload</Button>}
                 <Button onClick={() => { }} disabled={!qc?.has_changed}>Save</Button>
                 <Button onClick={() => { }} disabled={!qc?.has_changed}>Save As...</Button>
                 <Button onClick={() => { }} disabled={!qc?.is_cancellable}>Cancel</Button>

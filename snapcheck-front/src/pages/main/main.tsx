@@ -3,6 +3,7 @@ import type { BoardModel, QualityControlModel } from "../../api";
 import Board from "./board";
 import "./main.css"
 import { useRef } from "react";
+import { useQC } from "../../contexts/QCContext";
 
 const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
     const boardViewRef = useRef<HTMLDivElement>(null);
@@ -81,12 +82,8 @@ const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
 };
 
 
-const MainContent: React.FC<{
-    qc: QualityControlModel | null;
-    boardIndex?: number;
-    error: string | null;
-    onBoardChange?: (index: number) => void;
-}> = ({ qc, error, boardIndex, onBoardChange }) => {
+const MainContent: React.FC<{}> = () => {
+    const { qc, error, setCurrentBoard, currentBoardIndex, currentBoard } = useQC();
 
     if (!qc && !error) {
         return <div className="vertical-center">
@@ -106,7 +103,7 @@ const MainContent: React.FC<{
                 qc?.boards?.length && (
                     <ul className='board-list'>
                         {qc.boards.map((board: BoardModel, index) => (
-                            <li key={index} onClick={() => onBoardChange && onBoardChange(index)} className={boardIndex === index ? 'active' : ''}>
+                            <li key={index} onClick={() => setCurrentBoard(index)} className={currentBoardIndex === index ? 'active' : ''}>
                                 {board.title}
                             </li>
                         ))}
@@ -115,7 +112,7 @@ const MainContent: React.FC<{
             }
         </div>
         <BoardView
-            board={qc && qc.boards && boardIndex != undefined && qc.boards?.length >= boardIndex ? qc.boards[boardIndex] : null}
+            board={currentBoard}
         />
     </div>
 }

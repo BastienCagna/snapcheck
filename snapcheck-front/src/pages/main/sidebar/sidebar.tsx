@@ -12,6 +12,7 @@ import InlineToggle from '../../../components/lib/inlineToggle';
 import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
+import { useQC } from '../../../contexts/QCContext';
 
 
 function boardHasNote(board: BoardModel, note: NoteModel) {
@@ -91,15 +92,11 @@ const MetadataControl: React.FC<{
     </div>
 }
 
-const Sidebar: React.FC<{
-    qc: QualityControlModel | null;
-    currentBoard: BoardModel | null;
-    onLoadRequest?: () => void;
-    onNoteChanged?: (note: NoteModel) => void;
-}> = ({ qc, onLoadRequest, currentBoard, onNoteChanged }) => {
+const Sidebar: React.FC<{}> = ({ }) => {
+    const { qc, currentBoard, updateNote } = useQC();
     const menuItems: Tab[] = [
         { title: <FileCopyIcon />, content: <FilesControl qc={qc} /> },
-        { title: <EditNoteIcon />, content: <QCControl qc={qc} board={currentBoard} onNoteChanged={(note) => { if (onNoteChanged) onNoteChanged(note) }} /> },
+        { title: <EditNoteIcon />, content: <QCControl qc={qc} board={currentBoard} onNoteChanged={updateNote} /> },
         { title: <ViewListIcon />, content: <MetadataControl qc={qc} /> },
     ];
 
