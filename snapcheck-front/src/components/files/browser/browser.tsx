@@ -13,12 +13,11 @@ const FilesBrowser: React.FC<{
 }> = ({ path, extensions, onFileSelect, onPathChange }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [directory, setDirectory] = useState<DirectoryModel | null>(null);
-    const filesService = new FilesService();
 
     useEffect(() => {
         const fetchFiles = async () => {
             setIsLoading(true);
-            const directory = await filesService.filesListDirectory(path || undefined, extensions);
+            const directory = await FilesService.filesListDirectory(path || undefined, extensions);
             setDirectory(directory);
             setIsLoading(false);
         };
@@ -60,7 +59,8 @@ const FilesBrowser: React.FC<{
                             onDoubleClick={() => { if (!item.isdir) handleFileSelect(item) }}
                             className={item.isdir ? 'fb-dir-item' : ''}
                         >
-                            {item.isdir && <Folder className='fb-item-icon' />} {item.filename}
+                            {item.isdir && <Folder className='fb-item-icon' />} 
+                            <span>{item.filename}</span>
                         </li>
                     ))}
                 </ul>

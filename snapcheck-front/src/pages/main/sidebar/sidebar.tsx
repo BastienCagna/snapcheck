@@ -13,6 +13,7 @@ import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
 import { useQC } from '../../../contexts/QCContext';
+import Toolbar from '../toolbar/toolbar';
 
 
 function boardHasNote(board: BoardModel, note: NoteModel) {
@@ -53,7 +54,7 @@ const QCControl: React.FC<{
 
     return <div className="qc-control-panel">
         <div className="panel-header">
-            <h3>Notes</h3>
+            <h3>Ratings</h3>
             <div>
                 <InlineToggle
                     off="Board" on="All"
@@ -102,6 +103,7 @@ const Sidebar: React.FC<{}> = ({ }) => {
 
     return (
         <div className="sidebar">
+            <Toolbar />
             <div className='sidebar-header'>
             </div>
             <div className='sidebar-content'>

@@ -87,8 +87,7 @@ export function useQCActions() {
         dispatch({ type: 'LOAD', path: path || '' });
 
         try {
-            const qcService = new QcService();
-            const qc = await qcService.qcGetFullQc();
+            const qc = await QcService.qcGetFullQc();
             dispatch({ type: 'SUCCESS', payload: qc });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load QC';
@@ -105,8 +104,7 @@ export function useQCActions() {
         if (!dispatch) throw new Error('useQCActions must be used within a QCProvider');
 
         try {
-            const qcService = new QcService();
-            await qcService.qcUpdateNote(note);
+            await QcService.qcUpdateNote(note);
             // Reload data after update
             await loadQC();
         } catch (error) {

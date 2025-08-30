@@ -8,7 +8,7 @@ cd snapcheck-front/
 npm install
 cd ../
 ```
-SASS file smus tbe compiled (ex: using SASS live Compiler is VSCode)
+SASS files must be compiled (ex: using SASS live Compiler is VSCode)
 
 Building the javascript API for the frontend:
 ```shell
@@ -21,6 +21,6 @@ cd ../
 
 ```
 pixi run client
-
+// or
 python python/snapclient/main.py
 ```

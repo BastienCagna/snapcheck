@@ -1,0 +1,66 @@
+$menu-button-color: #c5c5c5ff
+$menu-font-size: 0.85rem
+$menu-hover-color: #474747
+
+.menu
+    display: flex
+
+.menu-item
+    position: relative
+
+.menu .open
+    background-color: $menu-hover-color
+
+.menu-button
+    padding: 8px 16px
+    border: none
+    cursor: pointer
+    font-size: $menu-font-size
+    color: $menu-button-color
+    outline: none
+
+.menu-button:hover
+    background: $menu-hover-color
+    
+.menu-dropdown
+    display: flex
+    flex-direction: column
+    position: absolute
+    top: 100%
+    left: 0    
+    min-width: 140px
+    z-index: 100
+    background: #242424ff
+    border: 1px solid #414141ff
+    color: $menu-button-color
+    cursor: pointer
+    font-size: $menu-font-size
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1)
+
+
+    .menu-inner-item
+        width: 100%
+        cursor: pointer
+        outline: none
+
+        span
+            width: 100%
+            text-align: left
+            padding: 6px 20px
+
+        span:hover
+            background: $menu-hover-color
+
+    .menu-inner-item[disabled]
+        color: #8b8b8b
+
+        span:hover
+            background: none
+
+
+    .menu-separator
+        display: block
+        height: 1px
+        width: 80%
+        background: #414141ff
+        margin: 4px 0

@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react';
-import type { NoteModel } from '../api/models/NoteModel';
 import type { NoteScaleModel } from '../../../api/models/NoteScaleModel';
-import type { NoteScaleItem } from '../../../api';
+import type { NoteModel_Input, NoteScaleItem } from '../../../api';
 import './noteinput.css';
+import Button from '../../lib/button';
+import { InfoOutline } from '@mui/icons-material';
+import { useModal } from '../../../contexts/ModalContext';
 
 interface NoteInputProps {
-    note: NoteModel;
-    onChange?: (note: NoteModel) => void;
+    note: NoteModel_Input;
+    onChange?: (note: NoteModel_Input) => void;
     highlight?: boolean;
 }
 
@@ -14,6 +16,8 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
     const [selectedValue, setSelectedValue] = useState<number | undefined | null>(note.value);
     const [comment, setComment] = useState<string>(note.comment || '');
     const commentInputRef = useRef<HTMLInputElement>(null);
+
+    const { showModal } = useModal();
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedValue(Number(event.target.value));
@@ -59,14 +63,19 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
                     ))}
             </select>
         </div>
-        <input
-            type="text"
-            className='note-comment'
-            ref={commentInputRef}
-            placeholder="No comment"
-            value={comment}
-            onChange={handleCommentChange}
-        />
+        <div className='rating-second-line'>
+            <div className='rating-infos-btn' onClick={()=>showModal(<div><h1>{name}</h1><p>{note.description}</p></div>)}>
+                <InfoOutline fontSize='xxsmall' />
+            </div>
+            <input
+                type="text"
+                className='note-comment'
+                ref={commentInputRef}
+                placeholder="No comment"
+                value={comment}
+                onChange={handleCommentChange}
+            />
+        </div>
     </div>;
 };
 

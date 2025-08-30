@@ -79,26 +79,67 @@ class CustomTitleBar(QWidget):
         self.initial_pos = None
 
     def mousePressEvent(self, event):
+        # Window manual resizing
+        window = self.window()
         if event.button() == Qt.MouseButton.LeftButton:
-            self.initial_pos = event.globalPos() - self.window().frameGeometry().topLeft()
+            # Check if click is in bottom-right corner (resize zone)
+            margin = 12
+            rect = self.rect()
+            if event.pos().x() >= rect.width() - margin and event.pos().y() >= rect.height() - margin and not window.isMaximized():
+                self.resizing = True
+                self.resize_start_pos = event.globalPos()
+                self.resize_start_size = window.size()
+                event.accept()
+                return
+            self.initial_pos = event.globalPos() - window.frameGeometry().topLeft()
             event.accept()
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        if self.initial_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
-            self.window().move(event.globalPos() - self.initial_pos)
+        window = self.window()
+        margin = 12
+        rect = self.rect()
+        if not window.isMaximized():
+            # Change cursor if in resize zone
+            print( event.pos().x(), rect.width() - margin, event.pos().y(), rect.height() - margin)
+            if event.pos().x() >= rect.width() - margin and event.pos().y() >= rect.height() - margin:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+            else:
+                self.setCursor(Qt.CursorShape.ArrowCursor)
+        if hasattr(self, 'resizing') and getattr(self, 'resizing', False):
+            # Window manual resizing:
+            delta = event.globalPos() - self.resize_start_pos
+            new_size = self.resize_start_size + delta
+            min_size = window.minimumSize()
+            new_width = max(new_size.width(), min_size.width())
+            new_height = max(new_size.height(), min_size.height())
+            window.resize(new_width, new_height)
             event.accept()
+            return
+        if self.initial_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            window.move(event.globalPos() - self.initial_pos)
+            event.accept()
+            return
+        super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event):
         self.initial_pos = None
         event.accept()
 
+        # Window manual resizing
+        self.initial_pos = None
+        if hasattr(self, 'resizing'):
+            self.resizing = False
+        event.accept()
+        super().mouseReleaseEvent(event)
+
     def mouseDoubleClickEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             window = self.window()
-            if window.isFullScreen():
+            if window.isMaximized():
                 window.showNormal()
             else:
-                window.showFullScreen()
+                window.showMaximized()
             event.accept()
 
     def eventFilter(self, obj, event):
@@ -114,13 +155,13 @@ class CustomTitleBar(QWidget):
                 geo = window.geometry()
                 screen_geo = screen.availableGeometry()
                 margin = 30  # pixels tolerance
-                if not self.window().isFullScreen() and abs(geo.top() - screen_geo.top()) <= margin:
-                    window.showFullScreen()
-                # elif window.isFullScreen():
-                #     window.showNormal()
-                #     # Move window slightly down to avoid snapping back to fullscreen
-                #     offset = 30
-                #     window.move(window.x(), screen_geo.top() + offset)
+                if not self.window().isMaximized() and abs(geo.top() - screen_geo.top()) <= margin:
+                    window.showMaximized()
+                elif window.isMaximized():
+                    window.showNormal()
+                    # Move window slightly down to avoid snapping back to fullscreen
+                    offset = 30
+                    window.move(window.x(), screen_geo.top() + offset)
         return super().eventFilter(obj, event)
 
     def showEvent(self, event):
@@ -134,3 +175,4 @@ class CustomTitleBar(QWidget):
         else:
             self.normal_button.setVisible(False)
             self.max_button.setVisible(True)
+

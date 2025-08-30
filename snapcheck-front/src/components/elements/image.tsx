@@ -5,12 +5,11 @@ const ImageComponent: React.FC<{
     src: string;
     style?: React.CSSProperties;
 }> = ({ src, style }) => {
-    const qcService = new QcService();
 
     useEffect(() => {
         const fetchImage = async () => {
             try {
-                await qcService.qcGetImage(src);
+                await QcService.qcGetImage(src);
             } catch (error) {
                 console.error('Error fetching image:', error);
             }

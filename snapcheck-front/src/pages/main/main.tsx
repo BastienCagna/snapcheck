@@ -4,6 +4,7 @@ import Board from "./board";
 import "./main.css"
 import { useRef } from "react";
 import { useQC } from "../../contexts/QCContext";
+import TabSelector from "../../components/lib/tabSelector/tabSelector";
 
 const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
     const boardViewRef = useRef<HTMLDivElement>(null);
@@ -96,7 +97,7 @@ const MainContent: React.FC<{}> = () => {
         </div>
     }
 
-    return <div>
+    return <div>        
         <div className="main-header">
             <span>{qc?.title}</span>
             {
