@@ -5,33 +5,36 @@ import Modal from './components/lib/modal/modal';
 import { ModalProvider } from './contexts/ModalContext';
 import { SnapSelector } from './pages/main/snapSelector';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { AppDataProvider } from './contexts/AppDataContext';
 import './App.css'
 
 function App() {
     return (
         <div className='app'>
             <SettingsProvider>
-                <SnapSessionProvider>
-                    <ModalProvider>
-                        <div className="page-container">
-                            <div className='sidebar-container'>
-                                <Sidebar />
-                            </div>
-                            <div className='main-container'>
-                                <div className='toolbar-container'>
-                                    <SnapSelector />
+                <AppDataProvider>
+                    <SnapSessionProvider>
+                        <ModalProvider>
+                            <div className="page-container">
+                                <div className='sidebar-container'>
+                                    <Sidebar />
                                 </div>
-                                <div className="board-container">
-                                    <MainContent />
+                                <div className='main-container'>
+                                    <div className='toolbar-container'>
+                                        <SnapSelector />
+                                    </div>
+                                    <div className="board-container">
+                                        <MainContent />
+                                    </div>
+                                </div>
+                                <div className='modal-container'>
+                                    <Modal />
                                 </div>
                             </div>
-                            <div className='modal-container'>
-                                <Modal />
-                            </div>
-                        </div>
-                    </ModalProvider>
-                </SnapSessionProvider>       
-            </SettingsProvider> 
+                        </ModalProvider>
+                    </SnapSessionProvider>
+                </AppDataProvider>
+            </SettingsProvider>
         </div>
     )
 }

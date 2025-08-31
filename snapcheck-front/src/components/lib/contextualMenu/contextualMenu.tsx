@@ -13,23 +13,6 @@ type ContextualMenuItemProps = {
 export const ContextualMenuItem: React.FC<ContextualMenuItemProps> = ({ label, icon, onClick, items, style}) => {
     const [submenuVisible, setSubmenuVisible] = useState(false);
 
-    // return <div className="contextual-menu-item" 
-    //     onClick={() => { if (items) setSubmenuVisible(true); else if (onClick) onClick(); }}
-    // >
-    //     {icon && <span className="icon">{icon}</span>}
-    //     <span className="label">{label}</span>
-    //     {Array.isArray(items) && items.length > 0 && (
-    //         <span className="submenu-arrow">▶</span>
-    //     )}
-    //     {submenuVisible && items && items.length > 0 && (
-    //         <div className="contextual-submenu">
-    //             {items.map((subItem, idx) => (
-    //                 <ContextualMenuItem key={idx} {...subItem} />
-    //             ))}
-    //         </div>
-    //     )}
-    // </div>;
-
     return  <div
         className="contextual-menu-item"
         onMouseEnter={() => { if (items && items.length > 0) setSubmenuVisible(true); }}

@@ -50,7 +50,7 @@ def generate_default_settings(settings_f: str, force=False):
                     label="Share Directory Path",
                     description="The data sharing directory path. It's use to save persistent data of the app.",
                     type="string",
-                    default=op.join(op.expanduser("~"), ".share", "snapcheck")
+                    default=op.join(op.expanduser("~"), ".local", "share", "snapcheck")
                 ),
             ]
         )

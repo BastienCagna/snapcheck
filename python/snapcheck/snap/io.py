@@ -131,14 +131,14 @@ class Snap(BSCObject):
             self._dir.cleanup()
 
 
-    def update_rating(self, rating: Rating):
+    def update_rating(self, ratingId: str, value: any):
         with self.changing():
             for i, n in enumerate(self.ratings):
-                if n.id == rating.id:
-                    self.ratings[i] = rating
+                if n.id == ratingId:
+                    self.ratings[i].value = value
                     break
             else:
-                raise ValueError(f"Note with ID '{rating.id}' not found.")
+                raise ValueError(f"Note with ID '{ratingId}' not found.")
 
 def load_snap(path: str) -> Snap:
     """ Load a Snap object from a JSON file """

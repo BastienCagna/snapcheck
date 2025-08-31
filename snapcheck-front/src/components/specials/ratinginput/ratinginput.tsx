@@ -1,18 +1,18 @@
 import React, { useRef, useState } from 'react';
-import type { NoteModel_Input, NoteScaleItem } from '../../../api';
-import './noteinput.css';
+import type { RatingModel, RatingScaleItem } from '../../../api';
+import './ratinginput.css';
 import { InfoOutline } from '@mui/icons-material';
 import { useModal } from '../../../contexts/ModalContext';
 
-interface NoteInputProps {
-    note: NoteModel_Input;
-    onChange?: (note: NoteModel_Input) => void;
+interface RatingInputProps {
+    rating: RatingModel;
+    onChange?: (rating: RatingModel) => void;
     highlight?: boolean;
 }
 
-const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
-    const [selectedValue, setSelectedValue] = useState<number | undefined | null>(note.value);
-    const [comment, setComment] = useState<string>(note.comment || '');
+const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }) => {
+    const [selectedValue, setSelectedValue] = useState<number | undefined | null>(rating.value);
+    const [comment, setComment] = useState<string>(rating.comment || '');
     const commentInputRef = useRef<HTMLInputElement>(null);
 
     const { showModal } = useModal();
@@ -23,19 +23,19 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
             commentInputRef.current.focus();
         }
         if (onChange) {
-            onChange({ ...note, value: Number(event.target.value) });
+            onChange({ ...rating, value: Number(event.target.value) });
         }
     };
 
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setComment(event.target.value);
         if (onChange) {
-            onChange({ ...note, comment: event.target.value });
+            onChange({ ...rating, comment: event.target.value });
         }
     };
 
-    const name = note.name || 'Unnamed (#' + note.id + ')';
-    const selectedNoteScale = note.scale?.notes.find((nt: NoteScaleItem) => nt.value === selectedValue);
+    const name = rating.name || 'Unnamed (#' + rating.id + ')';
+    const selectedRatingScale = rating.scale?.ratings.find((nt: RatingScaleItem) => nt.value === selectedValue);
 
     return <div className={`rating-input ${highlight ? ' rating-highlight' : ''}`}>
         <div className="rating-state-bar"></div>
@@ -46,14 +46,14 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
                     className="rating-select"
                     value={(selectedValue == undefined || isNaN(selectedValue)) ? undefined : selectedValue}
                     onChange={handleSelectChange}
-                    disabled={note.scale == undefined}
-                    style={(selectedNoteScale && selectedNoteScale.color) ? { backgroundColor: selectedNoteScale.color } : {}}
+                    disabled={rating.scale == undefined}
+                    style={(selectedRatingScale && selectedRatingScale.color) ? { backgroundColor: selectedRatingScale.color } : {}}
                 >
                     <option value={undefined}>
                         --
                     </option>
-                    {note.scale?.notes &&
-                        note.scale.notes.map((nt: NoteScaleItem, idx: number) => (
+                    {rating.scale?.ratings &&
+                        rating.scale.ratings.map((nt: RatingScaleItem, idx: number) => (
                             <option
                                 key={idx + 1}
                                 value={nt.value}
@@ -64,7 +64,7 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
                 </select>
             </div>
             <div className='rating-second-line'>
-                <div className='rating-infos-btn' onClick={()=>showModal(<div><h1>{name}</h1><p>{note.description}</p></div>)}>
+                <div className='rating-infos-btn' onClick={()=>showModal(<div><h1>{name}</h1><p>{rating.description}</p></div>)}>
                     <InfoOutline fontSize='xxsmall' />
                 </div>
                 <input
@@ -80,4 +80,4 @@ const NoteInput: React.FC<NoteInputProps> = ({ note, onChange, highlight }) => {
     </div>;
 };
 
-export default NoteInput;
+export default RatingInput;

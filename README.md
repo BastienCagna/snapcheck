@@ -1,5 +1,5 @@
 # SnapCheck
-SnapCheck is a tool to annotate data displayed by boards. Its main goal is to provides an interface to assign ratings to data observed throughout sets of screenshots.
+SnapCheck is a tool to annotate data displayed by graphical boards. Its main goal is to provides an interface to assign ratings to data observed throughout sets of screenshots.
 
 ## Main Concepts
 
@@ -50,6 +50,8 @@ Options:
 
 
 ## Install
+The project use [Pixi](https://pixi.sh/latest/) (Conda) to manage depencies and build.
+
 ```
 pixi shell
 cd snapcheck-front/

@@ -177,14 +177,14 @@ export function useSnapSessionActions() {
         dispatch({ type: 'SET_BOARD', boardIndex });
     }, [dispatch]);
 
-    const updateNote = useCallback(
-        async (snapId: string, note: any) => {
+    const updateRating = useCallback(
+        async (snapId: string, rating: any) => {
             if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
             if (!state) throw new Error('useSnapSessionActions must be used within a SnapSessionProvider');
             const sid = state.session?.id || "";
 
             try {
-                await SnapService.updateRating(sid, snapId, note);
+                await SnapService.updateRating(sid, snapId, rating.id, rating.value);
                 // Reload data after update
                 await openSnap();
             } catch (error) {
@@ -204,7 +204,7 @@ export function useSnapSessionActions() {
         openSnap,
         viewSnap,
         setCurrentBoard,
-        updateNote,
+        updateRating,
         closeSnap
     };
 }

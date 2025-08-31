@@ -6,6 +6,7 @@ import os.path as op
 import mimetypes
 
 from snapserve.snap.store import SnapStore
+from snapserve.app_data import APP_DATA
 
 router = APIRouter()
 
@@ -35,6 +36,7 @@ def list_qc(sid: str):
 def open_snap(sid: str, path: str):
     # TODO: implent and also use sid
     item = snap_store.open(sid, path)
+    APP_DATA.add_to_history(path)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     return item.to_dict()
@@ -68,11 +70,11 @@ def get_image(sid: str, snapid: str, src: str):
     )
 
 
-@router.put("/{sid}/{snapid}/rating")
-def update_rating(sid: str, snapid: str, rating: float):
+@router.put("/{sid}/{snapid}/rating/{ratingId}/{value}")
+def update_rating(sid: str, snapid: str, ratingId: str, value: float):
     # TODO: use sid
     item = snap_store.get_by_id(snapid)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
-    item.snap.update_rating(rating)
+    item.snap.update_rating(ratingId, value)
     return item.to_dict()

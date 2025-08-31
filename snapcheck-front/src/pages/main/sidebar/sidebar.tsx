@@ -1,24 +1,23 @@
 import React from 'react';
-import Button from '../../../components/lib/button';
-import NoteInput from '../../../components/specials/noteinput/noteinput';
-
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { type Tab, Tabs } from '../../../components/lib/tabs/tabs';
 import DictionaryTable from '../../../components/lib/table/dictTable';
-import type { NoteModel, QualityControlModel, BoardModel } from '../../../api';
+import type { BoardModel, RatingModel, SnapModel } from '../../../api';
 import InlineToggle from '../../../components/lib/inlineToggle';
-import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
 import { useSnapSession } from '../../../contexts/SnapSessionContext';
 import Toolbar from '../toolbar/toolbar';
+import RatingInput from '../../../components/specials/ratinginput/ratinginput';
+import { useAppData } from '../../../contexts/AppDataContext';
 
 
-function boardHasNote(board: BoardModel, note: NoteModel) {
-    for (const intendedNote of board.intended_notes) {
-        if (intendedNote.id === note.id) {
+function boardHasRating(board: BoardModel, rating: RatingModel) {
+    for (const intendedRating of board.intended_ratings
+    ) {
+        if (intendedRating.id === rating.id) {
             return true;
         }
     }
@@ -29,11 +28,19 @@ const FilesControl: React.FC<{
 }> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
     const { openSnap } = useSnapSession();
+    const { history } = useAppData();
 
     return <div className="files-control-panel">
         <div className="panel-header">
             <h3>Files</h3>
             <div>
+                <ul>
+                    {history && history.map(file => (
+                        <li key={file} onClick={() => openSnap(file)}>
+                            {file}
+                        </li>
+                    ))}
+                </ul>
             </div>
         </div>
         <FilesBrowser
@@ -41,35 +48,36 @@ const FilesControl: React.FC<{
             onPathChange={(p) => setCurrentPath(p)}
             onFileSelect={openSnap}
             extensions={[".snpk"]}
+            recent_files={history}
         />
     </div>
 }
 
-const QCControl: React.FC<{
-    onNoteChanged?: (note: NoteModel) => void;
-}> = ({onNoteChanged }) => {
-    const { snap, currentBoard } = useSnapSession();
-    const [showAllNotes, setShowAllNotes] = React.useState(true);
+const SnapControl: React.FC<{
+    onRatingChanged?: (sessionId: string | null, snapId: string | null, rating: RatingModel) => void;
+}> = ({onRatingChanged }) => {
+    const { session, snap, currentBoard } = useSnapSession();
+    const [showAllratings, setShowAllRatings] = React.useState(true);
 
-    return <div className="qc-control-panel">
+    return <div className="snap-control-panel">
         <div className="panel-header">
             <h3>Ratings</h3>
             <div>
                 <InlineToggle
                     off="Board" on="All"
-                    value={showAllNotes}
-                    onChange={(value) => setShowAllNotes(value)} />
+                    value={showAllratings}
+                    onChange={(value) => setShowAllRatings(value)} />
             </div>
         </div>
 
-        {/* {qc && <NoteStatBar qc={qc} />} */}
-        <div className="notes-list">
-            {snap?.ratings?.filter((rating) => currentBoard && (showAllNotes || boardHasNote(currentBoard, rating))).map((rating) => (
-                <NoteInput
+        {/* {snap && <RatingStatBar snap={snap} />} */}
+        <div className="ratings-list">
+            {snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
+                <RatingInput
                     key={rating.id}
-                    note={rating}
-                    onChange={(rating) => { if (onNoteChanged) onNoteChanged(rating) }}
-                    highlight={(showAllNotes && currentBoard && boardHasNote(currentBoard, rating)) || false} />
+                    rating={rating}
+                    onChange={(rating) => { if (onRatingChanged) onRatingChanged(session?.id || null, snap?.id || null, rating) }}
+                    highlight={(showAllratings && currentBoard && boardHasRating(currentBoard, rating)) || false} />
             ))}
         </div>
     </div>
@@ -77,8 +85,8 @@ const QCControl: React.FC<{
 
 
 const MetadataControl: React.FC<{
-    qc: QualityControlModel | null;
-}> = ({ qc }) => {
+    snap: SnapModel | null;
+}> = ({ snap }) => {
 
     return <div className="metadata-control-panel">
         <div className="panel-header">
@@ -87,17 +95,31 @@ const MetadataControl: React.FC<{
             </div>
         </div>
         <div className="">
-            <DictionaryTable dictionary={qc?.metadata || {}} />
+            <DictionaryTable dictionary={snap?.metadata || {}} />
         </div>
     </div>
 }
 
 const Sidebar: React.FC<{}> = ({ }) => {
-    const { snap: qc, currentBoard, updateNote } = useSnapSession();
+    const { snap: snap, updateRating } = useSnapSession();
+
+    // Adapter to match SnapControl's expected onRatingChanged signature
+    const handleRatingChanged = (
+        sessionId: string | null,
+        snapId: string | null,
+        rating: RatingModel
+    ) => {
+        // Only call updateRating if both IDs are present
+        if (snapId && rating) {
+            // updateRating expects (snapId: string, rating: any)
+            updateRating(snapId, rating);
+        }
+    };
+
     const menuItems: Tab[] = [
         { title: <FileCopyIcon />, content: <FilesControl /> },
-        { title: <EditNoteIcon />, content: <QCControl qc={qc} board={currentBoard} onNoteChanged={updateNote} /> },
-        { title: <ViewListIcon />, content: <MetadataControl qc={qc} /> },
+        { title: <EditNoteIcon />, content: <SnapControl onRatingChanged={handleRatingChanged} /> },
+        { title: <ViewListIcon />, content: <MetadataControl snap={snap} /> },
     ];
 
     return (

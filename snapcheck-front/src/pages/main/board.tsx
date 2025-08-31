@@ -1,6 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import type { BoardModel } from '../../api';
 import { ContextualMenu } from '../../components/lib/contextualMenu/contextualMenu';
+import { useSnapSession } from '../../contexts/SnapSessionContext';
 
 
 const ImageComponent = React.lazy(() => import('../../components/elements/image'));
@@ -29,6 +30,7 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
 
 const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> = ({ sessionId, snapId, board }) => {
     const [boardElements, setBoardElements] = useState<any[]>([]);
+    const { updateRating } = useSnapSession();
 
     useEffect(() => {
         if (board.elements) {
@@ -47,7 +49,7 @@ const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> 
                     items: rating.scale?.ratings.map((rate, index) => {
                         return {
                             label: rate.name,
-                            onClick: () => console.log('Rate clicked:', rate),
+                            onClick: () => updateRating(rating.id, rate.value),
                             style:{ backgroundColor: rate.color || "" }
                         };
                     }).concat([

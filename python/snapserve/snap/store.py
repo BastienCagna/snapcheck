@@ -7,6 +7,8 @@ import os.path as op
 SESSION_TIMEOUT = 12 * 3600
 QCITEM_TIMEOUT = 12 * 3600
 
+ID_LENGTH = 12
+
 class SnapStoreItem:
     snap: Snap
     id: str
@@ -15,7 +17,7 @@ class SnapStoreItem:
     def __init__(self, path):
         self._path = path
         self.snap = load_snap(path)
-        self.id = uuid.uuid4().hex
+        self.id = uuid.uuid4().hex[:ID_LENGTH]
         self.last_access = time()
 
     def to_dict(self):
@@ -34,7 +36,7 @@ class SnapSession:
     items: List[SnapStoreItem] = []
 
     def __init__(self):
-        self.id = uuid.uuid4().hex
+        self.id = uuid.uuid4().hex[:ID_LENGTH]  
         self.last_access = time()
 
     def register_item(self, item: SnapStoreItem):
