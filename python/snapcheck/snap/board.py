@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Union
 from snapcheck.core.objects import Serializable
-from snapcheck.qc.note import Note
+from snapcheck.snap.rating import Rating
 import shutil
 import os.path as op
 from warnings import warn
@@ -30,7 +30,7 @@ class FileElement(Element):
             Target directory should exist.
             If a file with the same name already exists, a suffix is added.
             If source_tracker is given, avoid to copy several time the same file
-            dir_path is attempted to be relative to parent file (like QC)
+            dir_path is attempted to be relative to parent file (like Snap)
         """
         if not op.isfile(self.src):
             warn(f"'{self.src}' doest not exist. Cannot export it then replacing with an empty source.")
@@ -62,18 +62,8 @@ class Board(Serializable):
     title: str
     description: str = ""
 
-    intended_notes: list[Note] = field(default_factory=list) # List of note IDs
+    intended_ratings: list[Rating] = field(default_factory=list) # List of rating IDs
 
     style: dict[str, str] = field(default_factory=dict) # Board CSS style
 
     elements: list[Element] = field(default_factory=list)  # Graphical elements of the board
-
-    # @property
-    # def __dict__(self):
-    #     return {
-    #         "title": self.title,
-    #         "description": self.description,
-    #         "style": self.style,
-    #         "elements": [element.__dict__ for element in self.elements],
-    #         'intended_notes': [note.id for note in self.intended_notes]
-    #     }

@@ -1,5 +1,4 @@
 from snapserve.settings.models import Setting, Settings, SettingsGroup
-import yaml
 import os.path as op
 from os import makedirs
 
@@ -32,7 +31,27 @@ def generate_default_settings(settings_f: str, force=False):
                     description="Comma-separated list of file extensions to filter by.",
                     type="string",
                     default=".snpk"
+                ),
+                Setting(
+                    id="n_history",
+                    label="Files History Length",
+                    description="Number of recent files to store",
+                    type="int",
+                    default=20
                 )
+            ]
+        ),
+        SettingsGroup(
+            id="core",
+            title="Core",
+            settings=[
+                Setting(
+                    id="share_dir",
+                    label="Share Directory Path",
+                    description="The data sharing directory path. It's use to save persistent data of the app.",
+                    type="string",
+                    default=op.join(op.expanduser("~"), ".share", "snapcheck")
+                ),
             ]
         )
     ])

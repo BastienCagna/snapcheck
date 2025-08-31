@@ -12,7 +12,7 @@ const ServerContent: React.FC<ServerContentProps> = ({ path, className }) => {
 
     useEffect(() => {
         let isMounted = true;
-        ContentService.contentGetStaticContent(path)
+        ContentService.getStaticContent(path)
             .then((data) => {
                 if (isMounted) setHtml(data.content);
             })

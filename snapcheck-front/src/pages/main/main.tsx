@@ -3,10 +3,10 @@ import type { BoardModel, QualityControlModel } from "../../api";
 import Board from "./board";
 import "./main.css"
 import { useRef } from "react";
-import { useQC } from "../../contexts/QCContext";
+import { useSnapSession } from "../../contexts/SnapSessionContext";
 import TabSelector from "../../components/lib/tabSelector/tabSelector";
 
-const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
+const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel | null }> = ({ sessionId, snapId, board }) => {
     const boardViewRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [isDragging, setIsDragging] = useState(false);
@@ -77,33 +77,27 @@ const BoardView: React.FC<{ board: BoardModel | null }> = ({ board }) => {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
         >
-            <Board board={board} />
+            <Board sessionId={sessionId} snapId={snapId} board={board} />
         </div>
     );
 };
 
 
 const MainContent: React.FC<{}> = () => {
-    const { qc, error, setCurrentBoard, currentBoardIndex, currentBoard } = useQC();
+    const { snap, setCurrentBoard, currentBoardIndex, currentBoard, session } = useSnapSession();
 
-    if (!qc && !error) {
+    if (!snap) {
         return <div className="vertical-center">
             <p className='default-text'>Nothing to show.</p>
-        </div>
-    }
-    if (error) {
-        return <div className="vertical-center">
-            <p className='error-text'>{error}</p>
         </div>
     }
 
     return <div>        
         <div className="main-header">
-            <span>{qc?.title}</span>
             {
-                qc?.boards?.length && (
+                snap?.boards?.length && (
                     <ul className='board-list'>
-                        {qc.boards.map((board: BoardModel, index) => (
+                        {snap.boards.map((board: BoardModel, index) => (
                             <li key={index} onClick={() => setCurrentBoard(index)} className={currentBoardIndex === index ? 'active' : ''}>
                                 {board.title}
                             </li>
@@ -111,8 +105,11 @@ const MainContent: React.FC<{}> = () => {
                     </ul>
                 )
             }
+            <span>{snap?.title}</span>
         </div>
         <BoardView
+            sessionId={session?.id || ""}
+            snapId={snap.id || ""}
             board={currentBoard}
         />
     </div>

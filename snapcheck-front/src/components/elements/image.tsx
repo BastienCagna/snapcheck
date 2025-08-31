@@ -1,24 +1,48 @@
 import React, { useEffect } from 'react';
-import { QcService } from '../../api';
+import { OpenAPI, SnapService } from '../../api';
 
 const ImageComponent: React.FC<{
+    sessionId: string;
+    snapId: string;
     src: string;
     style?: React.CSSProperties;
-}> = ({ src, style }) => {
+}> = ({ sessionId, snapId, src, style }) => {
+
+    const [imageUrl, setImageUrl] = React.useState<string | null>(null);
 
     useEffect(() => {
+        let url: string | null = null;
         const fetchImage = async () => {
             try {
-                await QcService.qcGetImage(src);
+                const response = await fetch(
+                    `${OpenAPI.BASE}/snap/${sessionId}/${snapId}/image/${src}`,
+                    { method: 'GET' }
+                );
+                if (!response.ok) throw new Error('Image not found');
+                const blob = await response.blob();
+                url = URL.createObjectURL(blob);
+                setImageUrl(url);
             } catch (error) {
                 console.error('Error fetching image:', error);
+                setImageUrl(null);
             }
         };
-
         fetchImage();
-    }, [src]);
-    return <img src={`http://127.0.0.1:8000/qc/image/` + src} alt={src} style={style} />;
+        // Cleanup function for useEffect
+        return () => {
+            if (url) {
+                URL.revokeObjectURL(url);
+            }
+        };
+    }, [sessionId, snapId, src]);
+
+    return imageUrl ? (
+        <img src={imageUrl} alt={src} style={style} />
+    ) : (
+        <div>Loading...</div>
+    );
 };
+
 
 export default ImageComponent;
 

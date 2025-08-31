@@ -9,7 +9,7 @@ from snapserve.router import api_router
 # Base.metadata.create_all(bind=engine)
 
 def custom_generate_unique_id(route: APIRoute):
-    return f"{route.tags[0]}-{route.name}"
+    return f"{route.name}"
 
 
 app = FastAPI(generate_unique_id_function=custom_generate_unique_id)

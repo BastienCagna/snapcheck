@@ -3,8 +3,8 @@ from dataclasses import dataclass, field
 from typing import Any, List
 from snapcheck.core.io import temporarly_change_directory
 from snapcheck.core.objects import BSCObject
-from snapcheck.qc.board import Board, FileElement
-from snapcheck.qc.note import Note
+from snapcheck.snap.board import Board, FileElement
+from snapcheck.snap.rating import Rating
 import json
 from warnings import warn
 import tempfile
@@ -15,11 +15,11 @@ import zipfile
 
 
 @dataclass
-class QualityControl(BSCObject):
+class Snap(BSCObject):
     title: str|None = None
     description: str|None = None
     metadata: dict[str, Any] = field(default_factory=dict)
-    notes: List[Note] = field(default_factory=list)
+    ratings: List[Rating] = field(default_factory=list)
     boards: List[Board] = field(default_factory=list)
 
     _dir: tempfile.TemporaryDirectory|None = None
@@ -27,22 +27,22 @@ class QualityControl(BSCObject):
 
     def _validate(self):
         """
-        Check if the QualityControl object is valid.
-        This can include checks like ensuring that all notes and boards are properly defined.
+        Check if the Snap object is valid.
+        This can include checks like ensuring that all ratings and boards are properly defined.
         """
-        # Check that all notes referenced in boards are defined in the notes list
+        # Check that all ratings referenced in boards are defined in the ratings list
         for board in self.boards:
-            for int_note in board.intended_notes:
-                for note in self.notes:
-                    if int_note.id == note.id:
+            for int_rating in board.intended_ratings:
+                for rating in self.ratings:
+                    if int_rating.id == rating.id:
                         break
                 else:
-                    raise ValueError(f"Note with #'{note.id}' used by board '{board.title}' is not defined in the notes list.")
+                    raise ValueError(f"Rating with #'{rating.id}' used by board '{board.title}' is not defined in the ratings list.")
         checked_scales = []
-        for note in self.notes:
-            if note.scale is None or note.scale in checked_scales:
+        for rating in self.ratings:
+            if rating.scale is None or rating.scale in checked_scales:
                 continue
-            note.scale.check()
+            rating.scale.check()
 
     def to_dict(self, validate=False, compress=True) -> None:
         """ Return the object as dict (optionally after validation) """
@@ -55,43 +55,43 @@ class QualityControl(BSCObject):
         if not compress:
             return data
 
-        # List all the scale to save them and use references in notes
+        # List all the scale to save them and use references in ratings
         scales = {}
         ser_scales = []
-        for real_note, ser_note in zip(self.notes, data["notes"]):
-            if real_note is None or real_note.scale is None:
+        for real_rating, ser_rating in zip(self.ratings, data["ratings"]):
+            if real_rating is None or real_rating.scale is None:
                 continue
-            if len(scales) == 0 or real_note.scale not in scales.values():
+            if len(scales) == 0 or real_rating.scale not in scales.values():
                 id = f"@._scales#{len(scales)}"
-                scales[id] = real_note.scale
-                ser_scales.append(ser_note["scale"])
+                scales[id] = real_rating.scale
+                ser_scales.append(ser_rating["scale"])
             else:
                 for id, scale in scales.items():
-                    if scale == real_note.scale:
+                    if scale == real_rating.scale:
                         break
                 else:
                     raise KeyError(f"Cannot found scale {scale}")
-            ser_note["scale"] = id
+            ser_rating["scale"] = id
 
-        # Replace intended_notes of each board to their references
+        # Replace intended_ratings of each board to their references
         for item in data["boards"]:
-            ref_intended_notes = []
-            for note in item["intended_notes"]:
-                note_id = note["id"]
-                for n, note in enumerate(data["notes"]):
-                    if note["id"] == note_id:
-                        ref_intended_notes.append(f"@.notes#{n}")
+            ref_intended_ratings = []
+            for rating in item["intended_ratings"]:
+                rating_id = rating["id"]
+                for n, rating in enumerate(data["ratings"]):
+                    if rating["id"] == rating_id:
+                        ref_intended_ratings.append(f"@.ratings#{n}")
                         break
-            item["intended_notes"] = ref_intended_notes
+            item["intended_ratings"] = ref_intended_ratings
 
-        # List all the notes to use references (ids) in boards
+        # List all the ratings to use references (ids) in boards
         data["_scales"] = ser_scales
 
         return data
 
     def to_json(self, path: str):
         warn(
-            "Using to_json() method on QualityControl object will only save metadata.\n" + \
+            "Using to_json() method on Snap object will only save metadata.\n" + \
             "To also save the boards content, use the save() method"
         )
         return super().to_json()
@@ -99,7 +99,7 @@ class QualityControl(BSCObject):
     def save(self, path: str):
         # Create the content directory
         fname = op.basename(path).split('.')[-2]
-        tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_")
+        tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_")
         content_path = op.join(tmp_dir.name, "content")
         mkdir(content_path)
         js_f = op.join(tmp_dir.name, fname + ".json")
@@ -121,7 +121,7 @@ class QualityControl(BSCObject):
         # Create the archive directly with the desired file name and extension
         base_name, ext = op.splitext(path)
         archive_path = shutil.make_archive(base_name=base_name, format='zip', root_dir=tmp_dir.name)
-        # If the extension is not .snapqc, rename the archive
+        # If the extension is not .snap, rename the archive
         rename(archive_path, path)
         self._path = path
 
@@ -131,18 +131,18 @@ class QualityControl(BSCObject):
             self._dir.cleanup()
 
 
-    def update_note(self, note: Note):
+    def update_rating(self, rating: Rating):
         with self.changing():
-            for i, n in enumerate(self.notes):
-                if n.id == note.id:
-                    self.notes[i] = note
+            for i, n in enumerate(self.ratings):
+                if n.id == rating.id:
+                    self.ratings[i] = rating
                     break
             else:
-                raise ValueError(f"Note with ID '{note.id}' not found.")
+                raise ValueError(f"Note with ID '{rating.id}' not found.")
 
-def load_quality_control(path: str) -> QualityControl:
-    """ Load a QualityControl object from a JSON file """
-    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_qc_load_", delete=False)
+def load_snap(path: str) -> Snap:
+    """ Load a Snap object from a JSON file """
+    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_load_", delete=False)
     with zipfile.ZipFile(path, 'r') as zip_ref:
         zip_ref.extractall(tmp_dir.name)
 
@@ -156,12 +156,12 @@ def load_quality_control(path: str) -> QualityControl:
     with open(js_path, 'r') as f:
         data = json.load(f)
 
-    qc = QualityControl.from_dict(data)
-    qc._path = path
-    del qc._scales
-    qc._dir = tmp_dir
+    snap = Snap.from_dict(data)
+    snap._path = path
+    del snap._scales
+    snap._dir = tmp_dir
 
     # Validate the loaded object
-    qc._validate()
+    snap._validate()
 
-    return qc
+    return snap

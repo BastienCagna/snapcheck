@@ -12,7 +12,7 @@ import InlineToggle from '../../../components/lib/inlineToggle';
 import NoteStatBar from '../../../components/specials/notestatbar/notestatbar';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
-import { useQC } from '../../../contexts/QCContext';
+import { useSnapSession } from '../../../contexts/SnapSessionContext';
 import Toolbar from '../toolbar/toolbar';
 
 
@@ -26,9 +26,9 @@ function boardHasNote(board: BoardModel, note: NoteModel) {
 }
 
 const FilesControl: React.FC<{
-    qc: QualityControlModel | null;
-}> = ({ qc }) => {
+}> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
+    const { openSnap } = useSnapSession();
 
     return <div className="files-control-panel">
         <div className="panel-header">
@@ -39,17 +39,16 @@ const FilesControl: React.FC<{
         <FilesBrowser
             path={currentPath}
             onPathChange={(p) => setCurrentPath(p)}
-            onFileSelect={(f) => console.log(f)}
+            onFileSelect={openSnap}
             extensions={[".snpk"]}
         />
     </div>
 }
 
 const QCControl: React.FC<{
-    qc: QualityControlModel | null;
-    board: BoardModel | null;
     onNoteChanged?: (note: NoteModel) => void;
-}> = ({ qc, board, onNoteChanged }) => {
+}> = ({onNoteChanged }) => {
+    const { snap, currentBoard } = useSnapSession();
     const [showAllNotes, setShowAllNotes] = React.useState(true);
 
     return <div className="qc-control-panel">
@@ -63,14 +62,14 @@ const QCControl: React.FC<{
             </div>
         </div>
 
-        {qc && <NoteStatBar qc={qc} />}
+        {/* {qc && <NoteStatBar qc={qc} />} */}
         <div className="notes-list">
-            {qc?.notes?.filter((note) => board && (showAllNotes || boardHasNote(board, note))).map((note) => (
+            {snap?.ratings?.filter((rating) => currentBoard && (showAllNotes || boardHasNote(currentBoard, rating))).map((rating) => (
                 <NoteInput
-                    key={note.id}
-                    note={note}
-                    onChange={(note) => { if (onNoteChanged) onNoteChanged(note) }}
-                    highlight={(showAllNotes && board && boardHasNote(board, note)) || false} />
+                    key={rating.id}
+                    note={rating}
+                    onChange={(rating) => { if (onNoteChanged) onNoteChanged(rating) }}
+                    highlight={(showAllNotes && currentBoard && boardHasNote(currentBoard, rating)) || false} />
             ))}
         </div>
     </div>
@@ -94,9 +93,9 @@ const MetadataControl: React.FC<{
 }
 
 const Sidebar: React.FC<{}> = ({ }) => {
-    const { qc, currentBoard, updateNote } = useQC();
+    const { snap: qc, currentBoard, updateNote } = useSnapSession();
     const menuItems: Tab[] = [
-        { title: <FileCopyIcon />, content: <FilesControl qc={qc} /> },
+        { title: <FileCopyIcon />, content: <FilesControl /> },
         { title: <EditNoteIcon />, content: <QCControl qc={qc} board={currentBoard} onNoteChanged={updateNote} /> },
         { title: <ViewListIcon />, content: <MetadataControl qc={qc} /> },
     ];

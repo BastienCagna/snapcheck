@@ -29,7 +29,7 @@ class SettingsGroupModel(BaseModel):
 class Setting(Serializable):
     id: str
     label: str
-    type: str
+    type: str               # string, int, ...
     choices: List[ValueTypes] | None = None
     min: NumericalValues| None = None
     max: NumericalValues | None = None

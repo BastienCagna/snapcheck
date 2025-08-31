@@ -17,7 +17,7 @@ const FilesBrowser: React.FC<{
     useEffect(() => {
         const fetchFiles = async () => {
             setIsLoading(true);
-            const directory = await FilesService.filesListDirectory(path || undefined, extensions);
+            const directory = await FilesService.listDirectory(path || undefined, extensions);
             setDirectory(directory);
             setIsLoading(false);
         };

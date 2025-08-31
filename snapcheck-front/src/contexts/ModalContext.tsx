@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useReducer } from 'react';
+import { createContext, useContext, useReducer } from 'react';
 import type { DefaultProps } from '../core/types';
 
 type ModalState = {
@@ -65,7 +65,7 @@ export function useModalActions() {
 
     Example:
     ```
-    const { loadQC, setCurrentBoard, updateNote } = useQCComplete();
+    const { openQC, setCurrentBoard, updateNote } = useQCComplete();
     ```
 */
 export function useModal() {

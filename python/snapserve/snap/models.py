@@ -2,21 +2,21 @@ from typing import List
 from pydantic import BaseModel
 
 
-class NoteScaleItem(BaseModel):
+class RatingScaleItem(BaseModel):
     name: str
     value: int
     description: str
     color: str | None = None
 
-class NoteScaleModel(BaseModel):
+class RatingScaleModel(BaseModel):
     description: str
-    notes: List[NoteScaleItem]
+    ratings: List[RatingScaleItem]
 
-class NoteModel(BaseModel):
+class RatingModel(BaseModel):
     id: str
     name: str
     description: str
-    scale:NoteScaleModel | None
+    scale:RatingScaleModel | None
     value: int|None
     comment: str|None
 
@@ -32,18 +32,31 @@ class ImageElementModel(ElementModel):
 class BoardModel(BaseModel):
     title: str
     description: str
-    intended_notes: List[NoteModel]
+    intended_ratings: List[RatingModel]
     style: dict[str, str]
     elements:List[ImageElementModel]
 
-class QualityControlModel(BaseModel):
+class SnapModel(BaseModel):
     title: str | None = None
     description: str | None = None
     metadata: dict
-    notes: List[NoteModel] = []
+    ratings: List[RatingModel] = []
     boards: List[BoardModel] = []
 
+    id: str | None = None
     has_changed: bool = False
     filename: str | None = None
     is_cancellable: bool = False
     is_redoable: bool = False
+
+class SnapShortModel(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    id: str | None = None
+    has_changed: bool = False
+    filename: str | None = None
+
+class SnapCheckSessionModel(BaseModel):
+    id: str
+    last_access: float
+    items: List[SnapShortModel] = []

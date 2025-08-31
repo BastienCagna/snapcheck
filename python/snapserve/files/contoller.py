@@ -1,11 +1,8 @@
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
-from snapcheck.qc.io import load_quality_control
+from fastapi import APIRouter, HTTPException
 from snapserve.files.models import DirectoryItemModel, DirectoryModel
-from snapserve.qc.models import NoteModel, QualityControlModel
-from fastapi.responses import FileResponse
 import os.path as op
-from os import listdir, getcwd
+from os import listdir
 from snapserve.app_settings import APP_SETTINGS
 
 router = APIRouter()

@@ -1,38 +1,37 @@
-import { useState, useEffect, useReducer } from 'react'
-import './App.css'
 import Sidebar from './pages/main/sidebar/sidebar';
 import MainContent from './pages/main/main';
-import Toolbar from './pages/main/toolbar/toolbar';
-import { QCProvider } from './contexts/QCContext';
-import TabSelector from './components/lib/tabSelector/tabSelector';
+import { SnapSessionProvider } from './contexts/SnapSessionContext';
 import Modal from './components/lib/modal/modal';
 import { ModalProvider } from './contexts/ModalContext';
+import { SnapSelector } from './pages/main/snapSelector';
+import { SettingsProvider } from './contexts/SettingsContext';
+import './App.css'
 
 function App() {
     return (
         <div className='app'>
-            <QCProvider>
-                <ModalProvider>
-                    <div className="page-container">
-                        <div className='sidebar-container'>
-                            <Sidebar />
-                        </div>
-                        <div className='main-container'>
-                            <div className='toolbar-container'>
-                                <TabSelector items={[
-                                    { label: "Tab 1", onClick: () => { }, isActive: true },
-                                ]} />
+            <SettingsProvider>
+                <SnapSessionProvider>
+                    <ModalProvider>
+                        <div className="page-container">
+                            <div className='sidebar-container'>
+                                <Sidebar />
                             </div>
-                            <div className="board-container">
-                                <MainContent />
+                            <div className='main-container'>
+                                <div className='toolbar-container'>
+                                    <SnapSelector />
+                                </div>
+                                <div className="board-container">
+                                    <MainContent />
+                                </div>
+                            </div>
+                            <div className='modal-container'>
+                                <Modal />
                             </div>
                         </div>
-                        <div className='modal-container'>
-                            <Modal />
-                        </div>
-                    </div>
-                </ModalProvider>
-            </QCProvider>        
+                    </ModalProvider>
+                </SnapSessionProvider>       
+            </SettingsProvider> 
         </div>
     )
 }
