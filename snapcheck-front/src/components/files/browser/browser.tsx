@@ -4,6 +4,7 @@ import { FilesService, type DirectoryItemModel, type DirectoryModel } from '../.
 
 import './browser.css';
 import { Folder } from '@mui/icons-material';
+import Button from '../../lib/button';
 
 const FilesBrowser: React.FC<{
     path: string | null
@@ -41,9 +42,22 @@ const FilesBrowser: React.FC<{
             onPathChange(p);
         }
     };
-
+    const breadcrumbs: JSX.Element[] = [];
+    if (path) {
+        const parts = path.split("/").filter(Boolean); // filter removes empty parts
+        breadcrumbs.push(<Button className='separator' onClick={() => goto("/")}>/</Button>);
+        parts.forEach((part, idx) => {
+            const cumPath = <span className="separator">/</span> + parts.slice(0, idx + 1).join("/");
+            breadcrumbs.push(
+                <span key={cumPath}>
+                    <Button onClick={() => goto(cumPath)}>{part}</Button>
+                    {idx < parts.length - 1 && <span className="separator">/</span>}
+                </span>
+            );
+        });
+    }
     return <div>
-        <span>{path}</span>
+        <div className="files-browser-breadcrumbs">{breadcrumbs}</div>
         {
             directory && (
                 <ul className="files-browser-items">

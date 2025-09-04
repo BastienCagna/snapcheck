@@ -8,18 +8,13 @@ import subprocess
 import time
 import atexit
 import PyQt5.QtWidgets as qw
-from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtGui import QPixmap
 import os.path as op
 import requests
+from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
 from snapclient.titlebar import CustomTitleBar
-
-ASSETS_PATH = op.abspath(op.join(op.dirname(__file__), "assets"))
-SPLASH_PATH = op.join(ASSETS_PATH, "splash.jpg")
-
-FRONT_PATH = op.abspath(op.join(op.dirname(__file__), "..", "..", "snapcheck-front"))
-DEFAULT_PORT = 3000
-DEFAULT_URL = "127.0.0.1"
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QTimer
 
 
 class BottomBar(QWidget):
@@ -51,9 +46,15 @@ class MainWindow(QMainWindow):
     def __init__(self, url: str):
         super().__init__()
         self.setWindowTitle("SnapCheck")
-        self.setStyleSheet("background-color: #333; color: #ccc;")
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+        self.setStyleSheet("background-color: #333; color: #ccc")
+        
+        # Remove the title bar and window frame (make it a frameless window)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+
+        if op.exists(APP_ICON):
+            self.setWindowIcon(QIcon(APP_ICON))
 
         self.title_bar = CustomTitleBar(self)
 
@@ -82,6 +83,60 @@ class MainWindow(QMainWindow):
 
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+
+        self.resizing = None
+
+    def mouseMoveEvent(self, event):
+        w = 3 # half border width
+        x, y = event.pos().x(), event.pos().y()
+        geo = self.geometry()
+        dist_to_top = abs(y - geo.top())
+        dist_to_left = abs(x - geo.left())
+        dist_to_right = abs(x - geo.right())
+        dist_to_bottom = abs(y - geo.bottom())
+        if dist_to_top <= w:
+            if dist_to_left <= w:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+                self.resizing = 'top-left'
+            elif dist_to_right <= w:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+                self.resizing = 'top-right'
+            else:
+                self.setCursor(Qt.CursorShape.SizeVerCursor)
+                self.resizing = 'top'
+        elif dist_to_bottom <= w:
+            if dist_to_left <= w:
+                self.setCursor(Qt.CursorShape.SizeBDiagCursor)
+                self.resizing = 'bottom-left'
+            elif dist_to_right <= w:
+                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
+                self.resizing = 'bottom-right'
+            else:
+                self.setCursor(Qt.CursorShape.SizeVerCursor)
+                self.resizing = 'bottom'
+        elif dist_to_left <= w:
+            self.setCursor(Qt.CursorShape.SizeHorCursor)
+            self.resizing = 'left'
+        elif dist_to_right <= w:
+            self.setCursor(Qt.CursorShape.SizeHorCursor)
+            self.resizing = 'right'
+        else:
+            self.resizing = None
+        print(f"Curseur déplacé : x={x}, y={y}", self.resizing)
+
+        super().mouseMoveEvent(event)
+
+    def showMaximized(self):
+        print("Maximizing")
+        super().showMaximized()
+
+    def showNormal(self):
+        print("Restoring")
+        super().showNormal()
+
+    def showMinimized(self):
+        print("Minimizing")
+        super().showMinimized()
 
 
 def vite_commandline(port):

@@ -29,7 +29,8 @@ $menu-hover-color: #474747
     top: 100%
     left: 0    
     min-width: 140px
-    z-index: 100
+    width: max-content
+    z-index: 10000
     background: #242424ff
     border: 1px solid #414141ff
     color: $menu-button-color
@@ -39,6 +40,8 @@ $menu-hover-color: #474747
 
 
     .menu-inner-item
+        display: flex
+        flex-direction: row
         width: 100%
         cursor: pointer
         outline: none
@@ -57,10 +60,14 @@ $menu-hover-color: #474747
         span:hover
             background: none
 
-
     .menu-separator
         display: block
         height: 1px
         width: 80%
         background: #414141ff
         margin: 4px 0
+
+    .submenu-child
+        position: relative
+        top: -20px
+        right:0

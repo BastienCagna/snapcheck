@@ -1,5 +1,6 @@
 import Menu from "../../../components/lib/menu/menu";
 import ServerContent from "../../../components/lib/serverContent";
+import { useAppData } from "../../../contexts/AppDataContext";
 import { useModal } from "../../../contexts/ModalContext";
 import { useSnapSession } from "../../../contexts/SnapSessionContext";
 import DebugPage from "../../debug/debug";
@@ -8,8 +9,9 @@ import "./toolbar.css";
 
 const Toolbar: React.FC<{
 }> = () => {
-    const { snap: qc, openQC, currentBoard, closeCurrentQc} = useSnapSession();
-    const { showModal} = useModal();
+    const { snap, openSnap, currentBoard, closeCurrentSnap } = useSnapSession();
+    const { showModal } = useModal();
+    const { history } = useAppData();
 
     const openFile = () => {
         const input = document.createElement("input");
@@ -22,7 +24,7 @@ const Toolbar: React.FC<{
                 // reader.onload = (event) => { ... };
                 // reader.readAsText(file);
                 console.log("user selected:", file.path, file)
-                openQC(file.path);
+                openSnap(file.path);
             }
         };
         input.click();
@@ -34,28 +36,36 @@ const Toolbar: React.FC<{
                 <Menu items={[
                     {label: "File", children: [  
                         { label: "Open file...", onClick: openFile },
-                        { label: "Open recent...", onClick: openQC },
+                        { 
+                            label: "Open recent...", 
+                            children: history && history.length > 0 
+                                ? history.map(file => ({
+                                    label: file.length > 20 ? `...${file.slice(-20)}` : file,
+                                    onClick: () => openSnap(file)
+                                })) 
+                                : [{ label: "No recent files", disabled: true }] 
+                        },
                         { type: "separator" },
-                        { label: "Reload", onClick: openQC, disabled: !qc },
-                        { label: "Save", onClick: () => { }, disabled: !qc?.has_changed },
-                        { label: "Save As...", onClick: () => { }, disabled: !qc?.has_changed },
-                        { label: "Close", onClick:closeCurrentQc, disabled: !qc},
-                        { label: "Close All", onClick: () => { }, disabled: !qc},
+                        { label: "Reload", onClick: openSnap, disabled: !snap },
+                        { label: "Save", onClick: () => { }, disabled: !snap?.has_changed },
+                        { label: "Save As...", onClick: () => { }, disabled: !snap?.has_changed },
+                        { label: "Close", onClick:closeCurrentSnap, disabled: !snap},
+                        { label: "Close All", onClick: () => { }, disabled: !snap},
                         { type: "separator" },
-                        { label: "Export to PDF", onClick: () => { }, disabled: !qc },
-                        { label: "Export to HTML", onClick: () => { }, disabled: !qc },
+                        { label: "Export to PDF", onClick: () => { }, disabled: !snap },
+                        { label: "Export to HTML", onClick: () => { }, disabled: !snap },
                         { type: "separator" },
                         {label: "Settings...", onClick: () => { showModal(<SettingsPage />)}},
                         { type: "separator" },
                         { label: "Quit", onClick: () => { }}
                     ]},
                     {label: "Edit", children: [
-                        { label: "Cancel", onClick: () => { }, disabled: !qc?.is_cancellable },
-                        { label: "Redo", onClick: () => { }, disabled: !qc?.is_redoable }
+                        { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
+                        { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
                     ]},
                     {label: "View", children: [
                         { label: "Show Sidebar", onClick: () => { } },
-                        {label: "Show this board in all files", onClick: () => {}, disabled: !qc || !currentBoard}
+                        {label: "Show this board in all files", onClick: () => {}, disabled: !snap || !currentBoard}
                     ]},
                     {label: "More", children: [
                         { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) }},

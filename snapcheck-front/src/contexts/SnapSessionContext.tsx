@@ -225,7 +225,7 @@ export function useSnapSession() {
         throw new Error('useSnapSession must be used within a SnapSessionProvider');
     }    
     
-    const closeCurrentQc = () => {
+    const closeCurrentSnap = () => {
         actions.closeSnap(state.currentSnapPath!);
     }
 
@@ -233,6 +233,6 @@ export function useSnapSession() {
         ...state,
         ...actions,
         ...state.snaps[state.currentSnapPath!],
-        closeCurrentQc
+        closeCurrentSnap
     };
 }

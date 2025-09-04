@@ -1,5 +1,7 @@
 from PyQt5.QtCore import QEvent, QSize, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt5.QtSvg import QSvgRenderer
+import os.path as op
 from PyQt5.QtWidgets import (
     QApplication,
     QHBoxLayout,
@@ -10,6 +12,22 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+from snapclient.constants import ASSETS_PATH, CLOSE_ICON, ICON_COLOR, MAXIMIZE_ICON, MINIMIZE_ICON, NORMAL_ICON
+# from snapclient.constants import CLOSE_ICON, RESTORE_ICON, MINIMIZE_ICON
+
+def svg_icon_with_color(svg_path: str, color: str, size=(24, 24)) -> QIcon:
+    """Load an SVG file and color it with the specified color."""
+    renderer = QSvgRenderer(svg_path)
+    pixmap = QPixmap(size[0], size[1])
+    pixmap.fill(Qt.transparent)
+    painter = QPainter(pixmap)
+    painter.setCompositionMode(QPainter.CompositionMode_Source)
+    renderer.render(painter)
+    painter.setCompositionMode(QPainter.CompositionMode_SourceIn)
+    painter.fillRect(pixmap.rect(), QColor(color))
+    painter.end()
+    return QIcon(pixmap)
+
 
 class CustomTitleBar(QWidget):
     def __init__(self, parent):
@@ -29,34 +47,32 @@ class CustomTitleBar(QWidget):
         if title := parent.windowTitle():
             self.title.setText(title)
         title_bar_layout.addWidget(self.title)
+
         # Min button
         self.min_button = QToolButton(self)
-        min_icon = QIcon()
-        min_icon.addFile("min.svg")
+        min_icon = svg_icon_with_color(MINIMIZE_ICON, ICON_COLOR)
         self.min_button.setIcon(min_icon)
         self.min_button.clicked.connect(self.window().showMinimized)
 
         # Max button
         self.max_button = QToolButton(self)
-        max_icon = QIcon()
-        max_icon.addFile("max.svg")
+        max_icon = svg_icon_with_color(MAXIMIZE_ICON, ICON_COLOR)
         self.max_button.setIcon(max_icon)
         self.max_button.clicked.connect(self.window().showMaximized)
 
         # Close button
         self.close_button = QToolButton(self)
-        close_icon = QIcon()
-        close_icon.addFile("close.svg")  # Close has only a single state.
+        close_icon = svg_icon_with_color(CLOSE_ICON, ICON_COLOR)
         self.close_button.setIcon(close_icon)
         self.close_button.clicked.connect(self.window().close)
 
         # Normal button
         self.normal_button = QToolButton(self)
-        normal_icon = QIcon()
-        normal_icon.addFile("normal.svg")
+        normal_icon = svg_icon_with_color(NORMAL_ICON, ICON_COLOR)
         self.normal_button.setIcon(normal_icon)
         self.normal_button.clicked.connect(self.window().showNormal)
         self.normal_button.setVisible(False)
+
         # Add buttons
         buttons = [
             self.min_button,
@@ -97,25 +113,6 @@ class CustomTitleBar(QWidget):
 
     def mouseMoveEvent(self, event):
         window = self.window()
-        margin = 12
-        rect = self.rect()
-        if not window.isMaximized():
-            # Change cursor if in resize zone
-            print( event.pos().x(), rect.width() - margin, event.pos().y(), rect.height() - margin)
-            if event.pos().x() >= rect.width() - margin and event.pos().y() >= rect.height() - margin:
-                self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-            else:
-                self.setCursor(Qt.CursorShape.ArrowCursor)
-        if hasattr(self, 'resizing') and getattr(self, 'resizing', False):
-            # Window manual resizing:
-            delta = event.globalPos() - self.resize_start_pos
-            new_size = self.resize_start_size + delta
-            min_size = window.minimumSize()
-            new_width = max(new_size.width(), min_size.width())
-            new_height = max(new_size.height(), min_size.height())
-            window.resize(new_width, new_height)
-            event.accept()
-            return
         if self.initial_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
             window.move(event.globalPos() - self.initial_pos)
             event.accept()
@@ -127,10 +124,10 @@ class CustomTitleBar(QWidget):
         event.accept()
 
         # Window manual resizing
-        self.initial_pos = None
-        if hasattr(self, 'resizing'):
-            self.resizing = False
-        event.accept()
+        # self.initial_pos = None
+        # if hasattr(self, 'resizing'):
+        #     self.resizing = False
+        # event.accept()
         super().mouseReleaseEvent(event)
 
     def mouseDoubleClickEvent(self, event):
@@ -155,15 +152,16 @@ class CustomTitleBar(QWidget):
                 geo = window.geometry()
                 screen_geo = screen.availableGeometry()
                 margin = 30  # pixels tolerance
-                if not self.window().isMaximized() and abs(geo.top() - screen_geo.top()) <= margin:
-                    window.showMaximized()
-                elif window.isMaximized():
-                    window.showNormal()
-                    # Move window slightly down to avoid snapping back to fullscreen
-                    offset = 30
-                    window.move(window.x(), screen_geo.top() + offset)
+                    # Correction: Commented out problematic block to prevent infinite loop
+                    # if not self.window().isMaximized() and abs(geo.top() - screen_geo.top()) <= margin:
+                    #     window.showMaximized()
+                    # elif window.isMaximized():
+                    #     window.showNormal()
+                    #     # Move window slightly down to avoid snapping back to fullscreen
+                    #     offset = 30
+                    #     window.move(window.x(), screen_geo.top() + offset)
         return super().eventFilter(obj, event)
-
+    
     def showEvent(self, event):
         self.window().installEventFilter(self)
         super().showEvent(event)

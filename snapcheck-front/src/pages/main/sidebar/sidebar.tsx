@@ -28,27 +28,16 @@ const FilesControl: React.FC<{
 }> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
     const { openSnap } = useSnapSession();
-    const { history } = useAppData();
 
     return <div className="files-control-panel">
         <div className="panel-header">
             <h3>Files</h3>
-            <div>
-                <ul>
-                    {history && history.map(file => (
-                        <li key={file} onClick={() => openSnap(file)}>
-                            {file}
-                        </li>
-                    ))}
-                </ul>
-            </div>
         </div>
         <FilesBrowser
             path={currentPath}
             onPathChange={(p) => setCurrentPath(p)}
             onFileSelect={openSnap}
             extensions={[".snpk"]}
-            recent_files={history}
         />
     </div>
 }
