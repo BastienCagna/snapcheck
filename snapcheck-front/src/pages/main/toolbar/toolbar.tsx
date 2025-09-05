@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import Menu from "../../../components/lib/menu/menu";
 import ServerContent from "../../../components/lib/serverContent";
 import { useAppData } from "../../../contexts/AppDataContext";
@@ -9,7 +10,7 @@ import "./toolbar.css";
 
 const Toolbar: React.FC<{
 }> = () => {
-    const { snap, openSnap, currentBoard, closeCurrentSnap } = useSnapSession();
+    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards} = useSnapSession();
     const { showModal } = useModal();
     const { history } = useAppData();
 
@@ -29,6 +30,18 @@ const Toolbar: React.FC<{
         };
         input.click();
     }
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // ctrl+b toggle sidebar
+            if (e.ctrlKey && e.key.toLowerCase() === "b") {
+                e.preventDefault();
+                toggleShowSidebar();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [snap]);
 
     return (
         <div className="toolbar">
@@ -64,8 +77,8 @@ const Toolbar: React.FC<{
                         { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
                     ]},
                     {label: "View", children: [
-                        { label: "Show Sidebar", onClick: () => { } },
-                        {label: "Show this board in all files", onClick: () => {}, disabled: !snap || !currentBoard}
+                        { label: "Show Sidebar", onClick: toggleShowSidebar},
+                        {label: "Sync boards", onClick: toggleSyncBoards, disabled: !snap || !currentBoard}
                     ]},
                     {label: "More", children: [
                         { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) }},

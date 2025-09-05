@@ -12,6 +12,7 @@ APP_DATA_PATH = op.join(APP_SETTINGS.get("core.share_dir").value, "app_data.json
 class AppData(Serializable):
     def __init__(self):
         self.history = deque(maxlen=APP_SETTINGS.get("files.n_history").value)  # Queue to store last n opened files
+        self.show_sidebar = True
 
     def add_to_history(self, file_path: str):
         if file_path in self.history:

@@ -20,6 +20,13 @@ def create_session():
 def get_session_infos(sid: str):
     return snap_store.get_session(sid)
 
+@router.get("/{sid}/saveall", response_model=SnapModel)
+def save_all_snaps(sid: str):
+    sess = snap_store.get_session(sid)
+    for item in sess.items:
+        item.save()
+    return [item.to_dict() for item in sess.items]
+
 @router.get("/{sid}/close", response_model=List[SnapModel] | None)
 def close_session(sid: str):
     items = snap_store.close_session(sid)
@@ -41,12 +48,22 @@ def open_snap(sid: str, path: str):
         raise HTTPException(status_code=404, detail="Snap not found")
     return item.to_dict()
 
-# @router.get("/{sid}/{snapid}", response_model=SnapModel)
-# def get_full_snap(sid: str, snapid: str):
-#     item = snap_store.get_by_id(snapid)
-#     if not item:
-#         raise HTTPException(status_code=404, detail="Quality control not found")
-#     return item.to_dict()
+@router.get("/{sid}/{snapid}/save", response_model=SnapModel)
+def save_snap(sid: str, snapid: str):
+    item = snap_store.get_by_id(sid, snapid)
+    if not item:
+        raise HTTPException(status_code=404, detail="Snap not found")
+    item.snap.save()
+    return item.to_dict()
+
+@router.get("/{sid}/{snapid}/saveas", response_model=SnapModel)
+def save_snap_as(sid: str, snapid: str, path: str):
+    item = snap_store.get_by_id(sid, snapid)
+    if not item:
+        raise HTTPException(status_code=404, detail="Snap not found")
+    item.snap.save(path)
+    return item.to_dict()
+
 
 @router.get("/{sid}/{snapid}/image/{src:path}")
 def get_image(sid: str, snapid: str, src: str):

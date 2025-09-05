@@ -96,7 +96,13 @@ class Snap(BSCObject):
         )
         return super().to_json()
 
-    def save(self, path: str):
+    def save(self, path: str = None):
+        # By default keep the same path
+        if path is None:
+            if self._path is None:
+                raise ValueError("No path provided to save the Snap object.") 
+            path = self._path
+
         # Create the content directory
         fname = op.basename(path).split('.')[-2]
         tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_")

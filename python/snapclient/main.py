@@ -68,6 +68,8 @@ class MainWindow(QMainWindow):
 
         # Set the central widget
         central_widget = QWidget()
+        m = 4
+        central_widget.setContentsMargins(m, m, m, m)
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
         layout.setSpacing(0)  # Remove spacing between widgets
@@ -85,10 +87,17 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.resizing = None
+        self.setMouseTracking(True)
+        central_widget.setMouseTracking(True)
+        self.browser.setMouseTracking(True)
+        self.title_bar.setMouseTracking(True)
+
+        self.showMaximized()
 
     def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
         w = 3 # half border width
-        x, y = event.pos().x(), event.pos().y()
+        x, y = event.globalPos().x(), event.globalPos().y()
         geo = self.geometry()
         dist_to_top = abs(y - geo.top())
         dist_to_left = abs(x - geo.left())
@@ -121,21 +130,65 @@ class MainWindow(QMainWindow):
             self.setCursor(Qt.CursorShape.SizeHorCursor)
             self.resizing = 'right'
         else:
+            self.setCursor(Qt.CursorShape.ArrowCursor)
             self.resizing = None
-        print(f"Curseur déplacé : x={x}, y={y}", self.resizing)
+        print(f"Curseur déplacé : x={x}, y={y}", self.resizing, dist_to_top, dist_to_left, dist_to_right, dist_to_bottom)
+        # Store the last resizing direction and position when mouse is pressed
+        if not hasattr(self, "_resize_active"):
+            self._resize_active = False
+            self._resize_start_pos = None
 
-        super().mouseMoveEvent(event)
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            if self.resizing and not self._resize_active:
+                # Start resizing
+                self._resize_active = True
+                self._resize_start_pos = event.globalPos()
+                self._resize_start_geo = self.geometry()
+                self._resize_direction = self.resizing
+
+            if self._resize_active:
+                # Continue resizing even if cursor leaves the border
+                new_geo = self._resize_start_geo
+                factor = 0.5
+                dx = int(factor * (event.globalPos().x() - self._resize_start_pos.x()))
+                dy = int(factor * (event.globalPos().y() - self._resize_start_pos.y()))
+                geo = new_geo
+            else:
+                return
+
+            if 'left' in self._resize_direction:
+                geo.setLeft(geo.left() + dx)
+            if 'right' in self._resize_direction:
+                geo.setRight(geo.right() + dx)
+            if 'top' in self._resize_direction:
+                geo.setTop(geo.top() + dy)
+            if 'bottom' in self._resize_direction:
+                geo.setBottom(geo.bottom() + dy)
+
+            min_width = self.minimumWidth()
+            min_height = self.minimumHeight()
+            if geo.width() < min_width:
+                if 'left' in self._resize_direction:
+                    geo.setLeft(geo.right() - min_width)
+                else:
+                    geo.setRight(geo.left() + min_width)
+            if geo.height() < min_height:
+                if 'top' in self._resize_direction:
+                    geo.setTop(geo.bottom() - min_height)
+                else:
+                    geo.setBottom(geo.top() + min_height)
+            self.setGeometry(geo)
+            event.accept()
+        else:
+            self._resize_active = False
 
     def showMaximized(self):
-        print("Maximizing")
         super().showMaximized()
 
     def showNormal(self):
-        print("Restoring")
         super().showNormal()
 
     def showMinimized(self):
-        print("Minimizing")
         super().showMinimized()
 
 

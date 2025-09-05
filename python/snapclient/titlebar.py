@@ -32,6 +32,7 @@ def svg_icon_with_color(svg_path: str, color: str, size=(24, 24)) -> QIcon:
 class CustomTitleBar(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
+        self.setMouseTracking(True)
         self.initial_pos = None
         title_bar_layout = QHBoxLayout(self)
         title_bar_layout.setContentsMargins(1, 1, 1, 1)
@@ -112,12 +113,10 @@ class CustomTitleBar(QWidget):
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
-        window = self.window()
-        if self.initial_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
-            window.move(event.globalPos() - self.initial_pos)
-            event.accept()
-            return
         super().mouseMoveEvent(event)
+        if self.initial_pos is not None and event.buttons() & Qt.MouseButton.LeftButton:
+            self.window().move(event.globalPos() - self.initial_pos)
+ 
 
     def mouseReleaseEvent(self, event):
         self.initial_pos = None

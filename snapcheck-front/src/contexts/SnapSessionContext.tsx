@@ -2,6 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useReducer } from 'r
 import type { DefaultProps } from '../core/types';
 import { SnapService, type BoardModel, type SnapCheckSessionModel, type SnapModel } from '../api';
 
+type GUISettings = {
+    showSidebar: boolean;
+    syncBoards: boolean;
+}
+const defaultGUISettings: GUISettings = {
+    showSidebar: true,
+    syncBoards: false,
+}; 
 
 type SnapState = {
     snap: SnapModel | null;
@@ -21,12 +29,14 @@ type SnapSessionState = {
     loading: boolean;
     snaps: Record<string, SnapState>;
     currentSnapPath: string | null;
+    guiSettings: GUISettings;
 }
 const defaultSnapSessionState: SnapSessionState = {
     session: null,
     loading: false,
     snaps: {},
     currentSnapPath: null,
+    guiSettings: defaultGUISettings,
 };
 
 /*
@@ -40,6 +50,9 @@ type SnapSessionAction =
     | { type: 'SET_SNAP_DATA'; path?: string, payload: SnapModel }
     | { type: 'REMOVE'; path: string}
     | { type: 'SET_BOARD'; boardIndex: number }
+    | { type: 'UPDATING_SNAP_DATA'; path: string}
+    | { type: 'UPDATE_SNAP_DATA'; path: string, payload: SnapModel }
+    | { type: 'SET_GUI_SETTINGS'; path: string, settings: Partial<GUISettings> }
 
 function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSessionState {
     const qc = state.snaps[state.currentSnapPath!];
@@ -79,6 +92,29 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
                     }
                 }
             };
+        case 'UPDATING_SNAP_DATA':
+            return {
+                ...state,
+                snaps: {
+                    ...state.snaps,
+                    [action.path]: {
+                        ...state.snaps[action.path],
+                        loading: true,
+                    }
+                }
+            };
+        case 'UPDATE_SNAP_DATA':
+            return {
+                ...state,
+                snaps: {
+                    ...state.snaps,
+                    [action.path]: {
+                        ...state.snaps[action.path],
+                        snap: action.payload,
+                        loading: false,
+                    }
+                }
+            };
         case 'REMOVE':
             if (!state.snaps[action.path]) return state;
 
@@ -103,6 +139,14 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
                 ...state,
                 snaps: { ...state.snaps, [state.currentSnapPath!]: { ...qc, currentBoardIndex: action.boardIndex, currentBoard: qc.snap.boards[idx] || null } }
             };
+        case 'SET_GUI_SETTINGS':
+            return {
+                ...state,
+                guiSettings: {
+                    ...state.guiSettings,
+                    ...action.settings
+                }
+            }
         default:
             return state;
     }
@@ -130,6 +174,23 @@ export function SnapSessionProvider(props: DefaultProps) {
         autoCreateSession();
     }, [])
 
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            // Custom logic before closing the page
+            // For example, warn if there are unsaved changes
+            const hasUnsaved = Object.values(state.snaps).some(snapState => snapState.snap?.has_changed);
+            if (hasUnsaved) {
+                alert("You have unsaved changes. Are you sure you want to leave?");
+                e.preventDefault();
+                e.returnValue = ''; // Chrome requires returnValue to be set
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [state.snaps]);
+
     return (
         <SnapSessionContext.Provider value={state}>
             <SnapSessionDispatchContext.Provider value={dispatch}>
@@ -156,9 +217,7 @@ export function useSnapSessionActions() {
             if (!path) { throw new Error('Path is required to open a Snap'); }
             const sid = state.session?.id || "";
 
-            console.log("Opening snap", sid, path, state);
             dispatch({ type: 'SET_CURRENT', path: path });
-
             try {
                 const snap = await SnapService.openSnap(sid, path);
                 dispatch({ type: 'SET_SNAP_DATA', path: path, payload: snap });
@@ -195,9 +254,36 @@ export function useSnapSessionActions() {
         [dispatch, openSnap, state]
     );
 
+    // const saveSnap = useCallback(async (snapId: string) => {
+    //     if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
+    //     if (!state) throw new Error('useSnapSessionActions must be used within a SnapSessionProvider');
+    //     const sid = state.session?.id || "";
+
+    //     dispatch({ type: 'UPDATING_SNAP_DATA', path });
+    //     try {
+    //         await SnapService.saveSnap(sid, snapId, );
+    //         // Reload data after update
+    //         await openSnap();
+    //     } catch (error) {
+    //         const errorMessage = error instanceof Error ? error.message : 'Failed to update note';
+    //         console.error(errorMessage);
+    //         }
+    //     dispatch({ type: 'UPDATE_SNAP_DATA', path, payload: state.snaps[path] });
+    // }, [dispatch]);
+
     const closeSnap = useCallback((path: string) => {
         if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
         dispatch({ type: 'REMOVE', path });
+    }, [dispatch]);
+    
+    const toggleShowSidebar = useCallback(() => {
+        if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
+        dispatch({ type: 'SET_GUI_SETTINGS', path: "", settings: { showSidebar: !state?.guiSettings.showSidebar } });
+    }, [dispatch]);
+
+    const toggleSyncBoards = useCallback(() => {
+        if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
+        dispatch({ type: 'SET_GUI_SETTINGS', path: "", settings: { syncBoards: !state?.guiSettings.syncBoards } });
     }, [dispatch]);
 
     return {
@@ -205,7 +291,9 @@ export function useSnapSessionActions() {
         viewSnap,
         setCurrentBoard,
         updateRating,
-        closeSnap
+        closeSnap,
+        toggleShowSidebar,
+        toggleSyncBoards
     };
 }
 
@@ -233,6 +321,7 @@ export function useSnapSession() {
         ...state,
         ...actions,
         ...state.snaps[state.currentSnapPath!],
+        ...state.guiSettings,
         closeCurrentSnap
     };
 }
