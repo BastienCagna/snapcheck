@@ -6,9 +6,15 @@ import { useModal } from "../../../contexts/ModalContext";
 import { useSnapSession } from "../../../contexts/SnapSessionContext";
 import DebugPage from "../../debug/debug";
 import SettingsPage from "../../settings/settings";
-import "./toolbar.css";
+import "./topbar.css";
+import { Close, FilterNone, Maximize, Minimize, Restore } from "@mui/icons-material";
+import { SnapSelector } from "../snapSelector";
 
-const Toolbar: React.FC<{
+// Declare missing globals and types
+declare const QWebChannel: any;
+
+
+const TopBar: React.FC<{
 }> = () => {
     const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards} = useSnapSession();
     const { showModal } = useModal();
@@ -30,21 +36,42 @@ const Toolbar: React.FC<{
         };
         input.click();
     }
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // ctrl+b toggle sidebar
-            if (e.ctrlKey && e.key.toLowerCase() === "b") {
-                e.preventDefault();
-                toggleShowSidebar();
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [snap]);
+ 
+    const close = () => {
+        if (typeof window !== "undefined" && (window as any).qt) {
+            new QWebChannel((window as any).qt.webChannelTransport, function(channel: any) {
+                (window as any).bridge = channel.objects.bridge;
+                (window as any).bridge.close();
+            });
+        }
+    }
+    const maximize = () => {
+        if (typeof window !== "undefined" && (window as any).qt) {
+            new QWebChannel((window as any).qt.webChannelTransport, function(channel: any) {
+                (window as any).bridge = channel.objects.bridge;
+                (window as any).bridge.maximize();
+            });
+        }
+    }
+    const minimize = () => {
+        if (typeof window !== "undefined" && (window as any).qt) {
+            new QWebChannel((window as any).qt.webChannelTransport, function(channel: any) {
+                (window as any).bridge = channel.objects.bridge;
+                (window as any).bridge.minimize();
+            });
+        }
+    }
+    const restore = () => {
+        if (typeof window !== "undefined" && (window as any).qt) {
+            new QWebChannel((window as any).qt.webChannelTransport, function(channel: any) {
+                (window as any).bridge = channel.objects.bridge;
+                (window as any).bridge.restore();
+            });
+        }
+    }
 
     return (
-        <div className="toolbar">
+        <div className="topbar">
             <div>
                 <Menu items={[
                     {label: "File", children: [  
@@ -60,7 +87,7 @@ const Toolbar: React.FC<{
                         },
                         { type: "separator" },
                         { label: "Reload", onClick: openSnap, disabled: !snap },
-                        { label: "Save", onClick: () => { }, disabled: !snap?.has_changed },
+                        { label: "Save", onClick: () => {}, disabled: !snap?.has_changed },
                         { label: "Save As...", onClick: () => { }, disabled: !snap?.has_changed },
                         { label: "Close", onClick:closeCurrentSnap, disabled: !snap},
                         { label: "Close All", onClick: () => { }, disabled: !snap},
@@ -70,7 +97,7 @@ const Toolbar: React.FC<{
                         { type: "separator" },
                         {label: "Settings...", onClick: () => { showModal(<SettingsPage />)}},
                         { type: "separator" },
-                        { label: "Quit", onClick: () => { }}
+                        { label: "Quit", onClick: close }
                     ]},
                     {label: "Edit", children: [
                         { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
@@ -86,8 +113,17 @@ const Toolbar: React.FC<{
                     ]},
                 ]} />
             </div>
+            <div className="snap-selector-container">
+                <SnapSelector />
+            </div>
+            <div className="topbar-buttons">
+                <div onClick={minimize}><Minimize /></div>
+                <div onClick={maximize}><Maximize /></div>
+                <div onClick={restore}><FilterNone /></div>
+                <div onClick={close}><Close /></div>
+            </div>
         </div>
     );
 };
 
-export default Toolbar;
+export default TopBar;

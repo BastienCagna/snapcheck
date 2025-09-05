@@ -278,6 +278,7 @@ export function useSnapSessionActions() {
     
     const toggleShowSidebar = useCallback(() => {
         if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
+        console.error(state?.guiSettings.showSidebar)
         dispatch({ type: 'SET_GUI_SETTINGS', path: "", settings: { showSidebar: !state?.guiSettings.showSidebar } });
     }, [dispatch]);
 

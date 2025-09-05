@@ -4,19 +4,44 @@ import Modal from './components/lib/modal/modal';
 import { SnapSelector } from './pages/main/snapSelector';
 import './App.css'
 import { useSnapSession } from './contexts/SnapSessionContext';
+import TopBar from './pages/main/topbar/topbar';
+import { useEffect } from 'react';
+import { useAppData } from './contexts/AppDataContext';
+import { useModal } from './contexts/ModalContext';
+
+const ShortCuts: React.FC<{
+}> = () => {
+    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards} = useSnapSession();
+    const { showModal } = useModal();
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // ctrl+b toggle sidebar
+            if (e.ctrlKey && e.key.toLowerCase() === "b") {
+                e.preventDefault();
+                toggleShowSidebar();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [snap]);
+
+    return <></>
+}
 
 function App() {
     const {showSidebar} = useSnapSession();
     return (
         <div className='app'>
+            <ShortCuts />
+            <div className='app-topbar'>
+                <TopBar />
+            </div>
             <div className="page-container">
                 <div className='sidebar-container' style={{display: showSidebar ? "block" : "none"}}>
                     <Sidebar />
                 </div>
                 <div className='main-container'>
-                    <div className='toolbar-container'>
-                        <SnapSelector />
-                    </div>
                     <div className="board-container">
                         <MainContent />
                     </div>

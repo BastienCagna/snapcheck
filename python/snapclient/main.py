@@ -15,6 +15,8 @@ from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL
 from snapclient.titlebar import CustomTitleBar
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWebChannel import QWebChannel
+from PyQt5.QtCore import QObject, pyqtSlot
 
 
 class BottomBar(QWidget):
@@ -42,6 +44,24 @@ class BottomBar(QWidget):
         self.setLayout(layout)
 
 
+class Bridge(QObject):
+    def __init__(self, win):
+        super().__init__()
+        self.win = win
+    @pyqtSlot()
+    def close(self):
+        QApplication.instance().quit()
+    @pyqtSlot()
+    def minimize(self):
+        self.win.showMinimized()
+    @pyqtSlot()
+    def restore(self):
+        self.win.showNormal()
+    @pyqtSlot()
+    def maximize(self):
+        self.win.showMaximized()
+
+
 class MainWindow(QMainWindow):
     def __init__(self, url: str):
         super().__init__()
@@ -55,8 +75,6 @@ class MainWindow(QMainWindow):
 
         if op.exists(APP_ICON):
             self.setWindowIcon(QIcon(APP_ICON))
-
-        self.title_bar = CustomTitleBar(self)
 
         # Create a QWebEngineView to display the web page
         self.browser = QWebEngineView()
@@ -73,8 +91,6 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
         layout.setSpacing(0)  # Remove spacing between widgets
-        layout.addWidget(self.title_bar)
-        layout.setStretchFactor(self.title_bar, 0)  #  Do not extend the title bar
         layout.addWidget(self.browser)
         layout.setStretchFactor(self.browser, 1)
 
@@ -90,9 +106,13 @@ class MainWindow(QMainWindow):
         self.setMouseTracking(True)
         central_widget.setMouseTracking(True)
         self.browser.setMouseTracking(True)
-        self.title_bar.setMouseTracking(True)
 
         self.showMaximized()
+
+        self.channel = QWebChannel()
+        self.bridge = Bridge(self)
+        self.channel.registerObject('bridge', self.bridge)
+        self.browser.page().setWebChannel(self.channel)
 
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)
@@ -132,7 +152,7 @@ class MainWindow(QMainWindow):
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
             self.resizing = None
-        print(f"Curseur déplacé : x={x}, y={y}", self.resizing, dist_to_top, dist_to_left, dist_to_right, dist_to_bottom)
+        # print(f"Curseur déplacé : x={x}, y={y}", self.resizing, dist_to_top, dist_to_left, dist_to_right, dist_to_bottom)
         # Store the last resizing direction and position when mouse is pressed
         if not hasattr(self, "_resize_active"):
             self._resize_active = False

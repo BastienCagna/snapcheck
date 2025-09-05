@@ -9,7 +9,7 @@ import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
 import { useSnapSession } from '../../../contexts/SnapSessionContext';
-import Toolbar from '../toolbar/toolbar';
+import TopBar from '../topbar/topbar';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 import { useAppData } from '../../../contexts/AppDataContext';
 
@@ -113,7 +113,6 @@ const Sidebar: React.FC<{}> = ({ }) => {
 
     return (
         <div className="sidebar">
-            <Toolbar />
             <div className='sidebar-header'>
             </div>
             <div className='sidebar-content'>
