@@ -9,9 +9,7 @@ import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
 import { useSnapSession } from '../../../contexts/SnapSessionContext';
-import TopBar from '../topbar/topbar';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
-import { useAppData } from '../../../contexts/AppDataContext';
 
 
 function boardHasRating(board: BoardModel, rating: RatingModel) {
