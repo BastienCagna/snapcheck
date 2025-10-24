@@ -9,7 +9,7 @@ type GUISettings = {
 const defaultGUISettings: GUISettings = {
     showSidebar: true,
     syncBoards: false,
-}; 
+};
 
 type SnapState = {
     snap: SnapModel | null;
@@ -44,13 +44,13 @@ const defaultSnapSessionState: SnapSessionState = {
     This modify only the state, it doesn't do any async work by itself (like loading data)
 */
 type SnapSessionAction =
-    | { type: 'WAIT_SESSION'}
-    | { type: 'SET_SESSION'; session: SnapCheckSessionModel}
+    | { type: 'WAIT_SESSION' }
+    | { type: 'SET_SESSION'; session: SnapCheckSessionModel }
     | { type: 'SET_CURRENT'; path: string }
     | { type: 'SET_SNAP_DATA'; path?: string, payload: SnapModel }
-    | { type: 'REMOVE'; path: string}
+    | { type: 'REMOVE'; path: string }
     | { type: 'SET_BOARD'; boardIndex: number }
-    | { type: 'UPDATING_SNAP_DATA'; path: string}
+    | { type: 'UPDATING_SNAP_DATA'; path: string }
     | { type: 'UPDATE_SNAP_DATA'; path: string, payload: SnapModel }
     | { type: 'SET_GUI_SETTINGS'; path: string, settings: Partial<GUISettings> }
 
@@ -59,9 +59,9 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
 
     switch (action.type) {
         case 'WAIT_SESSION':
-            return {...defaultSnapSessionState, loading: true}
+            return { ...defaultSnapSessionState, loading: true }
         case 'SET_SESSION':
-            return {...state, session: action.session, loading: false}
+            return { ...state, session: action.session, loading: false }
         case 'SET_CURRENT':
             if (state.snaps[action.path]) {
                 return { ...state, currentSnapPath: action.path };
@@ -74,7 +74,7 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
                 };
             }
         case 'SET_SNAP_DATA':
-            if(!action.path) {
+            if (!action.path) {
                 if (!state.currentSnapPath) {
                     console.error("No current Snap path set");
                     return state;
@@ -120,7 +120,7 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
 
             const removeCurrent = action.path == state.currentSnapPath;
             const { [action.path]: removedQc, ...remainingQcs } = state.snaps;
-            if(removedQc?.snap?.has_changed) {
+            if (removedQc?.snap?.has_changed) {
                 if (!window.confirm("Are you sure you want to close this quality control? Unsaved changes will be lost.")) {
                     return state;
                 }
@@ -129,11 +129,11 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
             const newCurrent = removeCurrent ? remainingKeys.length > 0 ? remainingKeys[remainingKeys.length - 1] : null : state.currentSnapPath;
             return { ...state, snaps: remainingQcs, currentSnapPath: newCurrent };
         case 'SET_BOARD':
-            if (!qc) return { ...state};
+            if (!qc) return { ...state };
             if (action.boardIndex < 0) {
                 return { ...state, snaps: { ...state.snaps, [state.currentSnapPath!]: { ...qc, currentBoardIndex: -1, currentBoard: null } } };
             }
-            if (!qc.snap || !qc.snap.boards) return { ...state};
+            if (!qc.snap || !qc.snap.boards) return { ...state };
             const idx = Math.min(action.boardIndex, qc.snap.boards.length!);
             return {
                 ...state,
@@ -161,11 +161,11 @@ export function SnapSessionProvider(props: DefaultProps) {
     // Auto-create session on mount
     useEffect(() => {
         const autoCreateSession = async () => {
-            if(!state.session && !state.loading) {
-                dispatch({ type: 'WAIT_SESSION'});
+            if (!state.session && !state.loading) {
+                dispatch({ type: 'WAIT_SESSION' });
                 try {
                     const session = await SnapService.createSession();
-                    dispatch({ type: 'SET_SESSION', session});
+                    dispatch({ type: 'SET_SESSION', session });
                 } catch (error) {
                     console.error("Session creation failed", error);
                 }
@@ -229,8 +229,6 @@ export function useSnapSessionActions() {
         [dispatch, state]
     );
 
-    const viewSnap = openSnap;
-
     const setCurrentBoard = useCallback((boardIndex: number) => {
         if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
         dispatch({ type: 'SET_BOARD', boardIndex });
@@ -244,8 +242,13 @@ export function useSnapSessionActions() {
 
             try {
                 await SnapService.updateRating(sid, snapId, rating.id, rating.value);
-                // Reload data after update
-                await openSnap();
+                // Instead of reloading the entire Snap, just update the local state
+                const snap = state.snaps[state.currentSnapPath!].snap;
+                if (snap) {
+                    const updatedRatings = snap.ratings?.map(r => r.id === rating.id ? rating : r) || [];
+                    const updatedSnap = { ...snap, ratings: updatedRatings };
+                    dispatch({ type: 'UPDATE_SNAP_DATA', path: state.currentSnapPath!, payload: updatedSnap });
+                }
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to update note';
                 console.error(errorMessage);
@@ -275,7 +278,7 @@ export function useSnapSessionActions() {
         if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
         dispatch({ type: 'REMOVE', path });
     }, [dispatch]);
-    
+
     const toggleShowSidebar = useCallback(() => {
         if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
         console.error(state?.guiSettings.showSidebar)
@@ -289,7 +292,6 @@ export function useSnapSessionActions() {
 
     return {
         openSnap,
-        viewSnap,
         setCurrentBoard,
         updateRating,
         closeSnap,
@@ -312,8 +314,8 @@ export function useSnapSession() {
 
     if (!state) {
         throw new Error('useSnapSession must be used within a SnapSessionProvider');
-    }    
-    
+    }
+
     const closeCurrentSnap = () => {
         actions.closeSnap(state.currentSnapPath!);
     }

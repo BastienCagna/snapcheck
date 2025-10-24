@@ -2,19 +2,17 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebEngineWidgets import QWebEngineSettings
 
-from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtCore import QUrl, Qt, QTimer
 import sys
 import subprocess
 import time
 import atexit
 import PyQt5.QtWidgets as qw
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QCursor
 import os.path as op
 import requests
 from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
-from snapclient.titlebar import CustomTitleBar
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QTimer
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot
 
@@ -45,33 +43,60 @@ class BottomBar(QWidget):
 
 
 class Bridge(QObject):
+    _threshold_ms = 25.0
+    _multiplier = 1.5
+    _last_move_time = None
+
     def __init__(self, win):
         super().__init__()
         self.win = win
+
     @pyqtSlot()
     def close(self):
         QApplication.instance().quit()
+
     @pyqtSlot()
     def minimize(self):
         self.win.showMinimized()
+
     @pyqtSlot()
     def restore(self):
         self.win.showNormal()
+
+    @pyqtSlot()
+    def toggleWindowSize(self):
+        if self.win.isMaximized():
+            self.win.showNormal()
+        else:
+            self.win.showMaximized()
+
     @pyqtSlot()
     def maximize(self):
         self.win.showMaximized()
 
+    @pyqtSlot(int, int)
+    def moveWindowTo(self, x, y):
+        self.win.moveWindowTo(x, y)
+
+    @pyqtSlot()
+    def startWindowDrag(self):
+        self.win.startWindowDrag()
+
+    @pyqtSlot()
+    def stopWindowDrag(self):
+        self.win.stopWindowDrag()
+
 
 class MainWindow(QMainWindow):
+
     def __init__(self, url: str):
         super().__init__()
         self.setWindowTitle("SnapCheck")
         self.setStyleSheet("background-color: #333; color: #ccc")
-        
+
         # Remove the title bar and window frame (make it a frameless window)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Window)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
 
         if op.exists(APP_ICON):
             self.setWindowIcon(QIcon(APP_ICON))
@@ -94,11 +119,6 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.browser)
         layout.setStretchFactor(self.browser, 1)
 
-        # # Add the bottom status bar
-        # self.bottom_bar = BottomBar()
-        # layout.addWidget(self.bottom_bar)
-        # layout.setStretch(0, 1)
-
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
@@ -111,12 +131,32 @@ class MainWindow(QMainWindow):
 
         self.channel = QWebChannel()
         self.bridge = Bridge(self)
-        self.channel.registerObject('bridge', self.bridge)
+        self.channel.registerObject("bridge", self.bridge)
         self.browser.page().setWebChannel(self.channel)
+
+        # Variables for window dragging
+        self.dragging = False
+        self.drag_position = None
+
+        # µUse a timer to periodically verify mouse position during drag
+        self.drag_timer = QTimer()
+        self.drag_timer.timeout.connect(self.checkMousePosition)
+        self.drag_timer.setInterval(16)  # ~60fps
 
     def mouseMoveEvent(self, event):
         super().mouseMoveEvent(event)
-        w = 3 # half border width
+
+        # Handle window dragging if enabled
+        if self.dragging and self.drag_position is not None:
+            from PyQt5.QtGui import QCursor
+
+            print(f"🐛 DEBUG: mouseMoveEvent - dragging mode active")
+            new_pos = QCursor.pos() - self.drag_position
+            print(f"🐛 DEBUG: moving window to {new_pos}")
+            self.move(new_pos)
+            return
+
+        w = 3  # half border width
         x, y = event.globalPos().x(), event.globalPos().y()
         geo = self.geometry()
         dist_to_top = abs(y - geo.top())
@@ -126,29 +166,29 @@ class MainWindow(QMainWindow):
         if dist_to_top <= w:
             if dist_to_left <= w:
                 self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-                self.resizing = 'top-left'
+                self.resizing = "top-left"
             elif dist_to_right <= w:
                 self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-                self.resizing = 'top-right'
+                self.resizing = "top-right"
             else:
                 self.setCursor(Qt.CursorShape.SizeVerCursor)
-                self.resizing = 'top'
+                self.resizing = "top"
         elif dist_to_bottom <= w:
             if dist_to_left <= w:
                 self.setCursor(Qt.CursorShape.SizeBDiagCursor)
-                self.resizing = 'bottom-left'
+                self.resizing = "bottom-left"
             elif dist_to_right <= w:
                 self.setCursor(Qt.CursorShape.SizeFDiagCursor)
-                self.resizing = 'bottom-right'
+                self.resizing = "bottom-right"
             else:
                 self.setCursor(Qt.CursorShape.SizeVerCursor)
-                self.resizing = 'bottom'
+                self.resizing = "bottom"
         elif dist_to_left <= w:
             self.setCursor(Qt.CursorShape.SizeHorCursor)
-            self.resizing = 'left'
+            self.resizing = "left"
         elif dist_to_right <= w:
             self.setCursor(Qt.CursorShape.SizeHorCursor)
-            self.resizing = 'right'
+            self.resizing = "right"
         else:
             self.setCursor(Qt.CursorShape.ArrowCursor)
             self.resizing = None
@@ -176,24 +216,24 @@ class MainWindow(QMainWindow):
             else:
                 return
 
-            if 'left' in self._resize_direction:
+            if "left" in self._resize_direction:
                 geo.setLeft(geo.left() + dx)
-            if 'right' in self._resize_direction:
+            if "right" in self._resize_direction:
                 geo.setRight(geo.right() + dx)
-            if 'top' in self._resize_direction:
+            if "top" in self._resize_direction:
                 geo.setTop(geo.top() + dy)
-            if 'bottom' in self._resize_direction:
+            if "bottom" in self._resize_direction:
                 geo.setBottom(geo.bottom() + dy)
 
             min_width = self.minimumWidth()
             min_height = self.minimumHeight()
             if geo.width() < min_width:
-                if 'left' in self._resize_direction:
+                if "left" in self._resize_direction:
                     geo.setLeft(geo.right() - min_width)
                 else:
                     geo.setRight(geo.left() + min_width)
             if geo.height() < min_height:
-                if 'top' in self._resize_direction:
+                if "top" in self._resize_direction:
                     geo.setTop(geo.bottom() - min_height)
                 else:
                     geo.setBottom(geo.top() + min_height)
@@ -211,10 +251,28 @@ class MainWindow(QMainWindow):
     def showMinimized(self):
         super().showMinimized()
 
+    def startWindowDrag(self):
+        """Start window drag mode - will be handled by timer."""
+        self.drag_position = QCursor.pos() - self.pos()
+        self.dragging = True
+        self.drag_timer.start()
+
+    def stopWindowDrag(self):
+        """Stop window drag mode."""
+        self.dragging = False
+        self.drag_timer.stop()
+
+    def checkMousePosition(self):
+        """Check mouse position and move window if dragging."""
+        if self.dragging and self.drag_position is not None:
+            new_pos = QCursor.pos() - self.drag_position
+            self.move(new_pos)
+
 
 def vite_commandline(port):
     """Return the command line to start the Vite development server."""
     return f"npm run dev -- --port {str(port)}"
+
 
 def start_vite_server(port) -> subprocess.Popen:
     """Start the Vite development server."""
@@ -223,7 +281,8 @@ def start_vite_server(port) -> subprocess.Popen:
     except Exception as e:
         print(f"Failed to start Vite server: {e}")
 
-def stop_vite_server(process:subprocess.Popen, port: int):
+
+def stop_vite_server(process: subprocess.Popen, port: int):
     """Stop the Vite development server."""
     try:
         process.terminate()
@@ -261,7 +320,7 @@ def main():
             response = requests.get(url)
         except requests.exceptions.ConnectionError:
             response = None
-        print('.', end='', flush=True)
+        print(".", end="", flush=True)
         if response and response.status_code == 200:
             # Server is ready
             break
