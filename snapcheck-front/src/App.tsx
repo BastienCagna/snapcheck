@@ -1,18 +1,15 @@
 import Sidebar from './pages/main/sidebar/sidebar';
 import MainContent from './pages/main/main';
 import Modal from './components/lib/modal/modal';
-import { SnapSelector } from './pages/main/snapSelector';
-import './App.css'
 import { useSnapSession } from './contexts/SnapSessionContext';
 import TopBar from './pages/main/topbar/topbar';
 import { useEffect } from 'react';
-import { useAppData } from './contexts/AppDataContext';
-import { useModal } from './contexts/ModalContext';
+import './App.css'
+
 
 const ShortCuts: React.FC<{
 }> = () => {
-    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards} = useSnapSession();
-    const { showModal } = useModal();
+    const { snap, toggleShowSidebar } = useSnapSession();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,7 +27,7 @@ const ShortCuts: React.FC<{
 }
 
 function App() {
-    const {showSidebar} = useSnapSession();
+    const { showSidebar } = useSnapSession();
     return (
         <div className='app'>
             <ShortCuts />
@@ -38,7 +35,7 @@ function App() {
                 <TopBar />
             </div>
             <div className="page-container">
-                <div className='sidebar-container' style={{display: showSidebar ? "block" : "none"}}>
+                <div className='sidebar-container' style={{ display: showSidebar ? "block" : "none" }}>
                     <Sidebar />
                 </div>
                 <div className='main-container'>
