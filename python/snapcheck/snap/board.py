@@ -13,6 +13,7 @@ class Element:
     title: str|None = None
     style: dict[str, str] = field(default_factory=dict)  # Element CSS style
     content: Union[str, "Element", None] = None
+    intended_ratings: list[Rating] = field(default_factory=list) # List of rating IDs
 
 @dataclass
 class FileElement(Element):
@@ -62,8 +63,17 @@ class Board(Serializable):
     title: str
     description: str = ""
 
-    intended_ratings: list[Rating] = field(default_factory=list) # List of rating IDs
-
     style: dict[str, str] = field(default_factory=dict) # Board CSS style
 
     elements: list[Element] = field(default_factory=list)  # Graphical elements of the board
+
+    @property
+    def all_intended_ratings(self) -> list[Rating]:
+        """ Return the list of all ratings intended by the board elements
+        """
+        ratings = set()
+        for el in self.elements:
+            for r in el.intended_ratings:
+                ratings.add(r)
+        return list(ratings)
+

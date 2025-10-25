@@ -57,10 +57,9 @@ from snapcheck.snap import Board, ImageElement
 metrics_board = Board(
     title="Cartes de métriques",
     description="Vérifiez la qualité des cartes de métriques.",
-    intended_ratings=[fa_rating, md_rating],
     elements=[
-        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png"),
-        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png")
+        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png", intended_ratings=[fa_rating]),
+        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png", intended_ratings=[md_rating])
     ]
 )
 

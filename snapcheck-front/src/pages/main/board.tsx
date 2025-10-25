@@ -44,7 +44,7 @@ const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> 
             {boardElements.map((element, index) => (
                 <ContextualMenu parentClass="board" items={[
                     {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')}
-                ].concat(board.intended_ratings.map(rating => ({
+                ].concat(board.all_intended_ratings.map(rating => ({
                     label: rating.name,
                     items: rating.scale?.ratings.map((rate, index) => {
                         return {

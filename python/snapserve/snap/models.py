@@ -24,6 +24,7 @@ class ElementModel(BaseModel):
     type: str
     style: dict[str, str] = {}  # Element CSS style
     title: str | None = None  # Optional title for the element, e.g., "Input DWI (b=0)"
+    intended_ratings: List[RatingModel]
 
 class ImageElementModel(ElementModel):
     type: str = "image"
@@ -32,7 +33,7 @@ class ImageElementModel(ElementModel):
 class BoardModel(BaseModel):
     title: str
     description: str
-    intended_ratings: List[RatingModel]
+    # all_intended_ratings: List[RatingModel] # TODO add this or not ? (already in elements)
     style: dict[str, str]
     elements:List[ImageElementModel]
 

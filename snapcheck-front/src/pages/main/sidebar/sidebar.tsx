@@ -13,7 +13,7 @@ import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 
 
 function boardHasRating(board: BoardModel, rating: RatingModel) {
-    for (const intendedRating of board.intended_ratings
+    for (const intendedRating of board.all_intended_ratings
     ) {
         if (intendedRating.id === rating.id) {
             return true;

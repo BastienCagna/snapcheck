@@ -32,7 +32,7 @@ class Snap(BSCObject):
         """
         # Check that all ratings referenced in boards are defined in the ratings list
         for board in self.boards:
-            for int_rating in board.intended_ratings:
+            for int_rating in board.all_intended_ratings:
                 for rating in self.ratings:
                     if int_rating.id == rating.id:
                         break
@@ -74,6 +74,7 @@ class Snap(BSCObject):
             ser_rating["scale"] = id
 
         # Replace intended_ratings of each board to their references
+        # TODO: use elements intended_ratings!
         for item in data["boards"]:
             ref_intended_ratings = []
             for rating in item["intended_ratings"]:
