@@ -11,7 +11,7 @@ const SettingsPage: React.FC<{}> = () => {
         {settings.map((group) => (
         <div key={group.id} className="settings-group">
             <h2>{group.title}</h2>
-            <table>
+            <table className="setting-table">
                 <tbody>
                 {group.settings.map((setting) => (
                     <tr key={setting.id}>

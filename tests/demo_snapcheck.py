@@ -70,10 +70,9 @@ mni_registration_rating = Rating(
 preproc_board = Board(
     title="Pré-traitements",
     description="Vérifiez la b=0 et le bon alignement de la FA sur l'espace modèle MNI.",
-    intended_ratings=[b0_rating, mni_registration_rating],
     elements=[
-        ImageElement(title="Input DWI (b=0)", src="./.local/demo_sources/input_dwi.png"),
-        ImageElement(title="FA & MNI", src=".local/demo_sources/FA_and_MNI_template.gif"),
+        ImageElement(title="Input DWI (b=0)", src="./.local/demo_sources/input_dwi.png", intended_ratings=[b0_rating]),
+        ImageElement(title="FA & MNI", src=".local/demo_sources/FA_and_MNI_template.gif", intended_ratings=[mni_registration_rating]),
     ]
 )
 
@@ -101,19 +100,17 @@ for bundle in sorted(bundles):
 cst_board = Board(
     title="Faisceau CST",
     description="Vérifiez la qualité des masques et la répartition des fibres du bundle CST.",
-    intended_ratings=bundles_ratings,
     elements=[
         ImageElement(title="Masques du faisceau sur la FA (espace MNI)", src=".local/demo_sources/bundles_on_subject_FA_MNI_axial.png"),
         ImageElement(src=".local/demo_sources/bundles_on_subject_FA_MNI_coronal.png"),
         ImageElement(title="Tract Orientation Maps", src=".local/demo_sources/bundles_TOM.png"),
-        ImageElement(title="Tractographie", src=".local/demo_sources/tractography_all.gif")
+        ImageElement(title="Tractographie", src=".local/demo_sources/tractography_all.gif", intended_ratings=bundles_ratings)
     ]
 )
 
 dev_board = Board(
     title="Développement",
     description="Board de développement pour tester des éléments.",
-    intended_ratings=[],
     elements=[
         ImageElement(title="Image de test", src=".local/demo_sources/test_image.png"),
         Element(title="Texte de test", content="Ceci est un texte de test pour le board de développement.")
@@ -140,10 +137,9 @@ md_rating = Rating(
 metrics_board = Board(
     title="Cartes de métriques",
     description="Vérifiez la qualité des cartes de métriques.",
-    intended_ratings=[fa_rating, md_rating],
     elements=[
-        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png"),
-        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png")
+        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png", intended_ratings=[fa_rating]),
+        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png", intended_ratings=[md_rating])
     ]
 )
 
