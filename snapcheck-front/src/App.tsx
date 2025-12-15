@@ -42,9 +42,9 @@ function App() {
                     <div className="board-container">
                         <MainContent />
                     </div>
-                </div>
-                <div className='modal-container'>
-                    <Modal />
+                    <div className='modal-container'>
+                        <Modal />
+                    </div>
                 </div>
             </div>
         </div>
