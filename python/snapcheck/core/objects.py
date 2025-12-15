@@ -5,7 +5,6 @@ import json
 from collections import deque
 from copy import deepcopy
 
-import yaml
 from .io import globalDynamicLoader, resolve_references, serialize
 from .callback import Callback
 

@@ -76,9 +76,10 @@ class Board(Serializable):
     def all_intended_ratings(self) -> list[Rating]:
         """ Return the list of all ratings intended by the board elements
         """
-        ratings = set()
+        ratings = []
         for el in self.elements:
             for r in el.intended_ratings:
-                ratings.add(r)
+                if not r in ratings:
+                    ratings.append(r)
         return list(ratings)
 

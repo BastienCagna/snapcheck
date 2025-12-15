@@ -28,9 +28,38 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
 };
 
 
+const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardModel, element: any}> = ({ sessionId, snapId, board, element }) => {
+    const { updateRating } = useSnapSession();
+
+    const allIntendedRatings = board.elements?.flatMap(el => el.intended_ratings || []) || [];
+    
+    const menuItems: any[] = [
+        {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')},
+        ...allIntendedRatings.map(rating => ({
+            label: rating.name,
+            items: [
+                ...(rating.scale?.ratings.map((rate, index) => ({
+                    label: rate.name,
+                    onClick: () => updateRating(snapId,{ ...rating, value: Number(rate.value)}),
+                    style:{ backgroundColor: rate.color || "" }
+                })) || []),
+                { label: "Comment", onClick: () => console.log('Comment clicked') },
+                { label: "Infos", onClick: () => console.log('Infos clicked') },
+            ]
+        }))
+    ];
+
+    return (
+        <ContextualMenu parentClass="board" items={menuItems}>
+            <div className="board-element">
+                    {renderElement(sessionId, snapId, element)}
+            </div>
+        </ContextualMenu> 
+    );
+}
+
 const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> = ({ sessionId, snapId, board }) => {
     const [boardElements, setBoardElements] = useState<any[]>([]);
-    const { updateRating } = useSnapSession();
 
     useEffect(() => {
         if (board.elements) {
@@ -41,27 +70,7 @@ const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> 
     return (
         <div className="board">
             {board.description && <p>{board.description}</p>}
-            {boardElements.map((element, index) => (
-                <ContextualMenu parentClass="board" items={[
-                    {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')}
-                ].concat(board.all_intended_ratings.map(rating => ({
-                    label: rating.name,
-                    items: rating.scale?.ratings.map((rate, index) => {
-                        return {
-                            label: rate.name,
-                            onClick: () => updateRating(rating.id, rate.value),
-                            style:{ backgroundColor: rate.color || "" }
-                        };
-                    }).concat([
-                        { label: "Comment", onClick: () => console.log('Comment clicked') },
-                        { label: "Infos", onClick: () => console.log('Infos clicked') },
-                    ])
-                })))}>
-                    <div key={index} className="board-element">
-                            {renderElement(sessionId, snapId, element)}
-                    </div>
-                </ContextualMenu> 
-            ))}       
+            {boardElements.map((element, index) => <BoardElement key={index} sessionId={sessionId} snapId={snapId} board={board} element={element} />)}       
         </div>
     );
 };

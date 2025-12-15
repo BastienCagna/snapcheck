@@ -44,6 +44,7 @@ pyqtwebengine = "<6"
 fastapi = ">=0.115.12,<0.116"
 nodejs = ">=24.4.1,<24.5"
 requests = ">=2.32.4,<3"
+py2puml = ">=0.9.1,<0.10"
 
 [tool.pixi.pypi-dependencies]
 snapcheck = { path = ".", editable = true }

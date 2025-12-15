@@ -30,27 +30,32 @@ generic_scale = RatingScale(
 first_board = Board(
     title="Axial & Coronal Views",
     description=".",
-    intended_ratings=[
-        Rating(id="coronal", name="Coronal", description="Quality of coronal view", scale=generic_scale),
-        Rating(id="axial", name="Axial", description="Quality of axial view", scale=generic_scale),
-    ],
     elements=[
-        ImageElement(title="Axial View", src="./tests/test_data/mni_axial.png"),
-        ImageElement(title="Coronal View", src="./tests/test_data/mni_coronal.png"),
+        ImageElement(
+            title="Axial View", 
+            src="./tests/test_data/mni_axial.png",
+            intended_ratings=[Rating(id="coronal", name="Coronal", description="Quality of coronal view", scale=generic_scale)]
+        ),
+        ImageElement(
+            title="Coronal View", 
+            src="./tests/test_data/mni_coronal.png",
+            intended_ratings=[Rating(id="axial", name="Axial", description="Quality of axial view", scale=generic_scale)]
+        ),
     ],
 )
 
 ##################
 # Sagittal board #
 ##################
-sag = ImageElement(title="Sagittal View", src="./tests/test_data/mni_lightbox.png")
+sag = ImageElement(
+    title="Sagittal View", 
+    src="./tests/test_data/mni_lightbox.png",
+    intended_ratings=[Rating(id="sagittal", name="Sagittal", description="Quality of sagittal view", scale=generic_scale)]
+)
 sag.annotations.append(ArrowAnnotation(x=150, y=200, width=50, length=0, color="blue", text="Check this area"))
 second_board = Board(
     title="Sagittal View",
     description="",
-    intended_ratings=[
-        Rating(id="sagittal", name="Sagittal", description="Quality of sagittal view", scale=generic_scale)
-    ],
     elements=[sag],
 )
 
@@ -61,8 +66,12 @@ second_board = Board(
 qc = Snap(
     title="MNI Quality Check",
     description=f"",
-    ratings=first_board.intended_ratings + second_board.intended_ratings,
+    ratings=first_board.all_intended_ratings + second_board.all_intended_ratings,
     boards=[first_board, second_board],
+    metadata={
+        "source": "MNI Template",
+        "version": "1.0",
+    }
 )
 
 f = ".local/mni.snpk"

@@ -77,12 +77,13 @@ class Snap(BSCObject):
         # TODO: use elements intended_ratings!
         for item in data["boards"]:
             ref_intended_ratings = []
-            for rating in item["intended_ratings"]:
-                rating_id = rating["id"]
-                for n, rating in enumerate(data["ratings"]):
-                    if rating["id"] == rating_id:
-                        ref_intended_ratings.append(f"@.ratings#{n}")
-                        break
+            for el in item["elements"]:
+                for rating in el["intended_ratings"]:
+                    rating_id = rating["id"]
+                    for n, rating in enumerate(data["ratings"]):
+                        if rating["id"] == rating_id:
+                            ref_intended_ratings.append(f"@.ratings#{n}")
+                            break
             item["intended_ratings"] = ref_intended_ratings
 
         # List all the ratings to use references (ids) in boards

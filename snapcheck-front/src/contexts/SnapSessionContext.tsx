@@ -236,6 +236,7 @@ export function useSnapSessionActions() {
 
     const updateRating = useCallback(
         async (snapId: string, rating: any) => {
+            console.log("Updating rating", snapId, rating);
             if (!dispatch) throw new Error('useSnapActions must be used within a SnapProvider');
             if (!state) throw new Error('useSnapSessionActions must be used within a SnapSessionProvider');
             const sid = state.session?.id || "";
