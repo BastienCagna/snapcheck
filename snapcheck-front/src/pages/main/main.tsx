@@ -1,66 +1,11 @@
-import { useEffect, useState } from "react";
-import type { BoardModel, QualityControlModel } from "../../api";
+import { useEffect } from "react";
+import type { BoardModel } from "../../api";
 import Board from "./board";
 import "./main.css"
-import { useRef } from "react";
 import { useSnapSession } from "../../contexts/SnapSessionContext";
-import TabSelector from "../../components/lib/tabSelector/tabSelector";
+import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel | null }> = ({ sessionId, snapId, board }) => {
-    const boardViewRef = useRef<HTMLDivElement>(null);
-    const [scale, setScale] = useState(1);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
-    const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const [zoomFactor, setZoomFactor] = useState<number>(0.2); // Adjust zoom sensitivity
-    const [zoomMin, setZoomMin] = useState<number>(0.5);
-    const [zoomMax, setZoomMax] = useState<number>(2.5);
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "œ" || event.key === "Œ") {
-            // Zoom
-            const newScale = (prevScale: number) => prevScale + (event.shiftKey == true ? -zoomFactor : zoomFactor);
-            setScale((prevScale) => Math.max(zoomMin, Math.min(newScale(prevScale), zoomMax)));
-        }
-    };
-
-    const handleMouseDown = (event: React.MouseEvent) => {
-        if (event.button === 1) { // Middle mouse button
-            setIsDragging(true);
-            setDragStart({ x: event.clientX, y: event.clientY });
-        }
-    };
-
-    const handleMouseMove = (event: React.MouseEvent) => {
-        if (isDragging && dragStart) {
-            const deltaX = event.clientX - dragStart.x;
-            const deltaY = event.clientY - dragStart.y;
-            setPosition((prevPosition) => ({
-                x: prevPosition.x + deltaX,
-                y: prevPosition.y + deltaY,
-            }));
-            setDragStart({ x: event.clientX, y: event.clientY });
-        }
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-        setDragStart(null);
-    };
-
-    useEffect(() => {
-        const boardViewElement = boardViewRef.current;
-        if (boardViewElement) {
-            boardViewElement.style.transform = `scale(${scale}) translate(${position.x}px, ${position.y}px)`;
-        }
-    }, [scale, position]);
-
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeyDown);
-        return () => {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, []);
 
     if (!board) {
         return <div className="vertical-center">
@@ -69,18 +14,12 @@ const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel
     }
 
     return (
-        <div
-            className="board-view"
-            ref={boardViewRef}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-        >
-            <Board sessionId={sessionId} snapId={snapId} board={board} />
-        </div>
-    );
-};
+        <TransformWrapper limitToBounds={false} minScale={0.1} maxScale={10}>
+            <TransformComponent wrapperStyle={{width: "100%", height: "calc(100vh - 50px)"}} >
+                <Board sessionId={sessionId} snapId={snapId} board={board} />
+            </TransformComponent>
+        </TransformWrapper>
+)};
 
 
 const MainContent: React.FC<{}> = () => {
