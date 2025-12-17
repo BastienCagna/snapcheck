@@ -1,18 +1,17 @@
-from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
+from pydantic import BaseModel, Field, model_validator
 
-@dataclass
-class RatingScaleItem:
+
+class RatingScaleItem(BaseModel):
     name: str = ""
     value: int = 0
     description: str = ""
-    color: str|None = None
+    color: Optional[str] = None
 
 
-@dataclass
-class RatingScale:
+class RatingScale(BaseModel):
     description: str = ""
-    ratings: List[RatingScaleItem] = field(default_factory=list)
+    ratings: List[RatingScaleItem] = Field(default_factory=list)
 
     def check(self):
         """Verify the object content integrity.
@@ -30,9 +29,7 @@ class RatingScale:
             values.append(rating.value)
 
 
-
-@dataclass
-class Rating:
+class Rating(BaseModel):
     """
         A rating with a scale for quality control.
         Attributes:
@@ -45,15 +42,18 @@ class Rating:
 
         Scale can be leaved None if only comment will be used.
     """
-    id: str|None = None
+    id: Optional[str] = None
     name: str = ""
     description: str = ""
-    scale: RatingScale|None = None
+    scale: Optional[RatingScale] = None
 
-    value: int|None = None
-    comment: str|None = None
+    value: Optional[int] = None
+    comment: Optional[str] = None
 
-    def __post_init__(self):
-        if self.id is None:
+    @model_validator(mode='after')
+    def generate_id(self):
+        if self.id is None and self.name:
             # If not provided, generate an ID from the name
             self.id = self.name.lower().replace(" ", "_")
+        return self
+

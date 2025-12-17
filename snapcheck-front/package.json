@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "api": "python ../python/snapserve/build.py; rm -rf ./src/api; cp -r ../build/api/client ./src/api; cp ./openapi_defaults/api_openapi.ts ./src/api/core/OpenAPI.ts; cp ./openapi_defaults/api_request.ts ./src/api/core/request.ts"
+    "api": "python ../python/snapserve/build.py; rm -rf ./src/api; cp -r ../build/api/client ./src/api; cp ./openapi_defaults/api_openapi.ts ./src/api/core/OpenAPI.ts; cp ./openapi_defaults/api_request.ts ./src/api/core/request.ts",
+    "docs": "typedoc"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -31,6 +32,7 @@
     "globals": "^16.0.0",
     "openapi-typescript-codegen": "^0.29.0",
     "sass": "^1.89.1",
+    "typedoc": "^0.27.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5"

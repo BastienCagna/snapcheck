@@ -1,6 +1,13 @@
+"""
+.. _demo_mni:
+
+==============================================================================
+Create a test SNAP file for MNI template
+==============================================================================
+"""
 from snapcheck.snap.annotation import ArrowAnnotation
 from snapcheck.snap.board import ImageElement
-from snapcheck.snap import Snap, Board, Element
+from snapcheck.snap import Snap, Board
 from snapcheck.snap.io import load_snap
 from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
 

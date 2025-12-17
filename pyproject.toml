@@ -2,7 +2,7 @@
 name = "snapcheck"
 version = "0.1.0"
 authors = [{ name = "BrainVISA team", email = "contact@brainvisa.info" }]
-description = "Control the quality of analysis performed on many neuroimaging data"
+description = "Make visual checking and annotation using HTML boards."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "CeCILL-B" }
@@ -29,10 +29,7 @@ repository = "https://github.com/brainvisa/snapcheck"
 "*" = ["*.html", "*.css", "*.js"]
 
 [tool.pixi.project]
-channels = [
-    "https://brainvisa.info/neuro-forge",
-    "https://repo.prefix.dev/conda-forge",
-]
+channels = ["https://repo.prefix.dev/conda-forge"]
 platforms = ["linux-64"]
 
 [tool.pixi.tasks]
@@ -45,6 +42,20 @@ fastapi = ">=0.115.12,<0.116"
 nodejs = ">=24.4.1,<24.5"
 requests = ">=2.32.4,<3"
 py2puml = ">=0.9.1,<0.10"
+
+# For the tests
+pytest = ">=9.0.2,<10"
+
+# For the doc
+sphinx = ">=8.2,<10"
+sphinx-gallery = ">=0.20.0,<0.21"
+sphinx_bootstrap_theme = ">=0.8.1,<0.9"
+numpydoc = ">=1.10.0,<2"
+sphinxcontrib-fulltoc = ">=1.2.0,<2"
+matplotlib = ">=3.10.8,<4"
+sphinx-mdinclude = ">=0.6.2,<0.7"
+sphinxcontrib-openapi = ">=0.8.3,<1.0"
+
 
 [tool.pixi.pypi-dependencies]
 snapcheck = { path = ".", editable = true }

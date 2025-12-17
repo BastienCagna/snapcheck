@@ -1,30 +1,13 @@
 from typing import List
 from pydantic import BaseModel
+from snapcheck.snap.rating import Rating
 
-
-class RatingScaleItem(BaseModel):
-    name: str
-    value: int
-    description: str
-    color: str | None = None
-
-class RatingScaleModel(BaseModel):
-    description: str
-    ratings: List[RatingScaleItem]
-
-class RatingModel(BaseModel):
-    id: str
-    name: str
-    description: str
-    scale:RatingScaleModel | None
-    value: int|None
-    comment: str|None
 
 class ElementModel(BaseModel):
     type: str
     style: dict[str, str] = {}  # Element CSS style
     title: str | None = None  # Optional title for the element, e.g., "Input DWI (b=0)"
-    intended_ratings: List[RatingModel]
+    intended_ratings: List[Rating] = []  # Ratings associated with this element
 
 class ImageElementModel(ElementModel):
     type: str = "image"
@@ -41,7 +24,7 @@ class SnapModel(BaseModel):
     title: str | None = None
     description: str | None = None
     metadata: dict
-    ratings: List[RatingModel] = []
+    ratings: List[Rating] = []
     boards: List[BoardModel] = []
 
     id: str | None = None

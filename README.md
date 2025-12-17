@@ -109,14 +109,8 @@ Even if the SnapCheck GUI can be displayed by any web browser, a Qt based client
 
 Options:
 
-* add more displayable elements (graphs, medical imagin viewer, ...)
-* make it usable throughou internet (adding user, security...)
-
-### Short term TODO
-
-* close session when leaving the GUI
-* use sessinoId and snapId in all snap controller routes
-* add recent files to the GUI
+* add more displayable elements (graphs, medical imaging viewer, ...)
+* make it usable throughout internet (adding user, security...)
 
 
 ## Install

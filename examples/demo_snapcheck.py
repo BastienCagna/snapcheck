@@ -1,17 +1,15 @@
+"""
+.. _demo_tracto:
+
+==============================================================================
+Crate a test snap file for tractography QC in French
+==============================================================================
+"""
 from snapcheck.snap.board import ImageElement
-from snapcheck.snap.cati import CATIVisit
 from snapcheck.snap import Snap, Board, Element
 from snapcheck.snap.io import load_snap
 from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
 
-
-visit = CATIVisit(
-    protocol="protocol_demo",
-    study="study1",
-    center="center1",
-    subject="001XM02",
-    visit="M0"
-)
 
 colors = [
     "#330C00",
@@ -92,7 +90,7 @@ for bundle in sorted(bundles):
     b_fibers_rating = Rating(
         id="tracto_bundle_fibers_" + bundle_nickname,
         name=f"Fibres {bundle}",
-        description=f"Répartition homogène des fibres du bundle",
+        description="Répartition homogène des fibres du bundle",
         scale=fibre_scale
     )
     bundles_ratings.extend([b_mask_rating, b_fibers_rating])
@@ -148,8 +146,14 @@ metrics_board = Board(
 ##########################
 qc = Snap(
     title="Tractométrie",
-    description=f"Tractométrie du CST (Corticospinal Tract) pour le sujet {visit.subject}/{visit.visit}",
-    metadata=visit.__dict__,
+    description="Tractométrie du CST (Corticospinal Tract) pour le sujet",
+    metadata={
+        "protocol":"protocol_demo",
+        "study":"study1",
+        "center":"center1",
+        "subject":"001XM02",
+        "visit":"M0"
+    },
     ratings=[subject_observations, b0_rating, mni_registration_rating, fa_rating, md_rating] + bundles_ratings,
     boards=[preproc_board, cst_board, metrics_board],
 )

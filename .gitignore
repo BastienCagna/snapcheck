@@ -12,6 +12,10 @@ pixi.lock
 
 __pycache__/
 
-
-
 build/
+docs/_build/
+docs/auto_examples/
+docs/sg_execution_times.rst
+docs/_autosummary/
+docs/generated/
+docs/frontend-docs/
