@@ -13,11 +13,12 @@ BACKUP_DEQUE_SIZE = 40
 
 class Changeable:
     """
-        A class that automatically emits a signal when an attribute is changed.
+    A class that automatically emits a signal when an attribute is changed.
 
-        Use the self.no_changed_signal() context manager to prevent the signal from being emitted
-        during initialization or bulk updates.
+    Use the self.no_changed_signal() context manager to prevent the signal from being emitted
+    during initialization or bulk updates.
     """
+
     has_changed: Callback
     _is_loading: bool = True
     _has_changed: bool = False
@@ -46,21 +47,22 @@ class Changeable:
 
 class Serializable:
     """
-        A class that recursively serializes its attributes to a dictionary.
-        The serialized dictionary can be used to recreate the object later.
-        An id attribute is automatically generated for each instance.
+    A class that recursively serializes its attributes to a dictionary.
+    The serialized dictionary can be used to recreate the object later.
+    An id attribute is automatically generated for each instance.
     """
+
     id = uuid4()
 
     def to_dict(self, validate=False) -> dict:
         return serialize(self)
 
     def to_json(self, path: str, indent=4) -> None:
-        """ Serialize as JSON content
-            This method allows to use an other default serialization method in future.
+        """Serialize as JSON content
+        This method allows to use an other default serialization method in future.
         """
         data = self.to_dict(validate=True)
-        json.dump(data, open(path, 'w'), indent=indent)
+        json.dump(data, open(path, "w"), indent=indent)
 
     @classmethod
     def from_dict(cls, data: dict, decompress=True):
@@ -92,34 +94,43 @@ class Serializable:
 
     @classmethod
     def from_json(cls, path: str) -> "Serializable":
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             data = json.load(f)
         return cls.from_dict(data)
 
 
 class Backupable:
     """
-        A class that allows to create backups of its state and revert or restore changes.
+    A class that allows to create backups of its state and revert or restore changes.
+
+    Backups are stored in a deque with a maximum size defined by BACKUP_DEQUE_SIZE.
+
+    It provides the changing() context manager to perform changes safely, reverting to the previous state
+    if an exception occurs.
     """
+
     _backups: deque
     _forwups: deque
 
     def __post_init__(self):
         self._backups = deque(maxlen=BACKUP_DEQUE_SIZE)
         self._forups = deque(maxlen=BACKUP_DEQUE_SIZE)
-        if hasattr(self, 'has_changed') and not isinstance(self.has_changed, Callback):
+        if hasattr(self, "has_changed") and not isinstance(self.has_changed, Callback):
             self.has_changed.connect(self.create_backup)
 
     def create_backup(self):
+        """Create a checkpoint of the current state."""
         self._backups.append(self.to_dict())
 
     def revert_changes(self):
+        """Restore a previous state."""
         if len(self.backups):
             self._forwups.append(deepcopy(self.__dict__))
             previous_state = self._backups.pop()
             self._restore_from_deepcopy(previous_state)
 
     def restore_changes(self):
+        """Retore a more recent state"""
         if len(self.forwups):
             self._backups.append(deepcopy(self.__dict__))
             next_state = self._forwups.pop()
@@ -133,6 +144,7 @@ class Backupable:
 
     @contextmanager
     def changing(self):
+        """Context manager to perform changes safely, reverting to the previous state if an exception occurs."""
         backup = self.to_dict()
         try:
             yield
@@ -141,11 +153,12 @@ class Backupable:
             raise e
         else:
             self._backups.append(backup)
-            if hasattr(self, 'has_changed') and not isinstance(self.has_changed, Callback):
+            if hasattr(self, "has_changed") and not isinstance(self.has_changed, Callback):
                 self.has_changed()
 
 
 class BSCObject(Backupable, Serializable, Changeable):
+    """A changeable, serializable and backupable object."""
 
     def __init__(self, *args, **attributes):
         Changeable.__init__(self, *args, **attributes)
