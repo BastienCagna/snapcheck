@@ -1,0 +1,58 @@
+.rating-input
+    margin-top: .5em
+    border-radius: 0.2rem
+
+    display: flex
+
+    border: 1px solid #313131
+
+    .rating-state-bar
+        width: .25rem
+        background-color: #383838
+        border-top-left-radius: 0.2rem
+        border-bottom-left-radius: 0.2rem
+        margin-right: 0.5em
+
+    .rating-content
+        padding: 0.2em
+        display: flex
+        flex-direction: column
+        flex-grow: 1
+
+        .rating-name
+            color: #d4d4d4
+            font-size: 0.9rem
+
+        .rating-select
+            float: right
+            display: block
+            background-color: #444343
+            color: #d4d4d4
+            font-size: 0.8rem
+
+        .rating-second-line
+            display: flex
+            width: 100%
+
+            .rating-infos-btn
+                padding: 5px 4px 0px 4px
+                border-radius: 60%
+        
+            .rating-infos-btn:hover
+                background-color: #35331a
+                cursor: pointer
+
+            .rating-comment
+                width: 100%
+                box-sizing: border-box
+                padding: 0.1rem
+                margin-left: 5%
+                border: 1px solid #292929
+                background-color: #444343
+                opacity: 0.8
+                color: #d4d4d4
+                font-size: 0.8rem
+
+.rating-highlight
+    border: 1px solid #5a561e
+    transition: background-color 0.2s ease

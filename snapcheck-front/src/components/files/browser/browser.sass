@@ -1,0 +1,44 @@
+
+.files-browser-items
+    list-style: none
+    padding: 0
+    margin: 0
+    max-height: 80vh
+    overflow-y: scroll
+
+    // Customize the scrollbar
+    scrollbar-width: thin
+    scrollbar-color: #888 #2c2c2c
+
+    &::-webkit-scrollbar
+        width: 8px
+
+    &::-webkit-scrollbar-thumb
+        background: #888
+        border-radius: 4px
+
+    &::-webkit-scrollbar-track
+        background: #2c2c2c
+
+.files-browser-items li
+    padding: 0.2em
+    border-bottom: 1px solid #474747
+    cursor: pointer
+    display: flex
+    align-items: center
+
+    span
+        font-size: 0.85rem
+
+    .fb-item-icon
+        margin-right: 0.1em
+        color: #9c9c9c
+
+.files-browser-items li:hover
+    background: #5e5e5e
+    transition: background 0.1s ease
+
+.files-browser-breadcrumbs
+    .separator
+        margin: 0 0.3em
+        color: #5f5f5fff

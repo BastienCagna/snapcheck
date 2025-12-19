@@ -1,0 +1,37 @@
+
+.tab-selector
+    margin: 0
+    text-align: left
+    background: #252525
+
+    display: flex
+
+    .tab-selector-item
+        padding: 8px 16px 6px 16px
+        cursor: pointer
+        font-size: 0.9rem
+
+        border: 1px solid #333333
+
+        transition: background-color 0.1s ease
+
+        &:hover
+            border-bottom: 2px solid #3b3a00
+            background-color: #4e4e4e
+
+        &.active
+            border-bottom: 2px solid #666400
+            background-color: #353535
+
+        .close-icon
+            position: relative
+            top: -4px
+            right: -10px
+            cursor: pointer
+            height: 14px
+            padding: 2px
+            border-radius: 50%
+        
+        .close-icon:hover
+            background-color: #777777
+            

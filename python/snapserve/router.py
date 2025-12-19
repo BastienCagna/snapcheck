@@ -1,0 +1,14 @@
+from fastapi import APIRouter
+
+import snapserve.snap.controller as snap
+import snapserve.files.controller as files
+import snapserve.settings.controller as settings
+import snapserve.content.controller as content
+import snapserve.appdata.controller as appdata
+
+api_router = APIRouter()
+api_router.include_router(snap.router, tags=["snap"], prefix="/snap")
+api_router.include_router(files.router, tags=["files"], prefix="/files")
+api_router.include_router(settings.router, tags=["settings"], prefix="/settings")
+api_router.include_router(content.router, tags=["content"], prefix="/content")
+api_router.include_router(appdata.router, tags=["appdata"], prefix="/appdata")

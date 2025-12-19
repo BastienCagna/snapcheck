@@ -1,0 +1,35 @@
+
+.main-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: 0
+    margin: 0
+
+    li
+        list-style: none
+        margin: 0
+        padding: .5em 1.6em
+        display: inline-block
+        cursor: pointer
+        background-color: #1d1d1d
+        color: #d4d4d4
+        border-radius: 1px
+        font-size: 0.9rem
+        border: 1px solid #383838
+
+    li:hover
+        background-color: #2d2d2d
+
+    li.active
+        background-color: #474945
+        font-weight: bold
+        color: #d6d332
+        // border: 1px solid yellow
+
+.board-view
+    transform-origin: center
+    transform: scale(1)
+    transition: transform 0.05s, scale 0.3s ease // Animation fluide uniquement pour le scaling
+
+    scrollbar-width: thin
