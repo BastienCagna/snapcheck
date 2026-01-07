@@ -1,6 +1,10 @@
 # SnapCheck
 SnapCheck is a tool to annotate data displayed by graphical boards. Its main goal is to provides an interface to assign ratings to data observed throughout sets of screenshots.
 
+
+## Quick Start
+
+
 ## Main Concepts
 
 ### Elements

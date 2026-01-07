@@ -1,8 +1,9 @@
 import uvicorn
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from snapserve.router import api_router
+# from snapserve.auth.auth import router as auth_router
 # from sulcilab.database import Base, engine
 
 
@@ -14,6 +15,7 @@ def custom_generate_unique_id(route: APIRoute):
 
 app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
 app.include_router(api_router) #, prefix=config.API_V1_STR)
+# app.include_router(auth_router)
 
 origins = [
     "http://127.0.0.1:8000",

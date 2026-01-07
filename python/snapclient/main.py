@@ -1,23 +1,21 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings
-
-from PyQt5.QtCore import QUrl, Qt, QTimer
 import sys
 import subprocess
 import time
 import atexit
-import PyQt5.QtWidgets as qw
-from PyQt5.QtGui import QPixmap, QCursor
-import os.path as op
 import requests
-from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
-from PyQt5.QtGui import QIcon
+import argparse
+import os.path as op
+
+import PyQt5.QtWidgets as qw
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
+from PyQt5.QtCore import QUrl, Qt, QTimer, QObject, pyqtSlot
+from PyQt5.QtGui import QPixmap, QCursor, QIcon
 from PyQt5.QtWebChannel import QWebChannel
-from PyQt5.QtCore import QObject, pyqtSlot
+
+from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
 
 
-class BottomBar(QWidget):
+class BottomBar(qw.QWidget):
     def __init__(self):
         super().__init__()
         self.setContentsMargins(0, 0, 0, 0)
@@ -47,13 +45,19 @@ class Bridge(QObject):
     _multiplier = 1.5
     _last_move_time = None
 
-    def __init__(self, win):
+    def __init__(self, win, jwt: str = None):
         super().__init__()
         self.win = win
+        self.jwt = jwt
+
+    @pyqtSlot(result=str)
+    def getJWT(self):
+        """Return the JWT token for authentication."""
+        return self.jwt if self.jwt else ""
 
     @pyqtSlot()
     def close(self):
-        QApplication.instance().quit()
+        qw.QApplication.instance().quit()
 
     @pyqtSlot()
     def minimize(self):
@@ -87,10 +91,19 @@ class Bridge(QObject):
         self.win.stopWindowDrag()
 
 
-class MainWindow(QMainWindow):
+class MainWindow(qw.QMainWindow):
+    url: str
+    jwt: str
 
-    def __init__(self, url: str):
+    def __init__(self, url: str, jwt: str = None):
+        """
+        Url: The URL to load in the web view.
+        JWT: Authentification token to be sent to the server.
+        """
         super().__init__()
+        self.url = url
+        self.jwt = jwt
+
         self.setWindowTitle("SnapCheck")
         self.setStyleSheet("background-color: #333; color: #ccc")
 
@@ -110,10 +123,10 @@ class MainWindow(QMainWindow):
         self.browser.settings().setAttribute(QWebEngineSettings.DnsPrefetchEnabled, True)
 
         # Set the central widget
-        central_widget = QWidget()
+        central_widget = qw.QWidget()
         m = 4
         central_widget.setContentsMargins(m, m, m, m)
-        layout = QVBoxLayout()
+        layout = qw.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)  # Remove margins
         layout.setSpacing(0)  # Remove spacing between widgets
         layout.addWidget(self.browser)
@@ -130,7 +143,7 @@ class MainWindow(QMainWindow):
         self.showMaximized()
 
         self.channel = QWebChannel()
-        self.bridge = Bridge(self)
+        self.bridge = Bridge(self, jwt=jwt)
         self.channel.registerObject("bridge", self.bridge)
         self.browser.page().setWebChannel(self.channel)
 
@@ -298,8 +311,12 @@ def main():
     port = DEFAULT_PORT
     url = f"http://{DEFAULT_URL}:{port}"
 
+    parser = argparse.ArgumentParser(description="SnapClient Application")
+    parser.add_argument("--jwt", type=str, default=None, help="Authentification token.")
+    args = parser.parse_args()
+
     # Launch the PyQt application
-    app = QApplication(sys.argv)
+    app = qw.QApplication(sys.argv)
 
     # Create a splash screen
     splash_pix = QPixmap(SPLASH_PATH)  # Replace with your splash image path
@@ -329,7 +346,7 @@ def main():
         print(f"Server dind't start in time.")
         sys.exit(1)
 
-    window = MainWindow(url)
+    window = MainWindow(url, jwt=args.jwt)
     splash.finish(window)
     window.show()
     sys.exit(app.exec_())
