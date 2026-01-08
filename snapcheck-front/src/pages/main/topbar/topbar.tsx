@@ -17,7 +17,7 @@ declare const QWebChannel: any;
 
 const TopBar: React.FC<{
 }> = () => {
-    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards } = useSnapSession();
+    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards, saveSnap, saveSnapAs } = useSnapSession();
     const { showModal } = useModal();
     const { history } = useAppData();
 
@@ -165,8 +165,8 @@ const TopBar: React.FC<{
                         },
                         { type: "separator" },
                         { label: "Reload", onClick: openSnap, disabled: !snap },
-                        { label: "Save", onClick: () => { }, disabled: !snap?.has_changed },
-                        { label: "Save As...", onClick: () => { }, disabled: !snap?.has_changed },
+                        { label: "Save", onClick: () => { snap?.id && saveSnap(snap.id) }, disabled: !snap?.has_changed },
+                        { label: "Save As...", onClick: () => { snap?.id && saveSnapAs(snap.id, "newPath") }, disabled: !snap?.has_changed },
                         { label: "Close", onClick: closeCurrentSnap, disabled: !snap },
                         { label: "Close All", onClick: () => { }, disabled: !snap },
                         { type: "separator" },

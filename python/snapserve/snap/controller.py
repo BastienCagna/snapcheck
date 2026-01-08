@@ -50,7 +50,7 @@ def open_snap(sid: str, path: str):
 
 @router.get("/{sid}/{snapid}/save", response_model=SnapModel)
 def save_snap(sid: str, snapid: str):
-    item = snap_store.get_by_id(sid, snapid)
+    item = snap_store.get_by_id(snapid)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     item.snap.save()
@@ -58,7 +58,7 @@ def save_snap(sid: str, snapid: str):
 
 @router.get("/{sid}/{snapid}/saveas", response_model=SnapModel)
 def save_snap_as(sid: str, snapid: str, path: str):
-    item = snap_store.get_by_id(sid, snapid)
+    item = snap_store.get_by_id(snapid)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     item.snap.save(path)
@@ -67,14 +67,20 @@ def save_snap_as(sid: str, snapid: str, path: str):
 
 @router.get("/{sid}/{snapid}/image/{src:path}")
 def get_image(sid: str, snapid: str, src: str):
-    # TODO: use sid
+    # TODO: validate sid/session ownership
     item = snap_store.get_by_id(snapid)
     if item is None:
         raise HTTPException(status_code=404, detail="Snap not found")
-    image_path = op.join(item.snap._dir.name, src)
-    if not op.exists(image_path):
+
+    # Reject missing src to avoid serving the directory itself
+    normalized_src = src.lstrip("/")
+    if not normalized_src:
         raise HTTPException(status_code=404, detail="Image not found")
-    # Automatically detect the MIME type
+
+    image_path = op.join(item.snap._dir.name, normalized_src)
+    if not op.isfile(image_path):
+        raise HTTPException(status_code=404, detail="Image not found")
+
     mime_type, _ = mimetypes.guess_type(image_path)
     if mime_type is None:
         mime_type = "application/octet-stream"
