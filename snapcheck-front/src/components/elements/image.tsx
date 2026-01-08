@@ -16,7 +16,10 @@ const ImageComponent: React.FC<{
             try {
                 const response = await fetch(
                     `${OpenAPI.BASE}/snap/${sessionId}/${snapId}/image/${src}`,
-                    { method: 'GET' }
+                    { 
+                        method: 'GET',
+                        headers: OpenAPI.HEADERS || {}
+                    }
                 );
                 if (!response.ok) throw new Error('Image not found');
                 const blob = await response.blob();

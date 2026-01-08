@@ -3,11 +3,15 @@ import sys
 import importlib
 import inspect
 from typing import Callable
-from warnings import warn
 from PyQt5.QtCore import pyqtSignal
 from .callback import Callback
-import os.path as op
 from os import getcwd, chdir
+
+try:  # Optional dependency: only needed to special-case Pydantic models during inflate
+    from pydantic import BaseModel as _PydanticBaseModel  # type: ignore
+except Exception:  # pragma: no cover - pydantic might not be installed
+    _PydanticBaseModel = None
+
 
 @contextmanager
 def temporarly_change_directory(target_dir: str):
@@ -38,6 +42,8 @@ def serialize(obj):
         return attributes
     else:
         return str(obj)
+
+
 
 
 class DynamicLoader:
@@ -105,6 +111,20 @@ class DynamicLoader:
 
         # Ge the class
         cls = getattr(module, obj_class)
+
+        # If we are dealing with a Pydantic model, use model_construct to create
+        # the instance without validation (needed because references like "@._scales#0"
+        # will be resolved later by resolve_references()).
+        if _PydanticBaseModel is not None and isinstance(cls, type) and issubclass(cls, _PydanticBaseModel):
+            model_data = {k: self.inflate(v) for k, v in data.items() if k != "__cls__"}
+            # Use model_construct (v2) or construct (v1) to bypass validation
+            # while properly initializing internal Pydantic attributes
+            if hasattr(cls, "model_construct"):
+                return cls.model_construct(**model_data)
+            if hasattr(cls, "construct"):
+                return cls.construct(**model_data)
+            # Fallback: direct instantiation (may fail with validation)
+            return cls(**model_data)
 
         # New instance of the object without calling __init__()
         obj = cls.__new__(cls)

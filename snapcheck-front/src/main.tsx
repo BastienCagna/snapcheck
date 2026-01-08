@@ -14,16 +14,6 @@ const initializeJWT = async () => {
   if ((window as any).qt?.webChannelTransport) {
     return new Promise<void>((resolve) => {
       // @ts-ignore
-      // new (window as any).qt.webChannelTransport.QWebChannel((window as any).qt.webChannelTransport, (channel: any) => {
-      //   const bridge = channel.objects.bridge;
-      //   bridge.getJWT((jwt: string) => {
-      //     if (jwt) {
-      //       OpenAPI.TOKEN = jwt;
-      //       console.log('JWT initialized from Qt bridge');
-      //     }
-      //     resolve();
-      //   });
-      // });
         new QWebChannel((window as any).qt.webChannelTransport, function (channel: any) {
               (window as any).bridge = channel.objects.bridge;
               (window as any).bridge.getJWT((jwt: string) => {
