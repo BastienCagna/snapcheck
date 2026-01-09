@@ -144,3 +144,26 @@ pixi run client
 // or
 python python/snapclient/main.py
 ```
+
+
+
+
+# TODO
+
+Back
+~~~~
+* numéro de session dans le JWT, possible?
+    => réouverture d'une session GUI en l'état?
+
+
+GUI
+~~~
+* changement de fichier marche pas
+* affichage de la première board à l'ouverture du fichier
+* nom du fichier n'apparait pas
+* les notes et metadonnées ne s'affiche pas?
+* pas de mouvement au clics (gauche et droit, seulement molette)
+* scroll sur les planches
+* navigation avecles flêches aussi
+* grossiessement du menu lors du dezoom sur les boards
+* transformation des boards board/board

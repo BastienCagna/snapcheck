@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { OpenAPI, SnapService } from '../../api';
+import { OpenAPI } from '../../api';
 
-const ImageComponent: React.FC<{
+const ImageElementComponent: React.FC<{
     sessionId: string;
     snapId: string;
     src: string;
@@ -16,7 +16,7 @@ const ImageComponent: React.FC<{
             try {
                 const response = await fetch(
                     `${OpenAPI.BASE}/snap/${sessionId}/${snapId}/image/${src}`,
-                    { 
+                    {
                         method: 'GET',
                         headers: OpenAPI.HEADERS || {}
                     }
@@ -47,6 +47,6 @@ const ImageComponent: React.FC<{
 };
 
 
-export default ImageComponent;
+export default ImageElementComponent;
 
 

@@ -12,32 +12,39 @@ router = APIRouter()
 
 snap_store = SnapStore()
 
+
 @router.post("/session", response_model=SnapCheckSessionModel)
 def create_session():
     return snap_store.new_session()
 
+
+# TODO: use sid in JWT payload instead of URLs
 @router.post("/{sid}", response_model=SnapCheckSessionModel)
 def get_session_infos(sid: str):
     return snap_store.get_session(sid)
+
 
 @router.get("/{sid}/saveall", response_model=SnapModel)
 def save_all_snaps(sid: str):
     sess = snap_store.get_session(sid)
     for item in sess.items:
         item.save()
-    return [item.to_dict() for item in sess.items]
+    return [item.to_dict(clean=True) for item in sess.items]
+
 
 @router.get("/{sid}/close", response_model=List[SnapModel] | None)
 def close_session(sid: str):
     items = snap_store.close_session(sid)
     if items:
-        return [item.to_dict() for item in items]
+        return [item.to_dict(clean=True) for item in items]
     return None
+
 
 @router.get("/{sid}/list", response_model=List[SnapModel])
 def list_qc(sid: str):
     # TODO: use sid
-    return [item.to_dict() for item in snap_store.get_all()]
+    return [item.to_dict(clean=True) for item in snap_store.get_all()]
+
 
 @router.get("/{sid}/open/{path:path}", response_model=SnapModel)
 def open_snap(sid: str, path: str):
@@ -46,7 +53,8 @@ def open_snap(sid: str, path: str):
     APP_DATA.add_to_history(path)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
-    return item.to_dict()
+    return item.to_dict(clean=True)
+
 
 @router.get("/{sid}/{snapid}/save", response_model=SnapModel)
 def save_snap(sid: str, snapid: str):
@@ -54,7 +62,8 @@ def save_snap(sid: str, snapid: str):
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     item.snap.save()
-    return item.to_dict()
+    return item.to_dict(clean=True)
+
 
 @router.get("/{sid}/{snapid}/saveas", response_model=SnapModel)
 def save_snap_as(sid: str, snapid: str, path: str):
@@ -62,7 +71,7 @@ def save_snap_as(sid: str, snapid: str, path: str):
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     item.snap.save(path)
-    return item.to_dict()
+    return item.to_dict(clean=True)
 
 
 @router.get("/{sid}/{snapid}/image/{src:path}")
@@ -87,9 +96,7 @@ def get_image(sid: str, snapid: str, src: str):
     return FileResponse(
         image_path,
         media_type=mime_type,
-        headers={
-            "Content-Disposition": f'inline; filename="{op.basename(image_path)}"'
-        }
+        headers={"Content-Disposition": f'inline; filename="{op.basename(image_path)}"'},
     )
 
 
@@ -100,4 +107,4 @@ def update_rating(sid: str, snapid: str, ratingId: str, value: float):
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     item.snap.update_rating(ratingId, value)
-    return item.to_dict()
+    return item.to_dict(clean=True)

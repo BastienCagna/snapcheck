@@ -9,6 +9,7 @@ QCITEM_TIMEOUT = 12 * 3600
 
 ID_LENGTH = 12
 
+
 class SnapStoreItem:
     snap: Snap
     id: str
@@ -20,8 +21,8 @@ class SnapStoreItem:
         self.id = uuid.uuid4().hex[:ID_LENGTH]
         self.last_access = time()
 
-    def to_dict(self):
-        ret_snap = self.snap.to_dict(compress=False)
+    def to_dict(self, clean=False) -> dict:
+        ret_snap = self.snap.to_dict(compress=False, clean=clean)
         ret_snap["filename"] = op.split(self._path)[1] if self._path else None
         ret_snap["has_changed"] = self.snap._has_changed or False
         ret_snap["is_cancellable"] = len(self.snap._backups) > 0
@@ -36,7 +37,7 @@ class SnapSession:
     items: List[SnapStoreItem] = []
 
     def __init__(self):
-        self.id = uuid.uuid4().hex[:ID_LENGTH]  
+        self.id = uuid.uuid4().hex[:ID_LENGTH]
         self.last_access = time()
 
     def register_item(self, item: SnapStoreItem):
@@ -80,7 +81,7 @@ class SnapStore:
     def open(self, session_id: str, path: str) -> SnapStoreItem:
         """Open a snap in the specified session.
 
-            If the file has already been open, return it.
+        If the file has already been open, return it.
         """
 
         # Get the target session

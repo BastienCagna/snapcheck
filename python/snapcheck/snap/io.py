@@ -1,9 +1,8 @@
-
 from dataclasses import dataclass, field
 from typing import Any, List
 from snapcheck.core.io import temporarly_change_directory
 from snapcheck.core.objects import BSCObject
-from snapcheck.snap.board import Board, FileElement
+from snapcheck.snap.board import AbstractElement, Board, FileElement
 from snapcheck.snap.rating import Rating
 import json
 from warnings import warn
@@ -16,14 +15,21 @@ import zipfile
 
 @dataclass
 class Snap(BSCObject):
-    title: str|None = None
-    description: str|None = None
+    title: str | None = None
+    description: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
     ratings: List[Rating] = field(default_factory=list)
     boards: List[Board] = field(default_factory=list)
 
-    _dir: tempfile.TemporaryDirectory|None = None
-    _path: str|None = None
+    _dir: tempfile.TemporaryDirectory | None = None
+    _path: str | None = None
+
+    def get_all_elements(self) -> list[AbstractElement]:
+        """Return a flat list of all elements in all boards, including those in rows."""
+        all_elements = []
+        for board in self.boards:
+            all_elements.extend(board.get_all_elements())
+        return all_elements
 
     def _validate(self):
         """
@@ -37,20 +43,22 @@ class Snap(BSCObject):
                     if int_rating.id == rating.id:
                         break
                 else:
-                    raise ValueError(f"Rating with #'{rating.id}' used by board '{board.title}' is not defined in the ratings list.")
+                    raise ValueError(
+                        f"Rating with #'{rating.id}' used by board '{board.title}' is not defined in the ratings list."
+                    )
         checked_scales = []
         for rating in self.ratings:
             if rating.scale is None or rating.scale in checked_scales:
                 continue
             rating.scale.check()
 
-    def to_dict(self, validate=False, compress=True) -> None:
-        """ Return the object as dict (optionally after validation) """
+    def to_dict(self, validate=False, compress=True, clean=False) -> None:
+        """Return the object as dict (optionally after validation)"""
         # Validate before saving
         if validate:
             self._validate()
 
-        data = super().to_dict()
+        data = super().to_dict(clean=clean)
 
         if not compress:
             return data
@@ -74,7 +82,7 @@ class Snap(BSCObject):
             ser_rating["scale"] = id
 
         # Replace intended_ratings of each board to their references
-        # TODO: use elements intended_ratings!
+        # TODO: do it recursively in elements
         for item in data["boards"]:
             ref_intended_ratings = []
             for el in item["elements"]:
@@ -93,8 +101,8 @@ class Snap(BSCObject):
 
     def to_json(self, path: str):
         warn(
-            "Using to_json() method on Snap object will only save metadata.\n" + \
-            "To also save the boards content, use the save() method"
+            "Using to_json() method on Snap object will only save metadata.\n"
+            + "To also save the boards content, use the save() method"
         )
         return super().to_json()
 
@@ -102,24 +110,22 @@ class Snap(BSCObject):
         # By default keep the same path
         if path is None:
             if self._path is None:
-                raise ValueError("No path provided to save the Snap object.") 
+                raise ValueError("No path provided to save the Snap object.")
             path = self._path
 
-        # Create the content directory
-        fname = op.basename(path).split('.')[-2]
+        # Create the content directory
+        fname = op.basename(path).split(".")[-2]
         tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_")
         content_path = op.join(tmp_dir.name, "content")
         mkdir(content_path)
         js_f = op.join(tmp_dir.name, fname + ".json")
 
-
-        # List all elements
-        elements = [element for board in self.boards for element in board.elements if isinstance(element, FileElement)]
+        # List all elements
+        elements: List[FileElement] = list(filter(lambda e: isinstance(e, FileElement), self.get_all_elements()))
         source_tracker = {}
-        with temporarly_change_directory(tmp_dir.name):
-            # Copy each source file and change its path in each elements
-            for el in elements:
-                el.export_to_local("./content", source_tracker)
+        # Copy each source file and change its path in each elements
+        for el in elements:
+            el.export_to_local(tmp_dir.name, "content", source_tracker)
 
         # Save the JSON file
         super().to_json(js_f)
@@ -128,16 +134,15 @@ class Snap(BSCObject):
         # TODO: make directly the archive with the proper name
         # Create the archive directly with the desired file name and extension
         base_name, ext = op.splitext(path)
-        archive_path = shutil.make_archive(base_name=base_name, format='zip', root_dir=tmp_dir.name)
+        archive_path = shutil.make_archive(base_name=base_name, format="zip", root_dir=tmp_dir.name)
         # If the extension is not .snap, rename the archive
         rename(archive_path, path)
         self._path = path
 
     def close(self):
-        """Remove temporary directory if set. """
+        """Remove temporary directory if set."""
         if self._dir:
             self._dir.cleanup()
-
 
     def update_rating(self, ratingId: str, value: any):
         with self.changing():
@@ -148,20 +153,21 @@ class Snap(BSCObject):
             else:
                 raise ValueError(f"Note with ID '{ratingId}' not found.")
 
+
 def load_snap(path: str) -> Snap:
-    """ Load a Snap object from a JSON file """
+    """Load a Snap object from a JSON file"""
     tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_load_", delete=False)
-    with zipfile.ZipFile(path, 'r') as zip_ref:
+    with zipfile.ZipFile(path, "r") as zip_ref:
         zip_ref.extractall(tmp_dir.name)
 
     # Find the JSON file at the root of the archive
-    json_files = [f for f in listdir(tmp_dir.name) if f.endswith('.json')]
+    json_files = [f for f in listdir(tmp_dir.name) if f.endswith(".json")]
     if not json_files:
         raise FileNotFoundError("No JSON file found at the root of the archive.")
     json_path = op.join(tmp_dir.name, json_files[0])
     js_path = json_path
 
-    with open(js_path, 'r') as f:
+    with open(js_path, "r") as f:
         data = json.load(f)
 
     snap = Snap.from_dict(data)
