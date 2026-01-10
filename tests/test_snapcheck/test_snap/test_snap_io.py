@@ -1,10 +1,10 @@
 import pytest
 import os
 import tempfile
-import json
 import zipfile
 from snapcheck.snap.io import Snap, load_snap
-from snapcheck.snap.board import Board, ImageElement, Element
+from snapcheck.snap.board import Board
+from snapcheck.snap.elements import ImageElement, Element
 from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
 
 

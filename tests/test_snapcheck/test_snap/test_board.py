@@ -1,9 +1,9 @@
 import pytest
 import os
 import tempfile
-import shutil
-from snapcheck.snap.board import Element, FileElement, ImageElement, Board
-from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
+from snapcheck.snap.elements import Element, FileElement, ImageElement
+from snapcheck.snap.board import Board
+from snapcheck.snap.rating import Rating
 from snapcheck.snap.annotation import Annotation
 
 

@@ -1,18 +1,7 @@
 from typing import List
 from pydantic import BaseModel
-from snapcheck.snap.board import ElementUnion
+from snapcheck.snap.elements import ElementUnion
 from snapcheck.snap.rating import Rating
-
-
-# class ElementModel(BaseModel):
-#     type: str
-#     style: dict[str, str] = {}  # Element CSS style
-#     title: str | None = None  # Optional title for the element, e.g., "Input DWI (b=0)"
-#     intended_ratings: List[Rating] = []  # Ratings associated with this element
-
-# class ImageElementModel(ElementModel):
-#     type: str = "image"
-#     src: str = ""  # Source of the image file, e.g., "input_dwi.png"
 
 
 class BoardModel(BaseModel):

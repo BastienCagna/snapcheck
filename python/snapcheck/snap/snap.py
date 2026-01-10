@@ -1,16 +1,23 @@
 from dataclasses import dataclass, field
 from typing import Any, List
-from snapcheck.core.io import temporarly_change_directory
 from snapcheck.core.objects import BSCObject
-from snapcheck.snap.board import AbstractElement, Board, FileElement
+from snapcheck.snap.board import AbstractElement, Board
+from snapcheck.snap.elements import FileElement
 from snapcheck.snap.rating import Rating
 import json
 from warnings import warn
 import tempfile
 import os.path as op
-from os import mkdir, rename, listdir
+from os import makedirs, mkdir, rename, listdir
 import shutil
 import zipfile
+from xhtml2pdf import pisa
+from pypdf import PdfWriter
+
+
+def html_to_pdf(html_string, output_path):
+    with open(output_path, "w+b") as pdf_file:
+        pisa.CreatePDF(html_string, dest=pdf_file)
 
 
 @dataclass
@@ -51,6 +58,20 @@ class Snap(BSCObject):
             if rating.scale is None or rating.scale in checked_scales:
                 continue
             rating.scale.check()
+
+    def close(self):
+        """Remove temporary directory if set."""
+        if self._dir:
+            self._dir.cleanup()
+
+    def update_rating(self, ratingId: str, value: any):
+        with self.changing():
+            for i, n in enumerate(self.ratings):
+                if n.id == ratingId:
+                    self.ratings[i].value = value
+                    break
+            else:
+                raise ValueError(f"Note with ID '{ratingId}' not found.")
 
     def to_dict(self, validate=False, compress=True, clean=False) -> None:
         """Return the object as dict (optionally after validation)"""
@@ -105,7 +126,7 @@ class Snap(BSCObject):
             + "To also save the boards content, use the save() method"
         )
         return super().to_json()
-
+    
     def save(self, path: str = None):
         # By default keep the same path
         if path is None:
@@ -139,19 +160,71 @@ class Snap(BSCObject):
         rename(archive_path, path)
         self._path = path
 
-    def close(self):
-        """Remove temporary directory if set."""
-        if self._dir:
-            self._dir.cleanup()
+    def export_to_html(self, save_path: str | None = None):
+        # Create the ouput directory
+        makedirs(save_path, exist_ok=True)
 
-    def update_rating(self, ratingId: str, value: any):
-        with self.changing():
-            for i, n in enumerate(self.ratings):
-                if n.id == ratingId:
-                    self.ratings[i].value = value
-                    break
-            else:
-                raise ValueError(f"Note with ID '{ratingId}' not found.")
+        # Generate boards HTML scripts
+        boards = list(board.to_html() for board in self.boards)
+        board_links = list(op.join(save_path, f"board_{b}.html") for b in range(len(self.boards)))
+
+        # Header
+        header = f"""<div class='snap-header'><div class='snap-title'>{self.title}</div><nav class='snap-nav'><ul>"""
+        header += "<li><a href='00_INDEX.html'>Home</a></li>"
+        for b, board in enumerate(self.boards):
+            header += f"<li><a href='board_{b}.html'>{board.title}</a></li>"
+        header += "</ul></nav></div>"
+
+        # Save each board
+        for b, board in enumerate(self.boards):
+            board_html = f"""<html><head><title>{self.title} - {self.boards[b].title}</title></head><body>"""
+            board_html += header
+            board_html += boards[b]
+            board_html += "</body></html>"
+            with open(board_links[b], "w") as f:
+                f.write(board_html)
+
+        # Save home page        
+        home_html = f"""<html><head><title>{self.title}</title></head><body>"""
+        home_html += header
+        home_html += "<h2>Boards</h2><ul>"
+        for b, board in enumerate(self.boards):
+            home_html += f"<li><a href='board_{b}.html'>{board.title}</a></li>"
+        home_html += "</ul>"
+        home_html += "</body></html>"
+        home_path = op.join(save_path, "00_INDEX.html")
+        with open(home_path, "w") as f:
+            f.write(home_html)
+
+        # Copy the content
+        ...
+        # shutil.copytree(
+        #     "./.local/"
+        #     dirs_exist_ok=True,
+        # )
+
+    def export_to_pdf(self, path: str):
+        """Export the Snap object to a PDF file."""
+        # Export as HTML in a temporary directory
+        tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_pdf_")
+        html_dir = op.join(tmp_dir.name, "html")
+        self.export_to_html(html_dir)
+
+        # Convert each board HTML to PDF
+        pdf_dir = op.join(tmp_dir.name, "pdf")
+        makedirs(pdf_dir, exist_ok=True)
+        files = []
+        for f in sorted(listdir(html_dir)):
+            pdf_f = op.join(pdf_dir, f.replace(".html", ".pdf"))
+            html_to_pdf(op.join(html_dir, f), pdf_f)
+            files.append(pdf_f)
+
+        # Merge all board PDFs into a single PDF file
+        merger = PdfWriter()
+        for pdf_path in files:
+            merger.append(pdf_path)
+        merger.write(path)
+        merger.close()
 
 
 def load_snap(path: str) -> Snap:
