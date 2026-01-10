@@ -10,6 +10,7 @@ import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
 import { useSnapSession } from '../../../contexts/SnapSessionContext';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
+import VerticalStackLayout, { type StackSection } from '../../../components/lib/layouts/verticalStackLayout';
 
 
 function boardHasRating(board: BoardModel, rating: RatingModel) {
@@ -28,17 +29,12 @@ const FilesControl: React.FC<{
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
     const { openSnap } = useSnapSession();
 
-    return <div className="files-control-panel">
-        <div className="panel-header">
-            <h3>Files</h3>
-        </div>
-        <FilesBrowser
+    return <FilesBrowser
             path={currentPath}
             onPathChange={(p) => setCurrentPath(p)}
             onFileSelect={openSnap}
             extensions={[".snpk"]}
         />
-    </div>
 }
 
 const SnapControl: React.FC<{
@@ -49,7 +45,6 @@ const SnapControl: React.FC<{
 
     return <div className="snap-control-panel">
         <div className="panel-header">
-            <h3>Ratings</h3>
             <div>
                 <InlineToggle
                     off="Board" on="All"
@@ -77,14 +72,7 @@ const MetadataControl: React.FC<{
 }> = ({ snap }) => {
 
     return <div className="metadata-control-panel">
-        <div className="panel-header">
-            <h3>Metadata</h3>
-            <div>
-            </div>
-        </div>
-        <div className="">
-            <DictionaryTable dictionary={snap?.metadata || {}} />
-        </div>
+        <DictionaryTable dictionary={snap?.metadata || {}} />
     </div>
 }
 
@@ -104,22 +92,15 @@ const Sidebar: React.FC<{}> = ({ }) => {
         }
     };
 
-    const menuItems: Tab[] = [
-        { title: <FileCopyIcon />, content: <FilesControl /> },
-        { title: <EditNoteIcon />, content: <SnapControl onRatingChanged={handleRatingChanged} /> },
-        { title: <ViewListIcon />, content: <MetadataControl snap={snap} /> },
+    const menuItems: StackSection[] = [
+        { id: "files", title: "Files", content: <FilesControl /> },
+        { id: "snap", title: "Ratings", content: <SnapControl onRatingChanged={handleRatingChanged} /> },
+        { id: "metadata", title: "Metadata", content: <MetadataControl snap={snap} /> },
     ];
 
     return (
-        <div className="sidebar">
-            <div className='sidebar-header'>
-            </div>
-            <div className='sidebar-content'>
-                <Tabs tabs={menuItems} />
-            </div>
-            <div>
-            </div>
-        </div>
+        <VerticalStackLayout sections={menuItems} height="100%">
+        </VerticalStackLayout>
     );
 };
 

@@ -5,6 +5,8 @@ import { FilesService, type DirectoryItemModel, type DirectoryModel } from '../.
 import './browser.css';
 import { Folder } from '@mui/icons-material';
 import Button from '../../lib/button';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 const FilesBrowser: React.FC<{
     path: string | null
@@ -14,6 +16,7 @@ const FilesBrowser: React.FC<{
 }> = ({ path, extensions, onFileSelect, onPathChange }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [directory, setDirectory] = useState<DirectoryModel | null>(null);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
         const fetchFiles = async () => {
@@ -42,6 +45,19 @@ const FilesBrowser: React.FC<{
             onPathChange(p);
         }
     };
+
+    const updateSarch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(event.target.value);
+    }
+
+    const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Escape') {
+            setSearch("");
+            // Optionally prevent further handling
+            event.stopPropagation();
+        }
+    }
+
     const breadcrumbs: JSX.Element[] = [];
     if (path) {
         const parts = path.split("/").filter(Boolean); // filter removes empty parts
@@ -58,6 +74,11 @@ const FilesBrowser: React.FC<{
     }
     return <div>
         <div className="files-browser-breadcrumbs">{breadcrumbs}</div>
+        <div className="files-filter-bar">
+            <input type="text" placeholder="Search..." value={search} onChange={(event) => updateSarch(event)} onKeyDown={handleSearchKeyDown} />
+            <SearchIcon />
+            { search && <ClearIcon onClick={() => setSearch("")}/>  }
+        </div>
         {
             directory && (
                 <ul className="files-browser-items">
@@ -66,7 +87,9 @@ const FilesBrowser: React.FC<{
                             ..
                         </li>
                     )}
-                    {directory?.content.map(item => (
+                    {directory?.content.filter(
+                        item => item.filename.toLowerCase().includes(search.toLowerCase())
+                    ).map(item => (
                         <li
                             key={item.path}
                             onClick={() => { if (item.isdir) goto(item.path) }}

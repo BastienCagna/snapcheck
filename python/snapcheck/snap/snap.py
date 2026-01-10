@@ -142,7 +142,7 @@ class Snap(BSCObject):
         js_f = op.join(tmp_dir.name, fname + ".json")
 
         # List all elements
-        elements: List[FileElement] = list(filter(lambda e: isinstance(e, FileElement), self.get_all_elements()))
+        elements: List[FileElement] = list(filter(lambda e: isinstance(e, FileElement) and not e.is_local, self.get_all_elements()))
         source_tracker = {}
         # Copy each source file and change its path in each elements
         for el in elements:

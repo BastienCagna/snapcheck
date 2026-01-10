@@ -1,5 +1,5 @@
 from typing import List
-from snapcheck.snap.io import Snap, load_snap
+from snapcheck.snap import Snap, load_snap
 from time import time
 import uuid
 import os.path as op

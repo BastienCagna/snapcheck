@@ -152,12 +152,16 @@ python python/snapclient/main.py
 
 Back
 ~~~~
+* jsonpatch + websocket pour update des snaps
 * numéro de session dans le JWT, possible?
     => réouverture d'une session GUI en l'état?
 
+* save sidebar sections heights in user settings
+* make each section hiddable
 
 GUI
 ~~~
+* debouncing + websocket + patchs
 * changement de fichier marche pas
 * affichage de la première board à l'ouverture du fichier
 * nom du fichier n'apparait pas
@@ -167,3 +171,5 @@ GUI
 * navigation avecles flêches aussi
 * grossiessement du menu lors du dezoom sur les boards
 * transformation des boards board/board
+* lorsqu'un fichier est ouvert, afficher le dossier du fichier dans le broswer de fichiers
+* clear le champs de recherche du broswer lorsqu'on change de fichier

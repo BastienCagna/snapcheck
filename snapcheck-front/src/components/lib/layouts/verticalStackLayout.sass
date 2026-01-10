@@ -1,0 +1,102 @@
+
+.vertical-stack-layout
+    display: flex
+    flex-direction: column
+    width: 100%
+    height: 100%
+    background-color: #121212
+    border: 1px solid #1f1f1f
+    border-radius: 6px
+    overflow: hidden
+
+    &.is-dragging
+        user-select: none
+        cursor: row-resize
+
+    .vsl-section
+        display: flex
+        flex-direction: column
+        overflow: hidden
+        background-color: #161616
+        border-bottom: 1px solid #1f1f1f
+        min-height: 66px
+
+        &.vsl-section--maximized
+            box-shadow: 0 0 0 1px #2f2f2f inset
+            background-color: #181818
+
+    .vsl-header
+        display: flex
+        align-items: center
+        justify-content: space-between
+        gap: 0
+        padding: 0 0.65rem
+        min-height: 36px
+        color: #e0e0e0
+        background: linear-gradient(180deg, #1f1f1f 0%, #151515 100%)
+        border-bottom: 1px solid #242424
+
+    .vsl-title
+        font-size: 0.95rem
+        font-weight: 500
+        overflow: hidden
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    .vsl-actions
+        display: flex
+        gap: 0.35rem
+        align-items: center
+
+    .vsl-icon-button
+        border: 1px solid #2f2f2f
+        background-color: #242424
+        color: #cfcfcf
+        border-radius: 4px
+        padding: 0.2rem
+        width: 26px
+        height: 26px
+        display: inline-flex
+        align-items: center
+        justify-content: center
+        cursor: pointer
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease
+
+        &:hover
+            background-color: #2f2f2f
+            border-color: #3a3a3a
+            color: #ffffff
+
+    .vsl-content
+        flex: 1
+        overflow: auto
+        padding: 0.5rem 0.65rem
+        color: #d4d4d4
+        background-color: #141414
+
+    .vsl-resizer
+        height: 6px
+        background-color: #1b1b1b
+        border-top: 1px solid #232323
+        border-bottom: 1px solid #101010
+        cursor: row-resize
+        position: relative
+        flex: 0 0 auto
+
+        &:after
+            content: ""
+            position: absolute
+            left: 50%
+            top: 50%
+            transform: translate(-50%, -50%)
+            width: 40px
+            height: 2px
+            background-color: #2f2f2f
+            border-radius: 999px
+            pointer-events: none
+
+        &:hover
+            background-color: #262626
+
+        &.dragging
+            background-color: #333333

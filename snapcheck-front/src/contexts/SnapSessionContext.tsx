@@ -163,12 +163,13 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
         case 'ASYNC_SUCCESS': {
             const snapState = getOrCreateSnapState(action.path);
             const boards = action.payload.boards;
-            // Clamp current board index to valid range
+            // Determine initial board selection: if none selected and boards exist, select first
             const boardsCount = boards?.length ?? 0;
-            const clampedIndex = snapState.currentBoardIndex < 0 || boardsCount === 0
-                ? snapState.currentBoardIndex
-                : Math.min(snapState.currentBoardIndex, boardsCount - 1);
-            const currentBoard = boardsCount > 0 && clampedIndex >= 0 ? boards![clampedIndex] || null : null;
+            const initialIndex = snapState.currentBoardIndex;
+            const nextIndex = initialIndex < 0 && boardsCount > 0
+                ? 0
+                : (boardsCount > 0 ? Math.min(initialIndex, boardsCount - 1) : initialIndex);
+            const currentBoard = boardsCount > 0 && nextIndex >= 0 ? boards![nextIndex] || null : null;
 
             return {
                 ...state,
@@ -180,7 +181,7 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
                         loading: false,
                         error: null,
                         lastUpdated: Date.now(),
-                        currentBoardIndex: clampedIndex,
+                        currentBoardIndex: nextIndex,
                         currentBoard,
                     }
                 }
@@ -350,6 +351,7 @@ export function useSnapSessionActions() {
 
         safeDispatch({ type: 'SET_CURRENT', path });
         await withAsync(path, () => SnapService.openSnap(sid, path));
+        setCurrentBoard(0);
     }, [dispatch, state, withAsync]);
 
     /**
@@ -399,7 +401,6 @@ export function useSnapSessionActions() {
      * Syncs all changes with the backend.
      */
     const saveSnap = useCallback(async (snapId: string) => {
-        const safeDispatch = requireDispatch();
         const safeState = requireState();
         const path = safeState.currentSnapPath;
         if (!path) return;
@@ -413,7 +414,6 @@ export function useSnapSessionActions() {
      * Updates the snap path after successful save.
      */
     const saveSnapAs = useCallback(async (snapId: string, newPath: string) => {
-        const safeDispatch = requireDispatch();
         const safeState = requireState();
         const path = safeState.currentSnapPath;
         if (!path) return;

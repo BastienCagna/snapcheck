@@ -100,6 +100,24 @@ def get_image(sid: str, snapid: str, src: str):
     )
 
 
+@router.get("/{sid}/{snapid}/html/{path:path}")
+def export_as_html(sid: str, snapid: str, path: str):
+    item = snap_store.get_by_id(snapid)
+    if not item:
+        raise HTTPException(status_code=404, detail="Snap not found")
+    item.snap.export_to_html(path)
+    print("Export:", path)
+
+
+@router.get("/{sid}/{snapid}/pdf/{path:path}")
+def export_as_pdf(sid: str, snapid: str, path: str):
+    item = snap_store.get_by_id(snapid)
+    if not item:
+        raise HTTPException(status_code=404, detail="Snap not found")
+    item.snap.export_to_pdf(path)
+    print("Export:", path)
+
+
 @router.put("/{sid}/{snapid}/rating/{ratingId}/{value}")
 def update_rating(sid: str, snapid: str, ratingId: str, value: float):
     # TODO: use sid
