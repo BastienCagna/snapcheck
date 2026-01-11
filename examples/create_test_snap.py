@@ -86,6 +86,6 @@ qc.save(f)
 
 qc_r = load_snap(f)
 
-
-qc_r.export_to_html(".local/mni_html_report")
-qc_r.export_to_pdf(".local/mni.pdf")
+pass
+# qc_r.export_to_html(".local/mni_html_report")
+# qc_r.export_to_pdf(".local/mni.pdf")

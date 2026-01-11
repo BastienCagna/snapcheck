@@ -14,21 +14,28 @@ class SnapStoreItem:
     snap: Snap
     id: str
     last_access: float
+    version: int
 
     def __init__(self, path):
         self._path = path
         self.snap = load_snap(path)
         self.id = uuid.uuid4().hex[:ID_LENGTH]
         self.last_access = time()
+        self.version = 0
 
     def to_dict(self, clean=False) -> dict:
         ret_snap = self.snap.to_dict(compress=False, clean=clean)
         ret_snap["filename"] = op.split(self._path)[1] if self._path else None
         ret_snap["has_changed"] = self.snap._has_changed or False
         ret_snap["is_cancellable"] = len(self.snap._backups) > 0
-        ret_snap["is_redoable"] = len(self.snap._forups) > 0
+        ret_snap["is_redoable"] = len(self.snap._forwups) > 0
         ret_snap["id"] = self.id
+        ret_snap["version"] = self.version
         return ret_snap
+    
+    def increment_version(self):
+        """Increment version after each modification"""
+        self.version += 1
 
 
 class SnapSession:

@@ -1,9 +1,11 @@
-from typing import List
+from typing import List, Optional, Any
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 from snapserve.snap.models import SnapModel, SnapCheckSessionModel
 from fastapi.responses import FileResponse
 import os.path as op
 import mimetypes
+import time
 
 from snapserve.snap.store import SnapStore
 from snapserve.app_data import APP_DATA
@@ -11,6 +13,22 @@ from snapserve.app_data import APP_DATA
 router = APIRouter()
 
 snap_store = SnapStore()
+
+
+# Pydantic models for request/response
+class FieldUpdateRequest(BaseModel):
+    """Request model for partial field update"""
+    field_path: str  # e.g., "metadata.title" or "boards.0.description"
+    value: Any
+    expected_version: Optional[int] = None
+
+
+class LightweightResponse(BaseModel):
+    """Lightweight response for modifications"""
+    ok: bool
+    version: int
+    has_changed: bool
+    timestamp: float
 
 
 @router.post("/session", response_model=SnapCheckSessionModel)
@@ -118,11 +136,79 @@ def export_as_pdf(sid: str, snapid: str, path: str):
     print("Export:", path)
 
 
-@router.put("/{sid}/{snapid}/rating/{ratingId}/{value}")
-def update_rating(sid: str, snapid: str, ratingId: str, value: float):
+
+@router.patch("/{sid}/{snapid}/field", response_model=LightweightResponse)
+def update_field(sid: str, snapid: str, update: FieldUpdateRequest):
+    """
+    Update a specific field of a snap with version conflict detection.
+    
+    Args:
+        sid: Session ID
+        snapid: Snap ID
+        update: Field update request with field_path, value, and optional expected_version
+        
+    Returns:
+        Lightweight response with version and status
+        
+    Raises:
+        409: Version conflict (expected_version doesn't match current)
+        404: Snap not found
+        400: Invalid field path
+    """
     # TODO: use sid
     item = snap_store.get_by_id(snapid)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
-    item.snap.update_rating(ratingId, value)
-    return item.to_dict(clean=True)
+    
+    # Check version conflict
+    if update.expected_version is not None and update.expected_version != item.version:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"Version conflict: expected {update.expected_version}, current {item.version}"
+        )
+    
+    # Update the field using dot notation
+    try:
+        parts = update.field_path.split('.')
+        obj = item.snap
+        
+        # Navigate to parent object
+        for part in parts[:-1]:
+            # Handle array indices
+            if part.isdigit():
+                obj = obj[int(part)]
+            # Handle filtering by id in lists
+            if part.startswith('{') and part.endswith('}'):
+                # e.g., {id:ratingId}
+                key, val = part[1:-1].split(':', 1)
+                obj = next((o for o in obj if getattr(o, key) == val), None)
+                if obj is None:
+                    raise HTTPException(status_code=400, detail=f"Invalid field path: {update.field_path}")
+            else:
+                obj = getattr(obj, part)
+        
+        # Set the final value
+        final_key = parts[-1]
+        if final_key.isdigit():
+            idx = int(final_key)
+            if idx < 0 or idx >= len(obj):
+                raise HTTPException(status_code=400, detail=f"Invalid field path: {update.field_path}")
+            if obj[idx] != update.value:
+                obj[idx] = update.value
+                item.snap._has_changed = True
+        else:
+            if hasattr(obj, final_key) and getattr(obj, final_key) != update.value:
+                setattr(obj, final_key, update.value)
+                item.snap._has_changed = True
+            
+    except (AttributeError, IndexError, TypeError) as e:
+        raise HTTPException(status_code=400, detail=f"Invalid field path: {update.field_path}")
+    
+    item.increment_version()
+    
+    return LightweightResponse(
+        ok=True,
+        version=item.version,
+        has_changed=item.snap._has_changed,
+        timestamp=time.time()
+    )

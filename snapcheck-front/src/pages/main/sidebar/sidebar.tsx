@@ -8,7 +8,7 @@ import type { BoardModel, RatingModel, SnapModel } from '../../../api';
 import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';
-import { useSnapSession } from '../../../contexts/SnapSessionContext';
+import { useSnapSession, useSnapSessionActions } from '../../../contexts/SnapSessionContext';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 import VerticalStackLayout, { type StackSection } from '../../../components/lib/layouts/verticalStackLayout';
 
@@ -37,10 +37,9 @@ const FilesControl: React.FC<{
         />
 }
 
-const SnapControl: React.FC<{
-    onRatingChanged?: (sessionId: string | null, snapId: string | null, rating: RatingModel) => void;
-}> = ({onRatingChanged }) => {
-    const { session, snap, currentBoard } = useSnapSession();
+const SnapControl: React.FC<{}> = () => {
+    const { snap, currentBoard } = useSnapSession();
+    const { updateFieldDebounced } = useSnapSessionActions();
     const [showAllratings, setShowAllRatings] = React.useState(true);
 
     return <div className="snap-control-panel">
@@ -53,13 +52,12 @@ const SnapControl: React.FC<{
             </div>
         </div>
 
-        {/* {snap && <RatingStatBar snap={snap} />} */}
         <div className="ratings-list">
             {snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
                 <RatingInput
                     key={rating.id}
                     rating={rating}
-                    onChange={(rating) => { if (onRatingChanged) onRatingChanged(session?.id || null, snap?.id || null, rating) }}
+                    onChange={(id, field, value) => { updateFieldDebounced(snap.id, `ratings.{id:${id}}.${field}`, value);}}
                     highlight={(showAllratings && currentBoard && boardHasRating(currentBoard, rating)) || false} />
             ))}
         </div>
@@ -77,24 +75,11 @@ const MetadataControl: React.FC<{
 }
 
 const Sidebar: React.FC<{}> = ({ }) => {
-    const { snap: snap, updateRating } = useSnapSession();
-
-    // Adapter to match SnapControl's expected onRatingChanged signature
-    const handleRatingChanged = (
-        sessionId: string | null,
-        snapId: string | null,
-        rating: RatingModel
-    ) => {
-        // Only call updateRating if both IDs are present
-        if (snapId && rating) {
-            // updateRating expects (snapId: string, rating: any)
-            updateRating(snapId, rating);
-        }
-    };
+    const { snap: snap } = useSnapSession();
 
     const menuItems: StackSection[] = [
         { id: "files", title: "Files", content: <FilesControl /> },
-        { id: "snap", title: "Ratings", content: <SnapControl onRatingChanged={handleRatingChanged} /> },
+        { id: "snap", title: "Ratings", content: <SnapControl /> },
         { id: "metadata", title: "Metadata", content: <MetadataControl snap={snap} /> },
     ];
 

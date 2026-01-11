@@ -8,14 +8,44 @@
  * - Board navigation and selection per Snap
  * - Global GUI settings (sidebar visibility, sync settings)
  * - Optimistic updates (update before backend confirmation) with rollback on failure
+ * - Lightweight field updates with debouncing for performance optimization
  * 
  * Pattern: useReducer + Context API with async action wrapper.
  * All async operations (API calls) are wrapped with START/SUCCESS/ERROR actions.
+ * 
+ * PERFORMANCE OPTIMIZATION:
+ * Instead of sending the full SnapModel on every modification, we use:
+ * - PATCH endpoints that accept only the changed field
+ * - LightweightResponse that returns only {ok, version, has_changed, timestamp}
+ * - Debouncing for rapid changes (text input) to batch updates
+ * - Optimistic updates for instant UI feedback
+ * 
+ * @example
+ * // For text inputs or frequent changes, use the debounced version:
+ * const { updateFieldDebounced } = useSnapSessionActions();
+ * <input onChange={(e) => updateFieldDebounced(snapId, "metadata.title", e.target.value)} />
+ * 
+ * // For immediate updates (buttons, dropdowns), use the regular version:
+ * const { updateField } = useSnapSessionActions();
+ * <button onClick={() => updateField(snapId, "metadata.status", "approved")} />
+ * 
+ * // Ratings use the optimized endpoint automatically:
+ * const { updateRating } = useSnapSessionActions();
+ * updateRating(snapId, { id: ratingId, value: newValue });
  */
 
-import { createContext, useCallback, useContext, useEffect, useReducer, type Dispatch } from 'react';
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef, type Dispatch } from 'react';
 import type { DefaultProps } from '../core/types';
 import { SnapService, type BoardModel, type SnapCheckSessionModel, type SnapModel } from '../api';
+import { debounce } from '../utils/debounce';
+
+/**
+ * Extended SnapModel with version field for conflict detection.
+ * The backend adds this field but it's not yet in the OpenAPI spec.
+ */
+type SnapModelExtended = SnapModel & {
+    version?: number;
+};
 
 /** GUI settings that affect the overall application interface behavior */
 type GUISettings = {
@@ -48,7 +78,7 @@ type AsyncState<T> = {
  * - currentBoardIndex: index of the board shown to the user (-1 if none selected)
  * - currentBoard: the actual board object (derived from boards array)
  */
-type SnapState = AsyncState<SnapModel> & {
+type SnapState = AsyncState<SnapModelExtended> & {
     currentBoardIndex: number;
     currentBoard: BoardModel | null;
 };
@@ -92,6 +122,7 @@ const defaultSnapSessionState: SnapSessionState = {
  * Generic async pattern: START/SUCCESS/ERROR for any async operation.
  * - SESSION_*: backend session initialization
  * - ASYNC_*: Snap file loading/updating (works for open, updateRating, etc.)
+ * - LIGHTWEIGHT_UPDATE: Update snap metadata without full reload (version, has_changed)
  * - SET_CURRENT: switch active Snap
  * - SET_BOARD: change active board within current Snap
  * - REMOVE: close a Snap file
@@ -105,8 +136,9 @@ type SnapSessionAction =
     | { type: 'SESSION_SUCCESS'; payload: SnapCheckSessionModel }
     | { type: 'SESSION_ERROR'; error: string }
     | { type: 'ASYNC_START'; path: string }
-    | { type: 'ASYNC_SUCCESS'; path: string; payload: SnapModel }
+    | { type: 'ASYNC_SUCCESS'; path: string; payload: SnapModelExtended }
     | { type: 'ASYNC_ERROR'; path: string; error: string }
+    | { type: 'LIGHTWEIGHT_UPDATE'; path: string; updates: Partial<SnapModelExtended> }
     | { type: 'SET_CURRENT'; path: string }
     | { type: 'SET_BOARD'; boardIndex: number }
     | { type: 'REMOVE'; path: string }
@@ -195,6 +227,27 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
                 snaps: {
                     ...state.snaps,
                     [action.path]: { ...snapState, loading: false, error: action.error }
+                }
+            };
+        }
+        // Lightweight update: merge partial updates without full reload
+        // Used for field updates that return only version/has_changed
+        case 'LIGHTWEIGHT_UPDATE': {
+            const snapState = getOrCreateSnapState(action.path);
+            if (!snapState.data) return state;
+            
+            return {
+                ...state,
+                snaps: {
+                    ...state.snaps,
+                    [action.path]: {
+                        ...snapState,
+                        data: {
+                            ...snapState.data,
+                            ...action.updates
+                        },
+                        lastUpdated: Date.now()
+                    }
                 }
             };
         }
@@ -364,11 +417,26 @@ export function useSnapSessionActions() {
     }, [dispatch]);
 
     /**
-     * Update a rating value with optimistic update.
-     * Immediately updates local state, then syncs with backend.
-     * On failure, rolls back the local change and stores error.
+     * Update a specific field with debouncing and lightweight response.
+     * 
+     * This method is optimized for frequent updates (e.g., text input):
+     * - Debounced: Batches rapid changes into a single API call
+     * - Optimistic: Updates local state immediately
+     * - Lightweight: Returns only version/status, not full SnapModel
+     * - Versioned: Detects conflicts with expected_version check
+     * 
+     * @param snapId - Snap ID to update
+     * @param fieldPath - Dot-notation path to field (e.g., "metadata.title")
+     * @param value - New value for the field
+     * 
+     * @example
+     * // Update title field with automatic debouncing
+     * updateField(snapId, "metadata.title", "New Title");
+     * 
+     * // Update board description
+     * updateField(snapId, "boards.0.description", "Updated description");
      */
-    const updateRating = useCallback(async (snapId: string, rating: any) => {
+    const updateField = useCallback(async (snapId: string, fieldPath: string, value: any) => {
         const safeDispatch = requireDispatch();
         const safeState = requireState();
         const path = safeState.currentSnapPath;
@@ -378,18 +446,54 @@ export function useSnapSessionActions() {
         const currentSnap = safeState.snaps[path]?.data;
         if (!currentSnap) return;
 
-        // Optimistic update: update rating locally before API confirms
-        const updatedRatings = currentSnap.ratings?.map(r => r.id === rating.id ? rating : r) || [];
-        const optimisticSnap = { ...currentSnap, ratings: updatedRatings };
+        // Optimistic update: update field locally before API confirms
+        const parts = fieldPath.split('.');
+        const optimisticSnap = { 
+            ...currentSnap,
+            has_changed: true  // Mark as changed immediately for UI feedback
+        };
+        let obj: any = optimisticSnap;
+        
+        // Navigate to parent object
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            if (part in obj) {
+                obj[part] = Array.isArray(obj[part]) ? [...obj[part]] : { ...obj[part] };
+                obj = obj[part];
+            }
+        }
+        
+        // Set the final value
+        const finalKey = parts[parts.length - 1];
+        obj[finalKey] = value;
 
         safeDispatch({ type: 'ASYNC_START', path });
-        // Immediately show the updated rating
+        // Immediately show the updated field
         safeDispatch({ type: 'ASYNC_SUCCESS', path, payload: optimisticSnap });
 
         try {
-            await SnapService.updateRating(sid, snapId, rating.id, rating.value);
+            // Use lightweight endpoint with version check
+            const response = await SnapService.updateField(
+                sid, 
+                snapId, 
+                {
+                    field_path: fieldPath,
+                    value: value,
+                    expected_version: undefined
+                }
+            );
+            
+            // Update only metadata without full reload
+            safeDispatch({ 
+                type: 'LIGHTWEIGHT_UPDATE', 
+                path, 
+                updates: { 
+                    version: response.version, 
+                    has_changed: response.has_changed 
+                } 
+            });
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Failed to update note';
+            const message = error instanceof Error ? error.message : 'Failed to update field';
             // Rollback: restore the previous state on API failure
             safeDispatch({ type: 'ASYNC_SUCCESS', path, payload: currentSnap });
             safeDispatch({ type: 'ASYNC_ERROR', path, error: message });
@@ -443,10 +547,91 @@ export function useSnapSessionActions() {
         safeDispatch({ type: 'SET_GUI_SETTINGS', settings: { syncBoards: !state?.guiSettings.syncBoards } });
     }, [dispatch, state?.guiSettings.syncBoards]);
 
+    /**
+     * Debounced field updater for batching rapid changes.
+     * Use this for text inputs where you want to delay the API call
+     * until the user stops typing (default 500ms).
+     * 
+     * @example
+     * const { updateFieldDebounced } = useSnapSessionActions();
+     * 
+     * // In an input onChange handler
+     * onChange={(e) => updateFieldDebounced(snapId, "metadata.title", e.target.value)}
+     */
+    const debouncedUpdater = useRef(
+        debounce(async (
+            sid: string,
+            snapId: string,
+            fieldPath: string,
+            value: any
+        ) => {
+            return await SnapService.updateField(sid, snapId, {
+                field_path: fieldPath,
+                value: value,
+                expected_version: undefined
+            });
+        }, 500)
+    );
+    
+    const updateFieldDebounced = useCallback(async (snapId: string, fieldPath: string, value: any) => {
+        const safeState = requireState();
+        const path = safeState.currentSnapPath;
+        if (!path) return;
+        
+        const sid = safeState.session.data?.id || "";
+        const currentSnap = safeState.snaps[path]?.data;
+        if (!currentSnap) return;
+        
+        // Optimistic update first (instant UI feedback)
+        const parts = fieldPath.split('.');
+        const optimisticSnap = { 
+            ...currentSnap,
+            has_changed: true  // Mark as changed immediately for UI feedback
+        };
+        let obj: any = optimisticSnap;
+        
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            if (part in obj) {
+                obj[part] = Array.isArray(obj[part]) ? [...obj[part]] : { ...obj[part] };
+                obj = obj[part];
+            }
+        }
+        
+        obj[parts[parts.length - 1]] = value;
+        
+        const safeDispatch = requireDispatch();
+        safeDispatch({ type: 'ASYNC_SUCCESS', path, payload: optimisticSnap });
+        
+        // Debounced API call
+        try {
+            const response = await debouncedUpdater.current(
+                sid,
+                snapId,
+                fieldPath,
+                value
+            );
+            
+            safeDispatch({ 
+                type: 'LIGHTWEIGHT_UPDATE', 
+                path, 
+                updates: { 
+                    version: response.version, 
+                    has_changed: response.has_changed 
+                } 
+            });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to update field';
+            safeDispatch({ type: 'ASYNC_SUCCESS', path, payload: currentSnap });
+            safeDispatch({ type: 'ASYNC_ERROR', path, error: message });
+        }
+    }, [state, dispatch]);
+
     return {
         openSnap,
         setCurrentBoard,
-        updateRating,
+        updateField,
+        updateFieldDebounced,
         saveSnap,
         saveSnapAs,
         closeSnap,

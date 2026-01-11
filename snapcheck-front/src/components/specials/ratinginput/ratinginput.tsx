@@ -6,7 +6,7 @@ import { useModal } from '../../../contexts/ModalContext';
 
 interface RatingInputProps {
     rating: RatingModel;
-    onChange?: (rating: RatingModel) => void;
+    onChange?: (rating: RatingModel, field: string, value: any) => void;
     highlight?: boolean;
 }
 
@@ -23,14 +23,14 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
             commentInputRef.current.focus();
         }
         if (onChange) {
-            onChange({ ...rating, value: Number(event.target.value) });
+            onChange(rating.id, "value", Number(event.target.value));
         }
     };
 
     const handleCommentChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setComment(event.target.value);
         if (onChange) {
-            onChange({ ...rating, comment: event.target.value });
+            onChange(rating.id, "comment", event.target.value);
         }
     };
 

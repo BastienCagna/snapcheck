@@ -160,6 +160,8 @@ class Snap(BSCObject):
         rename(archive_path, path)
         self._path = path
 
+        self._has_changed = False
+
     def export_to_html(self, save_path: str | None = None):
         # Create the ouput directory
         makedirs(save_path, exist_ok=True)

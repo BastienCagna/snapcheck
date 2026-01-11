@@ -132,8 +132,7 @@ class DynamicLoader:
         # Then set all the attribute from dict data
         cls_attributes = self.get_all_attributes(cls).keys()
         all_attributes = set(list(cls_attributes) + list(data.keys()))
-        # saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
-
+        
         if "_is_loading" in all_attributes:
             obj._is_loading = True
 

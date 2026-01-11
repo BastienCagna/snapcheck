@@ -35,7 +35,7 @@ class Changeable:
         self._is_loading = False
 
     def __post_init__(self, *args, **kwargs):
-        pass
+        self._has_changed = False
 
     def __setattr__(self, name, value):
         ret = super().__setattr__(name, value)
@@ -136,7 +136,7 @@ class Backupable:
 
     def __post_init__(self):
         self._backups = deque(maxlen=BACKUP_DEQUE_SIZE)
-        self._forups = deque(maxlen=BACKUP_DEQUE_SIZE)
+        self._forwups = deque(maxlen=BACKUP_DEQUE_SIZE)
         if hasattr(self, "has_changed") and not isinstance(self.has_changed, Callback):
             self.has_changed.connect(self.create_backup)
 
@@ -182,7 +182,6 @@ class BSCObject(Backupable, Serializable, Changeable):
         Serializable.__init__(self)
         Backupable.__init__(self)
 
-    # def __post_init__(self, *args, **kwargs):
-    #     Changeable.__post_init__(self, *args, **kwargs)
-    #     Serializable.__post_init__(self, *args, **kwargs)
-    #     Backupable.__post_init__(self, *args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        Changeable.__post_init__(self, *args, **kwargs)
+        Backupable.__post_init__(self, *args, **kwargs)
