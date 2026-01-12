@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+from dataclasses import dataclass
 from uuid import uuid4
 import json
 
@@ -30,6 +31,7 @@ class Changeable:
 
     @contextmanager
     def no_changed_signal(self):
+        """ A context manager to prevent the has_changed signal from being emitted. """
         self._is_loading = True
         yield
         self._is_loading = False
@@ -109,11 +111,6 @@ class Serializable:
         # Resolve references
         obj = resolve_references(obj)
 
-        # saved_attributes = filter(lambda k: not k[0] == "_", all_attributes)
-        # for attr in all_attributes:
-        #     if attr not in saved_attributes:
-        #         del obj[attr]
-
         if hasattr(obj, "_is_loading"):
             obj._is_loading = False
 
@@ -126,43 +123,57 @@ class Serializable:
         return cls.from_dict(data)
 
 
-class Backupable:
+@dataclass
+class Backupable(Serializable):
     """
     A class that allows to create backups of its state and revert or restore changes.
     """
 
-    _backups: deque
-    _forwups: deque
-
     def __post_init__(self):
+        # Initialize deques per instance to avoid sharing between objects
         self._backups = deque(maxlen=BACKUP_DEQUE_SIZE)
         self._forwups = deque(maxlen=BACKUP_DEQUE_SIZE)
-        if hasattr(self, "has_changed") and not isinstance(self.has_changed, Callback):
+        
+        if hasattr(self, "has_changed") and isinstance(self.has_changed, Callback):
             self.has_changed.connect(self.create_backup)
 
-    def create_backup(self):
-        self._backups.append(self.to_dict())
-
     def revert_changes(self):
-        if len(self.backups):
-            self._forwups.append(deepcopy(self.__dict__))
+        """ Go back to the previous state """
+        if len(self._backups):
+            self._forwups.append(self.to_dict())
             previous_state = self._backups.pop()
             self._restore_from_deepcopy(previous_state)
 
     def restore_changes(self):
-        if len(self.forwups):
-            self._backups.append(deepcopy(self.__dict__))
+        """ Redo the last reverted change """
+        if len(self._forwups):
+            self._backups.append(self.to_dict())
             next_state = self._forwups.pop()
             self._restore_from_deepcopy(next_state)
 
     def _restore_from_deepcopy(self, state: dict):
-        # Remplace les attributs actuels par ceux du dictionnaire passé
-        # for key, value in state.items():
-        #     setattr(self, key, value)
-        self = self.from_dict(state)
+        """Restore object state from a serialized dictionary.
+        Preserves backup history (_backups, _forwups) by not overwriting these specific attributes.
+        """
+        restored = self.from_dict(state)
+        # Save backup history before restoration
+        saved_backups = self._backups
+        saved_forwups = self._forwups
+        # Restore all attributes (including private ones like _has_changed, etc.)
+        self.__dict__.update(restored.__dict__)
+        # Restore backup history
+        self._backups = saved_backups
+        self._forwups = saved_forwups
 
     @contextmanager
     def changing(self):
+        """ A context manager to group multiple changes into a single backup. 
+        
+        Example:
+            with obj.changing():
+                obj.attr1 = new_value1
+                obj.attr2 = new_value2
+        """
         backup = self.to_dict()
         try:
             yield
@@ -171,15 +182,14 @@ class Backupable:
             raise e
         else:
             self._backups.append(backup)
-            if hasattr(self, "has_changed") and not isinstance(self.has_changed, Callback):
+            if hasattr(self, "has_changed") and isinstance(self.has_changed, Callback):
                 self.has_changed()
 
 
-class BSCObject(Backupable, Serializable, Changeable):
+class BSCObject(Backupable, Changeable):
 
     def __init__(self, *args, **attributes):
         Changeable.__init__(self, *args, **attributes)
-        Serializable.__init__(self)
         Backupable.__init__(self)
 
     def __post_init__(self, *args, **kwargs):

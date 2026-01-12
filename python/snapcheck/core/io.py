@@ -3,7 +3,6 @@ import sys
 import importlib
 import inspect
 from typing import Callable
-from PyQt5.QtCore import pyqtSignal
 from .callback import Callback
 from os import getcwd, chdir
 
@@ -15,10 +14,13 @@ except Exception:  # pragma: no cover - pydantic might not be installed
 
 @contextmanager
 def temporarly_change_directory(target_dir: str):
+    """ Temporarly change the working directory within the context and go back to the original one after. """
     memo = getcwd()
     chdir(target_dir)
+    # The context manager inner code is executed here
     yield
     chdir(memo)
+
 
 def serialize(obj):
     """Return the string version of objetcs or variables
@@ -36,7 +38,7 @@ def serialize(obj):
     elif hasattr(obj, "__dict__"):
         attributes = {}
         for key, value in obj.__dict__.items():
-            if not key.startswith("_") and not isinstance(value, (pyqtSignal, Callback)):
+            if not key.startswith("_") and not isinstance(value, Callback):
                 attributes[key] = serialize(value)
         attributes["__cls__"] = obj.__module__ + "." + obj.__class__.__name__
         return attributes
@@ -95,18 +97,22 @@ class DynamicLoader:
         return attributes
 
     def inflate(self, data: dict):
+        """ Inflate the given data into objects based on the __cls__ attribute.
+        """
+        # Recursively inflate all data
         if isinstance(data, list):
             return list(self.inflate(item) for item in data)
         if isinstance(data, tuple):
             return tuple(self.inflate(item) for item in data)
-        if not isinstance(data, dict) or not "__cls__" in data:
+        if not isinstance(data, dict) or "__cls__" not in data:
             return data
 
+        # Get the class name and its module path
         splt_path = data["__cls__"].split(".")
         obj_module_path = ".".join(splt_path[:-1])
         obj_class = splt_path[-1]
 
-        # Get the module
+        # Get the module (load it if not already done)
         module = self.get_module(obj_module_path)
 
         # Ge the class
@@ -136,6 +142,7 @@ class DynamicLoader:
         if "_is_loading" in all_attributes:
             obj._is_loading = True
 
+        # Set all attributes based on the given data
         for attr in all_attributes:
             if attr == "_is_loading" or attr == "has_changed":
                 continue

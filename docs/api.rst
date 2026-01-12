@@ -24,7 +24,7 @@ SnapServe Package
    snapserve
 
 SnapClient Package
------------------
+------------------
 
 .. autosummary::
    :toctree: _autosummary

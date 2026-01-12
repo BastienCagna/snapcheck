@@ -3,6 +3,23 @@ from typing import Callable
 
 
 class Callback:
+    """ Callback can be used to create simple signal/slot mechanism.
+
+    Several functions can be connected to the callback, and when the callback is emitted,
+    all connected functions are called with the provided arguments.
+
+    The registered functions can have different signatures. When the callback is emitted,
+    only the arguments that match the function signature are passed to it.
+    
+    Example:
+
+        def on_change(value):
+            print("Value changed:", value)
+
+        cb = Callback()
+        cb.connect(on_change)
+        cb.emit(42)  # This will call on_change(42)
+    """
     callbacks: list
 
     def __init__(self):

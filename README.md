@@ -72,7 +72,7 @@ metrics_board = Board(
 
 ### And save it in a new snap file
 ```python
-from snapcheck.snap.io import load_snap
+from snapcheck.snap import load_snap
 
 qc = Snap(
     title="Tractométrie",
@@ -152,7 +152,6 @@ python python/snapclient/main.py
 
 Back
 ~~~~
-* jsonpatch + websocket pour update des snaps
 * numéro de session dans le JWT, possible?
     => réouverture d'une session GUI en l'état?
 
@@ -161,11 +160,8 @@ Back
 
 GUI
 ~~~
-* debouncing + websocket + patchs
 * changement de fichier marche pas
-* affichage de la première board à l'ouverture du fichier
 * nom du fichier n'apparait pas
-* les notes et metadonnées ne s'affiche pas?
 * pas de mouvement au clics (gauche et droit, seulement molette)
 * scroll sur les planches
 * navigation avecles flêches aussi

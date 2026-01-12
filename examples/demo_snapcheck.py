@@ -5,9 +5,9 @@
 Crate a test snap file for tractography QC in French
 ==============================================================================
 """
-from snapcheck.snap.board import ImageElement
+from snapcheck.snap.elements import ImageElement
 from snapcheck.snap import Snap, Board, Element
-from snapcheck.snap.io import load_snap
+from snapcheck.snap.snap import load_snap
 from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
 
 

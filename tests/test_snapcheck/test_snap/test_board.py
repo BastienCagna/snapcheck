@@ -21,14 +21,13 @@ class TestElement:
         rating = Rating(name="Quality", description="Quality rating")
         annotation = Annotation()
         element = Element(
-            type="custom",
             title="Test Element",
             style={"color": "red"},
             content="Test content",
             intended_ratings=[rating],
             annotations=[annotation]
         )
-        assert element.type == "custom"
+        assert element.type == "default"
         assert element.title == "Test Element"
         assert element.style == {"color": "red"}
         assert element.content == "Test content"
@@ -36,9 +35,9 @@ class TestElement:
         assert len(element.annotations) == 1
 
     def test_element_nested_content(self):
-        nested = Element(type="nested", content="inner")
-        parent = Element(type="parent", content=nested)
-        assert parent.content.type == "nested"
+        nested = Element(content="inner")
+        parent = Element(content=nested)
+        assert parent.content.type == "default"
         assert parent.content.content == "inner"
 
 
@@ -63,7 +62,7 @@ class TestFileElement:
         with tempfile.TemporaryDirectory() as tmpdir:
             element = FileElement(src="/nonexistent/file.txt", is_local=False)
             with pytest.warns(UserWarning, match="doest not exist"):
-                element.export_to_local(tmpdir)
+                element.export_to_local(tmpdir, "content")
             assert element.src == ""
             assert element.is_local is True
 
@@ -76,14 +75,15 @@ class TestFileElement:
             
             try:
                 element = FileElement(src=src_file.name, is_local=False)
-                element.export_to_local(tmpdir)
+                element.export_to_local(tmpdir, "content")
                 
                 assert element.is_local is True
-                assert os.path.dirname(element.src) == tmpdir
-                assert os.path.isfile(element.src)
+                assert "content" in element.src
+                full_path = os.path.join(tmpdir, element.src)
+                assert os.path.isfile(full_path)
                 
                 # Verify content was copied
-                with open(element.src, 'rb') as f:
+                with open(full_path, 'rb') as f:
                     assert f.read() == b"test content"
             finally:
                 os.unlink(src_file.name)
@@ -96,14 +96,18 @@ class TestFileElement:
             src_file.close()
             basename = os.path.basename(src_file.name)
             
-            # Create conflicting file in target
-            conflict_path = os.path.join(tmpdir, basename)
+            # Create conflicting file in target content directory
+            content_dir = os.path.join(tmpdir, "content")
+            os.makedirs(content_dir, exist_ok=True)
+            conflict_path = os.path.join(content_dir, basename)
+            with open(conflict_path, 'w') as f:
+                f.write("conflict")
             
             try:
                 element = FileElement(src=src_file.name, is_local=False)
-                element.export_to_local(tmpdir)
+                element.export_to_local(tmpdir, "content")
                 
-                # Should have suffix added
+                # Should have suffix added due to conflict
                 assert element.is_local is True
                 assert os.path.basename(element.src) != basename
                 assert "_1" in os.path.basename(element.src)
@@ -119,11 +123,11 @@ class TestFileElement:
             try:
                 tracker = {}
                 element1 = FileElement(src=src_file.name, is_local=False)
-                element1.export_to_local(tmpdir, source_tracker=tracker)
+                element1.export_to_local(tmpdir, "content", source_tracker=tracker)
                 
                 # Second element with same source should reuse path
                 element2 = FileElement(src=src_file.name, is_local=False)
-                element2.export_to_local(tmpdir, source_tracker=tracker)
+                element2.export_to_local(tmpdir, "content", source_tracker=tracker)
                 
                 assert element1.src == element2.src
                 assert src_file.name in tracker
@@ -141,7 +145,6 @@ class TestImageElement:
     def test_image_element_inherits_file_element(self):
         element = ImageElement()
         assert isinstance(element, FileElement)
-        assert isinstance(element, Element)
 
 
 class TestBoard:
@@ -153,7 +156,7 @@ class TestBoard:
         assert board.elements == []
 
     def test_create_board_with_elements(self):
-        element1 = Element(type="element1")
+        element1 = Element()
         element2 = ImageElement(src="/path/to/image.png", is_local=True)
         
         board = Board(

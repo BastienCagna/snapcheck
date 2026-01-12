@@ -2,8 +2,7 @@ import pytest
 import os
 import tempfile
 import zipfile
-from snapcheck.snap.io import Snap, load_snap
-from snapcheck.snap.board import Board
+from snapcheck.snap import Snap, load_snap, Board
 from snapcheck.snap.elements import ImageElement, Element
 from snapcheck.snap.rating import Rating, RatingScale, RatingScaleItem
 

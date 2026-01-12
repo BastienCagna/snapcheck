@@ -98,7 +98,7 @@ class FileElement(AbstractElement):
 
     def export_to_local(self, root_dir, subdir: str, source_tracker: dict = None):
         """Copy the file to the target directory and update the path.
-        Target directory should exist.
+        Target directory will be created if it does not exist.
         If a file with the same name already exists, a suffix is added.
         If source_tracker is given, avoid to copy several time the same file
         dir_path is attempted to be relative to parent file (like Snap)
@@ -114,14 +114,21 @@ class FileElement(AbstractElement):
             if source_tracker is not None and self.src in source_tracker:
                 self.src = source_tracker[self.src]
             else:
+                # Ensure target directory exists
+                target_dir = op.join(root_dir, subdir)
+                if not op.exists(target_dir):
+                    from os import makedirs
+                    makedirs(target_dir, exist_ok=True)
+                
                 fname = op.basename(self.src)
                 abs_target = op.join(root_dir, subdir, fname)
-                rel_target = op.relpath(abs_target, root_dir)
                 i = 1
                 pfx, ext = op.splitext(fname)
                 while op.isfile(abs_target):
                     sub_fname = f"{pfx}_{i}{ext}"
                     abs_target = op.join(root_dir, subdir, sub_fname)
+                    i += 1
+                rel_target = op.relpath(abs_target, root_dir)
                 shutil.copy(self.src, abs_target)
                 if source_tracker is not None:
                     source_tracker[self.src] = rel_target
