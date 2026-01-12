@@ -150,6 +150,7 @@ const TopBar: React.FC<{
         onDoubleClick={handleDoubleClick}
     >
         <div>
+            <img src="assets/icon-32.png" className="app-logo" />
             <Menu items={[
                 {
                     label: "File", children: [
