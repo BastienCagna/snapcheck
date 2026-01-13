@@ -9,9 +9,9 @@
    id="svg5"
    inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    sodipodi:docname="icon_inskape.svg"
-   inkscape:export-filename="icon.svg"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
+   inkscape:export-filename="../../../snapcheck-front/src/assets/icon-32.png"
+   inkscape:export-xdpi="64"
+   inkscape:export-ydpi="64"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -31,7 +31,7 @@
      inkscape:snap-bbox="true"
      inkscape:zoom="10.248373"
      inkscape:cx="28.68748"
-     inkscape:cy="24.83321"
+     inkscape:cy="24.930787"
      inkscape:window-width="2494"
      inkscape:window-height="1371"
      inkscape:window-x="66"
@@ -102,10 +102,10 @@
        style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;white-space:pre;shape-inside:url(#rect4742);display:inline;fill:#000000;fill-opacity:1;stroke:none"><tspan
          x="7.90625"
          y="84.387195"
-         id="tspan417"><tspan
+         id="tspan279"><tspan
            dx="0 5.8560162 6.592021"
            style="font-size:10.6667px"
-           id="tspan415">SnK</tspan></tspan></text>
+           id="tspan277">SnK</tspan></tspan></text>
     <path
        style="fill:#39eeff;fill-opacity:1;stroke:#39eeff;stroke-width:0.294545px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 9.1382918,0.67660148 C 6.8033856,1.7547787 2.7397327,0.9755404 2.8206331,4.1862293 2.7659485,5.7748227 4.6347151,6.4946594 6.5801073,7.3922923 8.1975066,8.1385845 8.0595743,9.5897283 5.8927646,9.8927063 3.7259548,10.195684 2.8523849,8.2713056 2.3435837,8.0210994 1.8347824,7.7708932 1.406384,10.707319 1.5246944,11.110494 1.6430047,11.51367 4.4191099,11.807194 6.0569935,11.693249 7.6948772,11.579304 8.753868,10.922962 9.3180326,9.6630641 9.8821969,8.4031649 9.4634355,7.0810206 8.465889,6.4186085 7.4683424,5.7561962 4.3313588,5.6167569 4.8267731,3.9996984 5.3221875,2.38264 7.9995964,3.6830636 9.3531874,3.744945 10.706778,3.8068265 10.061271,0.13307462 9.1382918,0.67660148 Z"

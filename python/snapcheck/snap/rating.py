@@ -37,6 +37,8 @@ class Rating(BaseModel):
             name: Name of the rating.
             description: Description of the rating.
             scale: Scale used for the rating, which can be a NoteScale object.
+            is_boolean: If True, the rating is a boolean (pass/fail).
+            allow_comment: If True, allows adding comments to the rating.
             value: Value of the rating based on the scale.
             comment: Optional comment for additional information.
 
@@ -46,6 +48,9 @@ class Rating(BaseModel):
     name: str = ""
     description: str = ""
     scale: Optional[RatingScale] = None
+
+    is_boolean: bool = False
+    allow_comment: bool = True
 
     value: Optional[int] = None
     comment: Optional[str] = None

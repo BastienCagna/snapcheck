@@ -47,14 +47,14 @@ def save_all_snaps(sid: str):
     sess = snap_store.get_session(sid)
     for item in sess.items:
         item.save()
-    return [item.to_dict(clean=True) for item in sess.items]
+    return None
 
 
-@router.get("/{sid}/close", response_model=List[SnapModel] | None)
+@router.get("/{sid}/close", response_model=None)
 def close_session(sid: str):
     items = snap_store.close_session(sid)
     if items:
-        return [item.to_dict(clean=True) for item in items]
+        return None
     return None
 
 
@@ -72,6 +72,15 @@ def open_snap(sid: str, path: str):
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
     return item.to_dict(clean=True)
+
+
+@router.get("/{sid}/{snapid}/close", response_model=None)
+def close_snap(sid: str, snapid: str):
+    item = snap_store.get_by_id(snapid)
+    if not item:
+        raise HTTPException(status_code=404, detail="Snap not found")
+    snap_store.close(sid, snapid)
+    return None
 
 
 @router.get("/{sid}/{snapid}/save", response_model=SnapModel)

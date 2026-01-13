@@ -6,7 +6,6 @@ import { useSnapSession } from "../../contexts/SnapSessionContext";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
 const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel | null }> = ({ sessionId, snapId, board }) => {
-
     if (!board) {
         return <div className="vertical-center">
             <p className='default-text'>No boards available.</p>
@@ -14,7 +13,12 @@ const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel
     }
 
     return (
-        <TransformWrapper limitToBounds={false} minScale={0.1} maxScale={10}>
+        <TransformWrapper 
+            limitToBounds={false} 
+            minScale={0.1} 
+            maxScale={10} 
+            panning={{"allowLeftClickPan": false, "allowRightClickPan": false}}
+        >
             <TransformComponent wrapperStyle={{width: "100%", height: "calc(100vh - 50px)"}} >
                 <Board sessionId={sessionId} snapId={snapId} board={board} />
             </TransformComponent>

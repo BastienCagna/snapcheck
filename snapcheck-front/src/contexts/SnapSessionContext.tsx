@@ -255,18 +255,24 @@ function qcReducer(state: SnapSessionState, action: SnapSessionAction): SnapSess
         case 'REMOVE':
             if (!state.snaps[action.path]) return state;
 
-            const removeCurrent = action.path == state.currentSnapPath;
-            const { [action.path]: removedQc, ...remainingQcs } = state.snaps;
+            const removeCurrent = action.path === state.currentSnapPath;
+            const { [action.path]: removedSnap, ...remainingSnaps } = state.snaps;
+
             // Warn if Snap has unsaved changes
-            if (removedQc?.data?.has_changed) {
+            if (removedSnap?.data?.has_changed) {
                 if (!window.confirm("Are you sure you want to close this quality control? Unsaved changes will be lost.")) {
                     return state;
                 }
             }
-            const remainingKeys = Object.keys(remainingQcs);
-            // If closed Snap was active, switch to the most recently open one
-            const newCurrent = removeCurrent ? remainingKeys.length > 0 ? remainingKeys[remainingKeys.length - 1] : null : state.currentSnapPath;
-            return { ...state, snaps: remainingQcs, currentSnapPath: newCurrent };
+            const remainingKeys = Object.keys(remainingSnaps);
+            // If closed Snap was active, switch to the next available Snap or set to null if none left
+            const newCurrent = removeCurrent 
+                ? remainingKeys.length > 0 
+                    ? remainingKeys[Math.max(0, remainingKeys.indexOf(action.path) - 1)] 
+                    : null 
+                : state.currentSnapPath;
+
+            return { ...state, snaps: remainingSnaps, currentSnapPath: newCurrent || null };
         // Change active board within the current Snap. Auto-select and clamp.
         case 'SET_BOARD':
             if (!currentSnapState) return { ...state };
@@ -408,6 +414,20 @@ export function useSnapSessionActions() {
     }, [dispatch, state, withAsync]);
 
     /**
+     * Close a Snap file.
+     */
+    const closeSnap = useCallback(async (path: string) => {
+        const safeDispatch = requireDispatch();
+        const safeState = requireState();
+        const sid = safeState.session.data?.id || "";
+
+        safeDispatch({ type: 'REMOVE', path });
+        await withAsync(path, () => SnapService.closeSnap(sid, path));
+    }, [dispatch]);
+
+
+
+    /**
      * Switch the active board within the current Snap.
      * Synchronous action (no API call).
      */
@@ -526,11 +546,6 @@ export function useSnapSessionActions() {
         await withAsync(path, () => SnapService.saveSnapAs(sid, snapId, newPath));
     }, [dispatch, state, withAsync]);
 
-    const closeSnap = useCallback((path: string) => {
-        const safeDispatch = requireDispatch();
-        safeDispatch({ type: 'REMOVE', path });
-    }, [dispatch]);
-
     /**
      * Toggle sidebar visibility.
      */
@@ -573,7 +588,7 @@ export function useSnapSessionActions() {
         }, 500)
     );
     
-    const updateFieldDebounced = useCallback(async (snapId: string, fieldPath: string, value: any) => {
+const updateFieldDebounced = useCallback(async (snapId: string, fieldPath: string, value: any) => {
         const safeState = requireState();
         const path = safeState.currentSnapPath;
         if (!path) return;
@@ -582,23 +597,54 @@ export function useSnapSessionActions() {
         const currentSnap = safeState.snaps[path]?.data;
         if (!currentSnap) return;
         
-        // Optimistic update first (instant UI feedback)
-        const parts = fieldPath.split('.');
+        // Parse special syntax like "ratings.{id:123}.value"
+        const parseFieldPath = (fieldPath: string, obj: any) => {
+            const parts = fieldPath.split('.');
+            let current = obj;
+            const resolvedPath: any[] = [];
+            
+            for (const part of parts) {
+                // Check for {id:value} syntax
+                const idMatch = part.match(/^\{id:(.+)\}$/);
+                if (idMatch) {
+                    const targetId = idMatch[1];
+                    // Find item in array with matching id
+                    if (!Array.isArray(current)) {
+                        console.error(`Expected array at ${resolvedPath.join('.')}, got ${typeof current}`);
+                        return null;
+                    }
+                    const index = current.findIndex((item: any) => String(item.id) === targetId);
+                    if (index === -1) {
+                        console.error(`Item with id ${targetId} not found in array`);
+                        return null;
+                    }
+                    resolvedPath.push(index);
+                    current = current[index];
+                } else {
+                    resolvedPath.push(part);
+                    current = current?.[part];
+                }
+            }
+            return { resolvedPath, current };
+        };
+        
+        // Optimistic update with proper path resolution
         const optimisticSnap = { 
             ...currentSnap,
-            has_changed: true  // Mark as changed immediately for UI feedback
+            has_changed: true
         };
-        let obj: any = optimisticSnap;
         
-        for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (part in obj) {
-                obj[part] = Array.isArray(obj[part]) ? [...obj[part]] : { ...obj[part] };
-                obj = obj[part];
+        const parsed = parseFieldPath(fieldPath, optimisticSnap);
+        
+        if (parsed) {
+            let obj: any = optimisticSnap;
+            for (let i = 0; i < parsed.resolvedPath.length - 1; i++) {
+                const key = parsed.resolvedPath[i];
+                obj[key] = Array.isArray(obj[key]) ? [...obj[key]] : { ...obj[key] };
+                obj = obj[key];
             }
+            obj[parsed.resolvedPath[parsed.resolvedPath.length - 1]] = value;
         }
-        
-        obj[parts[parts.length - 1]] = value;
         
         const safeDispatch = requireDispatch();
         safeDispatch({ type: 'ASYNC_SUCCESS', path, payload: optimisticSnap });
@@ -667,9 +713,10 @@ export function useSnapSession() {
     /**
      * Convenience method: close the currently active Snap without needing to pass the path.
      */
-    const closeCurrentSnap = () => {
+    const closeCurrentSnap = async () => {
         if (state.currentSnapPath) {
-            actions.closeSnap(state.currentSnapPath);
+            await actions.closeSnap(state.currentSnapPath);
+            
         }
     }
 

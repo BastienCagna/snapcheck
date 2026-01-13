@@ -150,6 +150,12 @@ python python/snapclient/main.py
 
 # TODO
 
+Snap
+~~~~
+* pouvoir ajouter des notes à un board voir un snap
+* implémenter les notes booléenne et avac/sans commentaires
+* ajouter un commentaire global
+
 Back
 ~~~~
 * numéro de session dans le JWT, possible?
@@ -157,15 +163,18 @@ Back
 
 * save sidebar sections heights in user settings
 * make each section hiddable
+* prendre en compte les notes booléennes
+* ajouter l'élement viewer3d
 
 GUI
 ~~~
-* changement de fichier marche pas
-* nom du fichier n'apparait pas
-* pas de mouvement au clics (gauche et droit, seulement molette)
 * scroll sur les planches
-* navigation avecles flêches aussi
+* navigation avec les flêches aussi
 * grossiessement du menu lors du dezoom sur les boards
 * transformation des boards board/board
-* lorsqu'un fichier est ouvert, afficher le dossier du fichier dans le broswer de fichiers
+* lorsqu'un fichier est ouvert depuisles fichiers récents, afficher le dossier du fichier dans le broswer de fichiers
 * clear le champs de recherche du broswer lorsqu'on change de fichier
+* bien gérer le has_changed lorsqu'on modofie dans la sidebar
+* afficher la nouvelle valeur lorsqu'on modifie la note via le menu contextuel
+* implémenter saveas
+* férer la fermeture des snap correctement

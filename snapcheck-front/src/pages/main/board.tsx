@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import type { BoardModel } from '../../api';
 import { ContextualMenu } from '../../components/lib/contextualMenu/contextualMenu';
-import { useSnapSession } from '../../contexts/SnapSessionContext';
+import { useSnapSession, useSnapSessionActions } from '../../contexts/SnapSessionContext';
 
 
 const DefaultElementComponent = React.lazy(() => import('../../components/elements/default'));
@@ -44,7 +44,7 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
 
 
 const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardModel, element: any}> = ({ sessionId, snapId, board, element }) => {
-    const { updateRating } = useSnapSession();
+    const { updateFieldDebounced } = useSnapSessionActions();
 
     const allIntendedRatings = board.elements?.flatMap(el => el.intended_ratings || []) || [];
 
@@ -55,7 +55,7 @@ const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardMo
             items: [
                 ...(rating.scale?.ratings.map((rate, index) => ({
                     label: rate.name,
-                    onClick: () => updateRating(snapId,{ ...rating, value: Number(rate.value)}),
+                    onClick: () => updateFieldDebounced(snapId, `ratings.{id:${rating.id}}.value`, rate.value),
                     style:{ backgroundColor: rate.color || "" }
                 })) || []),
                 { label: "Comment", onClick: () => console.log('Comment clicked') },
@@ -65,7 +65,7 @@ const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardMo
     ];
 
     return (
-        <ContextualMenu parentClass="board" items={menuItems}>
+        <ContextualMenu parentClass="board" items={[]}>
             <div className="board-element">
                     {renderElement(sessionId, snapId, element)}
             </div>

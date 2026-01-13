@@ -104,8 +104,6 @@ class FileElement(AbstractElement):
         dir_path is attempted to be relative to parent file (like Snap)
         """
 
-        # TODO: add some tests for this function
-
         if not op.isfile(self.src):
             warn(f"'{self.src}' doest not exist. Cannot export it then replacing with an empty source.")
             self.src = ""

@@ -142,10 +142,16 @@ class Snap(BSCObject):
         js_f = op.join(tmp_dir.name, fname + ".json")
 
         # List all elements
-        elements: List[FileElement] = list(filter(lambda e: isinstance(e, FileElement) and not e.is_local, self.get_all_elements()))
+        files_elements: List[FileElement] = list(filter(lambda e: isinstance(e, FileElement), self.get_all_elements()))
         source_tracker = {}
         # Copy each source file and change its path in each elements
-        for el in elements:
+        for el in files_elements:
+            if el.is_local:
+                # If the file is already local, behave as it isn't to
+                # copy the files to the new destination
+                # It's a bit ugly but it works...
+                el.is_local = False
+                el.src = op.join(self._dir.name, el.src)
             el.export_to_local(tmp_dir.name, "content", source_tracker)
 
         # Save the JSON file
