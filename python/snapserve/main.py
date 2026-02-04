@@ -1,38 +1,17 @@
-import uvicorn
-from fastapi import FastAPI
-from fastapi.routing import APIRoute
-from fastapi.middleware.cors import CORSMiddleware
-from snapserve.router import api_router
-# from snapserve.auth.auth import router as auth_router
-# from sulcilab.database import Base, engine
+from lepton.app import LeptonApp, LeptonConfig
+import snapserve.snap.controller as snap
+import snapserve.files.controller as files
+import snapserve.content.controller as content
 
-
-# Base.metadata.create_all(bind=engine)
-
-def custom_generate_unique_id(route: APIRoute):
-    return f"{route.name}"
-
-
-app = FastAPI(generate_unique_id_function=custom_generate_unique_id)
-app.include_router(api_router) #, prefix=config.API_V1_STR)
-# app.include_router(auth_router)
-
-origins = [
-    "http://127.0.0.1:8000",
-    "http://127.0.0.1:3000"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['*'],#origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+#
+app = LeptonApp(
+    LeptonConfig(
+        
+    )
 )
-
-
-# @app.on_event("startup")
-# def startup():
+app.router.include_router(snap.router, tags=["snap"], prefix="/snap")
+app.router.include_router(files.router, tags=["files"], prefix="/files")
+app.router.include_router(content.router, tags=["content"], prefix="/content")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    app.start_uvicorn()

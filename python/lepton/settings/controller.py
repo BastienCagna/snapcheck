@@ -1,8 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
-from snapserve.app_settings import APP_SETTINGS
-from snapserve.settings.models import SettingModel, SettingsGroupModel
+from lepton.app_settings import APP_SETTINGS
+from lepton.settings.models import SettingModel, SettingsGroupModel
 
 router = APIRouter()
 

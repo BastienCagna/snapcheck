@@ -6,7 +6,7 @@ import { SettingsProvider } from './contexts/SettingsContext';
 import { AppDataProvider } from './contexts/AppDataContext';
 import { OpenAPI } from './api/core/OpenAPI';
 import './index.css'
-import App from './App.tsx'
+import App from './lepton/App.tsx'
 
 
 // Initialize JWT from Qt bridge if available

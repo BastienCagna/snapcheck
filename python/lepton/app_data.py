@@ -1,13 +1,13 @@
 import os.path as op
-import json
 from os import makedirs
-
-from snapcheck.core.objects import Serializable
 from typing import List
 from collections import deque
-from snapserve.app_settings import APP_SETTINGS
+from lepton.app_settings import APP_SETTINGS
+from lepton.core.objects import Serializable
+
 
 APP_DATA_PATH = op.join(APP_SETTINGS.get("core.share_dir").value, "app_data.json")
+
 
 class AppData(Serializable):
     def __init__(self):

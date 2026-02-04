@@ -1,10 +1,10 @@
-from snapserve.settings.models import Setting, Settings, SettingsGroup
+from lepton.settings.models import Setting, Settings, SettingsGroup
 import os.path as op
 from os import makedirs
 
 
 CONFIG_DIR = op.join(op.expanduser("~"), ".config", "snapcheck")
-SETTINGS_PATH = op.join(CONFIG_DIR, "snapserve.json")
+SETTINGS_PATH = op.join(CONFIG_DIR, "lepton.json")
 
 
 def generate_default_settings(settings_f: str, force=False):
