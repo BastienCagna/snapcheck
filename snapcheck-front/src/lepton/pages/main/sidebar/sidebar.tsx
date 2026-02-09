@@ -4,7 +4,7 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import { type Tab, Tabs } from '../../../components/lib/tabs/tabs';
 import DictionaryTable from '../../../components/lib/table/dictTable';
-import type { BoardModel, RatingModel, SnapModel } from '../../../api';
+import type { BoardModel, RatingModel, SnapModel } from '@lepton/api-client';
 import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
 import './sidebar.css';

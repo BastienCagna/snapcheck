@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ContentService } from '../../api';
+import { ContentService } from '@lepton/api-client';
 
 type ServerContentProps = {
     path: string;

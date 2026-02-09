@@ -1,6 +1,6 @@
 import { createContext, useContext, useReducer } from 'react';
 import type { DefaultProps } from '../core/types';
-import { SettingsService, type SettingsGroupModel } from '../api';
+import { SettingsService, type SettingsGroupModel } from '@lepton/api-client';
 import { useEffect } from 'react';
 
 type SettingsState = {

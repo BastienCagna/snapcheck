@@ -1,5 +1,5 @@
 import React, { useEffect, useState, Suspense } from 'react';
-import type { BoardModel } from '../../api';
+import type { BoardModel } from '@lepton/api-client';
 import { ContextualMenu } from '../../components/lib/contextualMenu/contextualMenu';
 import { useSnapSession, useSnapSessionActions } from '../../contexts/SnapSessionContext';
 

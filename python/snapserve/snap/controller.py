@@ -8,7 +8,6 @@ import mimetypes
 import time
 
 from snapserve.snap.store import SnapStore
-from snapserve.app_data import APP_DATA
 
 router = APIRouter()
 

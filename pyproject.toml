@@ -28,7 +28,7 @@ repository = "https://github.com/brainvisa/snapcheck"
 [tool.setuptools.package-data]
 "*" = ["*.html", "*.css", "*.js"]
 
-[tool.pixi.project]
+[tool.pixi.workspace]
 channels = ["https://repo.prefix.dev/conda-forge"]
 platforms = ["linux-64"]
 

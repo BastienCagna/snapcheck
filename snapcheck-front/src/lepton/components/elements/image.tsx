@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { OpenAPI } from '../../api';
+import { OpenAPI } from '@lepton/api-client';
 
 const ImageElementComponent: React.FC<{
     sessionId: string;

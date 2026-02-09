@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import type { NoteScaleItem, QualityControlModel } from '../../../api';
+import type { NoteScaleItem, QualityControlModel } from '@lepton/api-client';
 import './notestatbar.css';
 
 interface NoteStatBarProps {

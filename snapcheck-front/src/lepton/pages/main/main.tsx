@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { BoardModel } from "../../api";
+import type { BoardModel } from "@lepton/api-client";
 import Board from "./board";
 import "./main.css"
 import { useSnapSession } from "../../contexts/SnapSessionContext";

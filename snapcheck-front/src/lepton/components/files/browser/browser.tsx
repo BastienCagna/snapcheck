@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FilesService, type DirectoryItemModel, type DirectoryModel } from '../../../api';
+import { FilesService, type DirectoryItemModel, type DirectoryModel } from '@lepton/api-client';
 
 
 import './browser.css';

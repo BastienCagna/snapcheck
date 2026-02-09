@@ -36,7 +36,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useReducer, useRef, type Dispatch } from 'react';
 import type { DefaultProps } from '../core/types';
-import { SnapService, type BoardModel, type SnapCheckSessionModel, type SnapModel } from '../api';
+import { SnapService, type BoardModel, type SnapCheckSessionModel, type SnapModel } from '@lepton/api-client';
 import { debounce } from '../utils/debounce';
 
 /**

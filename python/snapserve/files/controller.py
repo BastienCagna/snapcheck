@@ -3,7 +3,6 @@ from fastapi import APIRouter, HTTPException
 from snapserve.files.models import DirectoryItemModel, DirectoryModel
 import os.path as op
 from os import listdir
-from snapserve.app_settings import APP_SETTINGS
 
 router = APIRouter()
 

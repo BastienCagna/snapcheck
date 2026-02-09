@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import type { RatingModel, RatingScaleItem } from '../../../api';
+import type { RatingModel, RatingScaleItem } from '@lepton/api-client';
 import './ratinginput.css';
 import { InfoOutline } from '@mui/icons-material';
 import { useModal } from '../../../contexts/ModalContext';

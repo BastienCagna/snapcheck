@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer } from 'react';
 import type { DefaultProps } from '../core/types';
 import { useEffect } from 'react';
-import { AppdataService, type AppDataModel } from '../api';
+import { AppdataService, type AppDataModel } from '@lepton/api-client';
 
 type AppDataState = {
     loading: boolean;

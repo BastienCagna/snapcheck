@@ -1,10 +1,10 @@
-import Sidebar from './pages/main/sidebar/sidebar';
-import MainContent from './pages/main/main';
-import Modal from './components/lib/modal/modal';
-import { useSnapSession } from './contexts/SnapSessionContext';
-import TopBar from './pages/main/topbar/topbar';
+import Sidebar from './lepton/pages/main/sidebar/sidebar';
+import MainContent from './lepton/pages/main/main';
+import Modal from './lepton/components/lib/modal/modal';
+import { useSnapSession } from './lepton/contexts/SnapSessionContext';
+import TopBar from './lepton/pages/main/topbar/topbar';
 import { useEffect } from 'react';
-import './App.css'
+import './Snapcheck.css'
 
 
 const ShortCuts: React.FC<{
@@ -26,7 +26,7 @@ const ShortCuts: React.FC<{
     return <></>
 }
 
-function App() {
+function SnapCheck() {
     const { showSidebar } = useSnapSession();
     return (
         <div className='app'>
@@ -51,4 +51,4 @@ function App() {
     )
 }
 
-export default App
+export default SnapCheck
