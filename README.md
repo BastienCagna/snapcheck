@@ -92,29 +92,26 @@ qc.save(f)
 ## The GUI Framework
 SnapCheck is made as a Web App. It is composed of a backend written in Python and a frontend, the GUI, written if TypeScript (Javascript).
 
-### The core package (python)
+### The framwork
+#### The core package (python)
 The core python package, named "snapcheck", provide all it is need to create and read snap files (.snpk).
 
-### Backend
+#### Backend
 The backend end use [FastAPI](https://fastapi.tiangolo.com/) to serve the snaps, settings and track some usefull data for the GUI (like the last loaded files paths).
 
-### Frontend
+#### Frontend
 The frontend use the well known [React](https://react.dev/) typescript framework.
 
 The backend and the frontend can communicate thanks to an javascript API automatically generated from the FastAPI backend.
 
-### The client
+#### The client
 Even if the SnapCheck GUI can be displayed by any web browser, a Qt based client is also provided to get a better experience (avoid to lost screen space and get a better focus).
 
 
-## Roadmap
+### Run the GUI
 
-* develop the minimal features to be usabled by the CATI team
-
-Options:
-
-* add more displayable elements (graphs, medical imaging viewer, ...)
-* make it usable throughout internet (adding user, security...)
+#### Dev and Debugging
+Set the ```SNAP_UNSAFE``` environment variable to 1 to disable API security checks.
 
 
 ## Install

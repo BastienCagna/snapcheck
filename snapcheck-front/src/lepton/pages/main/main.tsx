@@ -4,6 +4,7 @@ import Board from "./board";
 import "./main.css"
 import { useSnapSession } from "../../contexts/SnapSessionContext";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import Viewer3D from "../../components/elements/viewer3d";
 
 const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel | null }> = ({ sessionId, snapId, board }) => {
     if (!board) {
@@ -13,10 +14,10 @@ const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel
     }
 
     return (
-        <TransformWrapper 
-            limitToBounds={false} 
-            minScale={0.1} 
-            maxScale={10} 
+        <TransformWrapper
+            limitToBounds={false}
+            minScale={0.1}
+            maxScale={10}
             panning={{"allowLeftClickPan": false, "allowRightClickPan": false}}
         >
             <TransformComponent wrapperStyle={{width: "100%", height: "calc(100vh - 50px)"}} >
@@ -46,12 +47,16 @@ const MainContent: React.FC<{}> = () => {
 
     if (!snap) {
         return <div className="vertical-center">
-            <p className='default-text'>Nothing to show.</p>
+
+            <Viewer3D>
+
+            </Viewer3D>
+            {/* <p className='default-text'>Nothing to show.</p> */}
         </div>
     }
 
     return (
-        <div>        
+        <div>
             <div className="main-header">
                 {
                     snap?.boards?.length && (
@@ -66,13 +71,13 @@ const MainContent: React.FC<{}> = () => {
                 }
                 <span>{snap?.title}</span>
             </div>
-            <BoardView
+            {/* <BoardView
                 sessionId={session?.id || ""}
                 snapId={snap.id || ""}
                 board={currentBoard}
-            />
+            /> */}
         </div>
-    );       
+    );
 }
 
 export default MainContent;
