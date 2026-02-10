@@ -17,6 +17,7 @@ snap_store = SnapStore()
 # Pydantic models for request/response
 class FieldUpdateRequest(BaseModel):
     """Request model for partial field update"""
+
     field_path: str  # e.g., "metadata.title" or "boards.0.description"
     value: Any
     expected_version: Optional[int] = None
@@ -24,43 +25,11 @@ class FieldUpdateRequest(BaseModel):
 
 class LightweightResponse(BaseModel):
     """Lightweight response for modifications"""
+
     ok: bool
     version: int
     has_changed: bool
     timestamp: float
-
-
-@router.post("/session", response_model=SnapCheckSessionModel)
-def create_session():
-    return snap_store.new_session()
-
-
-# TODO: use sid in JWT payload instead of URLs
-@router.post("/{sid}", response_model=SnapCheckSessionModel)
-def get_session_infos(sid: str):
-    return snap_store.get_session(sid)
-
-
-@router.get("/{sid}/saveall", response_model=SnapModel)
-def save_all_snaps(sid: str):
-    sess = snap_store.get_session(sid)
-    for item in sess.items:
-        item.save()
-    return None
-
-
-@router.get("/{sid}/close", response_model=None)
-def close_session(sid: str):
-    items = snap_store.close_session(sid)
-    if items:
-        return None
-    return None
-
-
-@router.get("/{sid}/list", response_model=List[SnapModel])
-def list_qc(sid: str):
-    # TODO: use sid
-    return [item.to_dict(clean=True) for item in snap_store.get_all()]
 
 
 @router.get("/{sid}/open/{path:path}", response_model=SnapModel)
@@ -144,20 +113,19 @@ def export_as_pdf(sid: str, snapid: str, path: str):
     print("Export:", path)
 
 
-
 @router.patch("/{sid}/{snapid}/field", response_model=LightweightResponse)
 def update_field(sid: str, snapid: str, update: FieldUpdateRequest):
     """
     Update a specific field of a snap with version conflict detection.
-    
+
     Args:
         sid: Session ID
         snapid: Snap ID
         update: Field update request with field_path, value, and optional expected_version
-        
+
     Returns:
         Lightweight response with version and status
-        
+
     Raises:
         409: Version conflict (expected_version doesn't match current)
         404: Snap not found
@@ -167,34 +135,33 @@ def update_field(sid: str, snapid: str, update: FieldUpdateRequest):
     item = snap_store.get_by_id(snapid)
     if not item:
         raise HTTPException(status_code=404, detail="Snap not found")
-    
+
     # Check version conflict
     if update.expected_version is not None and update.expected_version != item.version:
         raise HTTPException(
-            status_code=409, 
-            detail=f"Version conflict: expected {update.expected_version}, current {item.version}"
+            status_code=409, detail=f"Version conflict: expected {update.expected_version}, current {item.version}"
         )
-    
+
     # Update the field using dot notation
     try:
-        parts = update.field_path.split('.')
+        parts = update.field_path.split(".")
         obj = item.snap
-        
+
         # Navigate to parent object
         for part in parts[:-1]:
             # Handle array indices
             if part.isdigit():
                 obj = obj[int(part)]
             # Handle filtering by id in lists
-            if part.startswith('{') and part.endswith('}'):
+            if part.startswith("{") and part.endswith("}"):
                 # e.g., {id:ratingId}
-                key, val = part[1:-1].split(':', 1)
+                key, val = part[1:-1].split(":", 1)
                 obj = next((o for o in obj if getattr(o, key) == val), None)
                 if obj is None:
                     raise HTTPException(status_code=400, detail=f"Invalid field path: {update.field_path}")
             else:
                 obj = getattr(obj, part)
-        
+
         # Set the final value
         final_key = parts[-1]
         if final_key.isdigit():
@@ -208,15 +175,10 @@ def update_field(sid: str, snapid: str, update: FieldUpdateRequest):
             if hasattr(obj, final_key) and getattr(obj, final_key) != update.value:
                 setattr(obj, final_key, update.value)
                 item.snap._has_changed = True
-            
+
     except (AttributeError, IndexError, TypeError) as e:
         raise HTTPException(status_code=400, detail=f"Invalid field path: {update.field_path}")
-    
+
     item.increment_version()
-    
-    return LightweightResponse(
-        ok=True,
-        version=item.version,
-        has_changed=item.snap._has_changed,
-        timestamp=time.time()
-    )
+
+    return LightweightResponse(ok=True, version=item.version, has_changed=item.snap._has_changed, timestamp=time.time())

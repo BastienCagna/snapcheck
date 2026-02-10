@@ -7,12 +7,13 @@ SETTINGS_VERSION = "dev.1.0"
 NumericalValues = int | float
 ValueTypes = str | bool | NumericalValues
 
+
 class SettingModel(BaseModel):
     id: str
     label: str
     type: str
     choices: List[ValueTypes] | None = None
-    min: NumericalValues| None = None
+    min: NumericalValues | None = None
     max: NumericalValues | None = None
     default: ValueTypes | None = None
     value: ValueTypes | None = None
@@ -29,9 +30,9 @@ class SettingsGroupModel(BaseModel):
 class Setting(Serializable):
     id: str
     label: str
-    type: str               # string, int, ...
+    type: str  # string, int, ...
     choices: List[ValueTypes] | None = None
-    min: NumericalValues| None = None
+    min: NumericalValues | None = None
     max: NumericalValues | None = None
     default: ValueTypes | None = None
     value: ValueTypes | None = None
@@ -40,10 +41,19 @@ class Setting(Serializable):
 
     _is_getting = False
 
-    def __init__(self, id: str, label: str, type: str, choices: List[ValueTypes] | None = None,
-                 min: NumericalValues | None = None, max: NumericalValues | None = None,
-                 default: ValueTypes | None = None, value: ValueTypes | None = None,
-                 description: str = "", auto_default: bool = True):
+    def __init__(
+        self,
+        id: str,
+        label: str,
+        type: str,
+        choices: List[ValueTypes] | None = None,
+        min: NumericalValues | None = None,
+        max: NumericalValues | None = None,
+        default: ValueTypes | None = None,
+        value: ValueTypes | None = None,
+        description: str = "",
+        auto_default: bool = True,
+    ):
         super().__init__()
         self.id = id
         self.label = label
@@ -82,13 +92,13 @@ class Settings(Serializable):
     version: str = SETTINGS_VERSION
     groups: List[SettingsGroup]
 
-    def __init__(self, groups: List[SettingsGroup], version= SETTINGS_VERSION):
+    def __init__(self, groups: List[SettingsGroup], version=SETTINGS_VERSION):
         super().__init__()
         self.groups = groups
         self.version = version
 
     def get(self, set_path: str) -> Setting:
-        grp_id, set_id = set_path.split('.')
+        grp_id, set_id = set_path.split(".")
         for group in self.groups:
             if group.id == grp_id:
                 for setting in group.settings:
