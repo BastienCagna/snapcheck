@@ -1,6 +1,6 @@
 # Lepton
 
-## Features
+## Features
 
 ### AppData
 Manage internal app data

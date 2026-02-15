@@ -7,11 +7,9 @@ import os.path as op
 import mimetypes
 import time
 
-from snapserve.snap.store import SnapStore
 
 router = APIRouter()
 
-snap_store = SnapStore()
 
 
 # Pydantic models for request/response

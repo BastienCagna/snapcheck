@@ -3,12 +3,12 @@ from typing import List
 from time import time
 import uuid
 from pydantic import BaseModel
-from lepton.core.objects import BSCObject
+from lepton_common import LObject
 
 
 ID_LENGTH = 12
 
-
+    
 class ObjectModel(BaseModel):
     title: str | None = None
     description: str | None = None
@@ -41,12 +41,12 @@ class SessionWithTokenModel(SessionModel):
 
 class ObjectStoreItem:
     path: str | Path
-    object: BSCObject
+    object: LObject
     id: str
     last_access: float
     version: int
 
-    def __init__(self, path: str | Path, object: BSCObject):
+    def __init__(self, path: str | Path, object: LObject):
         self.path = path
         self.object = object
         self.id = uuid.uuid4().hex[:ID_LENGTH]
@@ -68,7 +68,7 @@ class ObjectStoreItem:
         self.version += 1
 
 
-class LeptonSession:
+class LSession:
     id: str
     last_access: float
     items: List[ObjectStoreItem] = []

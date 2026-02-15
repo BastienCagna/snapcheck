@@ -1,8 +1,10 @@
 from typing import List
 from pydantic import BaseModel
-from snapcheck.core.objects import Serializable
+from lepton_common.objects import Serializable
+
 
 SETTINGS_VERSION = "dev.1.0"
+
 
 NumericalValues = int | float
 ValueTypes = str | bool | NumericalValues

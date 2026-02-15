@@ -1,19 +1,19 @@
 from typing import List
 from time import time
 
-from lepton.session.models import LeptonSession, ObjectStoreItem
+from lepton.session.models import LSession, ObjectStoreItem
 
 
 class SessionStore:
     items: List[ObjectStoreItem] = []
-    sessions: List[LeptonSession] = []
+    sessions: List[LSession] = []
     loader: callable
 
     def get_all(self):
         return self.items
 
-    def new_session(self) -> LeptonSession:
-        session = LeptonSession()
+    def new_session(self) -> LSession:
+        session = LSession()
         self.sessions.append(session)
         return session
 
@@ -32,7 +32,7 @@ class SessionStore:
         self.sessions.remove(session)
         return None
 
-    def get_session(self, sid: str) -> LeptonSession:
+    def get_session(self, sid: str) -> LSession:
         for session in self.sessions:
             if session.id == sid:
                 session.last_access = time()

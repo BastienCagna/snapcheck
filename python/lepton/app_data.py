@@ -2,7 +2,7 @@ import os.path as op
 from os import makedirs
 from typing import List
 from collections import deque
-from lepton.core.objects import Serializable
+from lepton_common.objects import Serializable
 
 
 DEFAULT_HISTORY_LENGTH = 20

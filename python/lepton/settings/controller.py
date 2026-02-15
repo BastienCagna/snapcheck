@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter
 
 from fastapi.params import Depends
-from lepton.core.utils import get_lepton_app
+from lepton.utils import get_lepton_app
 from lepton.settings.models import SettingModel, SettingsGroupModel
 
 

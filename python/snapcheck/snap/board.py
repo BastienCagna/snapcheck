@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from snapcheck.core.objects import Serializable
+from lepton_common.objects import Serializable
 from snapcheck.core.renderable import HTMLRenderable
 from snapcheck.snap.elements import AbstractElement, list_elements
 from snapcheck.snap.rating import Rating

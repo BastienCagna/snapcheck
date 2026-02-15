@@ -185,7 +185,7 @@ class Backupable(Serializable):
                 self.has_changed()
 
 
-class BSCObject(Backupable, Changeable):
+class LObject(Backupable, Changeable):
 
     def __init__(self, *args, **attributes):
         Changeable.__init__(self, *args, **attributes)

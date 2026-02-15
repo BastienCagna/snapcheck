@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from lepton.session.store import SessionStore
+from lepton_common import LObject
 from lepton.auth import TokenData, bearer_scheme
-from lepton.core.utils import get_lepton_app
-from pydantic import BaseModel
-
+from lepton.utils import get_lepton_app
 from lepton.session.models import SessionModel
 
 
@@ -83,9 +83,10 @@ def get_one_by(session=Depends(get_session_from_token), by: str = "id", value: s
 
 
 class CRUDRouter(APIRouter):
-    def __init__(self, data_model: type[BaseModel]):
+    # Créer AbstractCRUDRouter(APIRouter) et FileCRUDRouter(AbstractCRUDRouter)
+    def __init__(self, store:SessionStore):
         super().__init__()
-        self.data_model = data_model
+        self.store = store
 
         # List objects
         self.add_api_route("/all", list_objects, methods=["GET"], response_model=list[self.data_model])
@@ -94,6 +95,15 @@ class CRUDRouter(APIRouter):
         # Get one object by any attribute
         self.add_api_route("/one/{by}/{value}", get_one_by, methods=["GET"], response_model=self.data_model)
         # Load
+        # Get one object by any attribute
+        self.add_api_route("/open/{path:path}", self.open, methods=["GET"], response_model=self.data_model)
         # Create object
         # Update object
         # Delete object
+
+    @property
+    def data_model(self):
+        return self.store.data_model
+
+    def open(self, session=Depends(get_session_from_token), by: str = "id", value: str = ""):
+        ...

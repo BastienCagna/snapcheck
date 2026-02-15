@@ -75,7 +75,7 @@ def custom_generate_unique_id(route: APIRoute):
     return f"{route.name}"
 
 
-def default_router(authenticator: Authenticator = None, data_model: type[BaseModel] | None = None):
+def default_router(store: SessionStore, authenticator: Authenticator = None):
     dependencies = []
     if not authenticator:
         warn("Running without authentication.")
@@ -95,10 +95,9 @@ def default_router(authenticator: Authenticator = None, data_model: type[BaseMod
         prefix="/appdata",
         dependencies=dependencies,
     )
-    if data_model is not None:
-        api_router.include_router(
-            session.CRUDRouter(data_model=data_model), tags=["data"], prefix="/objects", dependencies=dependencies
-        )
+    api_router.include_router(
+        session.CRUDRouter(store), tags=["data"], prefix="/objects", dependencies=dependencies
+    )
     api_router.include_router(session.router, tags=["session"], prefix="/session")
     return api_router
 
@@ -149,7 +148,6 @@ class LeptonApp:
     store: SessionStore
     auth: Authenticator
     app: FastAPI
-    data_model: type[BaseModel]
 
     def __init__(self, config: LeptonConfig, data_model: type[BaseModel]):
         """Initialize the app"""
@@ -158,7 +156,6 @@ class LeptonApp:
         # Initialize the session store
         self.store = SessionStore()
         self.auth = Authenticator(secret=config.secret_key)
-        self.data_model = data_model
 
         # Load settings and app data
         self.settings = load_settings(config.settings_f)
@@ -170,7 +167,7 @@ class LeptonApp:
         self.app.state.lepton_app = self
 
         # Create the default router
-        self.router = default_router(authenticator=self.auth, data_model=self.data_model)
+        self.router = default_router(self.store, authenticator=self.auth)
         self.app.include_router(self.router)
 
         self.app.add_middleware(

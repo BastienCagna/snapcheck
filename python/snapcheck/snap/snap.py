@@ -1,18 +1,19 @@
 from dataclasses import dataclass, field
 from typing import Any, List
-from snapcheck.core.objects import BSCObject
+from os import makedirs, mkdir, rename, listdir
+import json
+import tempfile
+import shutil
+import zipfile
+from warnings import warn
+import os.path as op
+from xhtml2pdf import pisa
+from pypdf import PdfWriter
+
+from lepton_common import LObject
 from snapcheck.snap.board import AbstractElement, Board
 from snapcheck.snap.elements import FileElement
 from snapcheck.snap.rating import Rating
-import json
-from warnings import warn
-import tempfile
-import os.path as op
-from os import makedirs, mkdir, rename, listdir
-import shutil
-import zipfile
-from xhtml2pdf import pisa
-from pypdf import PdfWriter
 
 
 def html_to_pdf(html_string, output_path):
@@ -21,7 +22,7 @@ def html_to_pdf(html_string, output_path):
 
 
 @dataclass
-class Snap(BSCObject):
+class Snap(LObject):
     title: str | None = None
     description: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
