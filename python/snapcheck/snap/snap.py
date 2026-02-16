@@ -126,7 +126,7 @@ class Snap(BSCObject):
             + "To also save the boards content, use the save() method"
         )
         return super().to_json()
-    
+
     def save(self, path: str = None):
         # By default keep the same path
         if path is None:
@@ -151,7 +151,7 @@ class Snap(BSCObject):
                 # copy the files to the new destination
                 # It's a bit ugly but it works...
                 el.is_local = False
-                el.src = op.join(self._dir.name, el.src)
+                el.src = op.join(tmp_dir.name, el.src)
             el.export_to_local(tmp_dir.name, "content", source_tracker)
 
         # Save the JSON file
@@ -192,7 +192,7 @@ class Snap(BSCObject):
             with open(board_links[b], "w") as f:
                 f.write(board_html)
 
-        # Save home page        
+        # Save home page
         home_html = f"""<html><head><title>{self.title}</title></head><body>"""
         home_html += header
         home_html += "<h2>Boards</h2><ul>"

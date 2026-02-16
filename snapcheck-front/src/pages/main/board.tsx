@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import type { BoardModel } from '../../api';
 import { ContextualMenu } from '../../components/lib/contextualMenu/contextualMenu';
-import { useSnapSession, useSnapSessionActions } from '../../contexts/SnapSessionContext';
+import { useSnapSessionActions } from '../../contexts/SnapSessionContext';
 
 
 const DefaultElementComponent = React.lazy(() => import('../../components/elements/default'));
@@ -18,7 +18,7 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
         case 'image':
             return (
                 <Suspense fallback={<div>Loading...</div>}>
-                    <ImageElementComponent sessionId={sessionId} snapId={snapId} src={element.src} style={element.style} />
+                    <ImageElementComponent sessionId={sessionId} snapId={snapId} src={element.src} style={element.style} title={element.title} />
                 </Suspense>
             );
         //   case '3d':

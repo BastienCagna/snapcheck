@@ -5,8 +5,9 @@ const ImageElementComponent: React.FC<{
     sessionId: string;
     snapId: string;
     src: string;
+    title?: string;
     style?: React.CSSProperties;
-}> = ({ sessionId, snapId, src, style }) => {
+}> = ({ sessionId, snapId, src, style, title }) => {
 
     const [imageUrl, setImageUrl] = React.useState<string | null>(null);
 
@@ -40,7 +41,10 @@ const ImageElementComponent: React.FC<{
     }, [sessionId, snapId, src]);
 
     return imageUrl ? (
-        <img src={imageUrl} alt={src} style={style} />
+        <div>
+            { title && <h2>{title}</h2> }
+            <img src={imageUrl} alt={src} style={style} />
+        </div>
     ) : (
         <div>Loading...</div>
     );
