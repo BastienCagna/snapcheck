@@ -219,6 +219,17 @@ class LeptonApp:
         with open(tsconfig_js, "w+") as tf:
             tf.write(api_ts_config_json)
 
+        # Keep a frontend-local symlink so generated API sources appear under src/lepton.
+        frontend_api_link = Path(self.config.frontend_path) / "src" / "lepton" / "api-client"
+        frontend_api_link.parent.mkdir(parents=True, exist_ok=True)
+        # Replace any previous link/folder before creating the new symlink target.
+        if frontend_api_link.is_symlink() or frontend_api_link.is_file():
+            frontend_api_link.unlink()
+        elif frontend_api_link.exists():
+            shutil.rmtree(frontend_api_link)
+        frontend_api_link.symlink_to((build_path / "src").resolve(), target_is_directory=True)
+        print("Frontend API symlink:", frontend_api_link, "->", (build_path / "src").resolve())
+
         print("Build path:", build_path)
         print("Frontend path:", self.config.frontend_path)
         system(

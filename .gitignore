@@ -20,3 +20,6 @@ docs/sg_execution_times.rst
 docs/_autosummary/
 docs/generated/
 docs/frontend-docs/
+
+
+snapcheck-front/src/lepton/api-client
