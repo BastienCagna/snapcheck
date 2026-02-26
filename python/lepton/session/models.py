@@ -73,8 +73,8 @@ class LSession:
     last_access: float
     items: List[ObjectStoreItem] = []
 
-    def __init__(self):
-        self.id = uuid.uuid4().hex[:ID_LENGTH]
+    def __init__(self, id: str | None = None):
+        self.id = id if id is not None else uuid.uuid4().hex[:ID_LENGTH]
         self.last_access = time()
 
     def register_item(self, item: ObjectStoreItem):

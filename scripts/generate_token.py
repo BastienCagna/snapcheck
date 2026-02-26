@@ -1,11 +1,10 @@
+from lepton.auth import TokenData
+from snapserve.main import app
 import sys
-import os
-from snapserve.auth import TokenData, create_access_token
 
 
-
-username = os.getlogin()
-
-token = create_access_token(TokenData(username=username), secret=sys.argv[1])
-
-print(token)
+app.auth.secret = sys.argv[1]
+sess = app.store.new_session()
+dt = TokenData(sid=sess.id)
+print(sess.id)
+print(app.auth.create_access_token(dt))

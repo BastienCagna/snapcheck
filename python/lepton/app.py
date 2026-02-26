@@ -21,6 +21,10 @@ from lepton.auth import Authenticator
 import shutil
 
 
+DEFAULT_HOST = "127.0.0.1"
+DEFAULT_PORT = 8000
+
+
 openapi_bin = "node node_modules/openapi-typescript-codegen/bin/index.js"
 
 
@@ -111,11 +115,6 @@ class LeptonConfig(BaseModel):
     allow_credentials: bool = True
     allow_methods: list[str] = ["*"]
     allow_headers: list[str] = ["*"]
-    # Server
-    host: str = "127.0.0.1"
-    port: int = 8000
-    # API
-    secret_key: str = uuid4().hex
     # Build
     frontend_path: str | Path
     api_package_name: str = "@lepton/api-client"
@@ -157,7 +156,7 @@ class LeptonApp:
 
         # Initialize the session store
         self.store = SessionStore(io_helper)
-        self.auth = Authenticator(secret=config.secret_key)
+        self.auth = Authenticator(secret=uuid4().hex)
 
         # Load settings and app data
         self.settings = load_settings(config.settings_f)
@@ -184,8 +183,8 @@ class LeptonApp:
         """Include a router in the app"""
         self.app.include_router(router, **kwargs)
 
-    def start_uvicorn(self):
-        return uvicorn.run(self.app, host=self.config.host, port=self.config.port)
+    def start_uvicorn(self, host=DEFAULT_HOST, port=DEFAULT_PORT):
+        return uvicorn.run(self.app, host=host, port=port)
 
     def build_tsx_api(self, build_path: str | Path = None) -> None:
         """Generate the Typescript API client as a package and install it in the frontend"""

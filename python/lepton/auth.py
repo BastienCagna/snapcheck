@@ -40,7 +40,7 @@ class Authenticator(BaseModel):
     algorithm: str = DEFAULT_ALGORITHM
 
     def create_access_token(self, data: TokenData):
-        to_encode = data.dict().copy()
+        to_encode = data.model_dump().copy()
         expire = datetime.now(timezone.utc) + timedelta(minutes=self.token_expire_minutes)
         to_encode.update({"expire": expire.timestamp()})
 

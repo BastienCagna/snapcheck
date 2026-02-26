@@ -32,9 +32,12 @@ class SessionStore:
     def get_all(self):
         return self.items
 
-    def new_session(self) -> LSession:
+    def new_session(self, sess_id: str | None = None) -> LSession:
         """ Create and register a new empty session """
-        session = LSession()
+        for session in self.sessions:
+            if session.id == sess_id:
+                raise ValueError(f"Session with id {sess_id} already exists")
+        session = LSession(id=sess_id)
         self.sessions.append(session)
         return session
 
