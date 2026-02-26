@@ -261,3 +261,8 @@ def load_snap(path: str) -> Snap:
     snap._validate()
 
     return snap
+
+
+def save_snap(snap: Snap, path: str):
+    """Save a Snap object to a JSON file"""
+    snap.save(path)

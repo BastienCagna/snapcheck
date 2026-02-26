@@ -10,6 +10,8 @@ from lepton.session.models import SessionModel
 
 import typing
 
+from pydantic import BaseModel
+
 if typing.TYPE_CHECKING:
     from lepton.app import LeptonApp
 
@@ -102,8 +104,8 @@ class CRUDRouter(APIRouter):
         # Delete object
 
     @property
-    def data_model(self):
-        return self.store.data_model
+    def data_model(self) -> type[BaseModel]:
+        return self.store.io.model
 
     def open(self, session=Depends(get_session_from_token), by: str = "id", value: str = ""):
         ...

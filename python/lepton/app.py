@@ -1,6 +1,8 @@
 import json
 from os import system
 from pathlib import Path
+from uuid import uuid4
+from lepton_common.objects import IOHelper
 import uvicorn
 from lepton.session.store import SessionStore
 from pydantic import BaseModel
@@ -113,7 +115,7 @@ class LeptonConfig(BaseModel):
     host: str = "127.0.0.1"
     port: int = 8000
     # API
-    secret_key: str
+    secret_key: str = uuid4().hex
     # Build
     frontend_path: str | Path
     api_package_name: str = "@lepton/api-client"
@@ -149,12 +151,12 @@ class LeptonApp:
     auth: Authenticator
     app: FastAPI
 
-    def __init__(self, config: LeptonConfig, data_model: type[BaseModel]):
+    def __init__(self, config: LeptonConfig, io_helper: IOHelper):
         """Initialize the app"""
         self.config = config
 
         # Initialize the session store
-        self.store = SessionStore()
+        self.store = SessionStore(io_helper)
         self.auth = Authenticator(secret=config.secret_key)
 
         # Load settings and app data

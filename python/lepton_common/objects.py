@@ -5,6 +5,8 @@ import json
 
 from collections import deque
 
+from pydantic import BaseModel
+
 from .io import globalDynamicLoader, resolve_references, serialize
 from .callback import Callback
 
@@ -194,3 +196,21 @@ class LObject(Backupable, Changeable):
     def __post_init__(self, *args, **kwargs):
         Changeable.__post_init__(self, *args, **kwargs)
         Backupable.__post_init__(self, *args, **kwargs)
+
+
+
+class IOHelper:
+    """A helper class to manage objects in the app. It provides methods to open and save objects."""
+
+    model: type[BaseModel]
+
+    def __init__(self, model: type[BaseModel], loader: callable = None, saver: callable = None):
+        self.model = model
+        self.loader = loader
+        self.saver = saver
+
+    def open(self, path: str) -> LObject:
+        return self.loader(path)
+    
+    def save(self, obj: LObject, path: str=None):
+        return self.saver(obj, path)

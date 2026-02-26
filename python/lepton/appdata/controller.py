@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.params import Depends
 from lepton.appdata.models import AppDataModel
-from lepton.core.utils import get_lepton_app
+from lepton.utils import get_lepton_app
 
 
 router = APIRouter()

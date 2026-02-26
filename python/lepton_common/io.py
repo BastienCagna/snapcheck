@@ -3,6 +3,7 @@ import sys
 import importlib
 import inspect
 from typing import Callable
+
 from .callback import Callback
 from os import getcwd, chdir
 
@@ -44,8 +45,6 @@ def serialize(obj):
         return attributes
     else:
         return str(obj)
-
-
 
 
 class DynamicLoader:
@@ -197,4 +196,6 @@ def resolve_references(data, ref_data=None):
 
 
 
+# Instantiate a global dynamic loader to avoid multiple module loadings 
+# and to centralize the dynamic loading management
 globalDynamicLoader = DynamicLoader()
