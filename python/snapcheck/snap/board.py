@@ -27,11 +27,11 @@ class Board(Serializable, HTMLRenderable):
     def get_all_elements(self) -> list[AbstractElement]:
         """Return a flat list of all elements in the board, including those in rows."""
         return list_elements(self.elements)
-    
-    # HTML Rendering    
+
+    # HTML Rendering
     def get_html_content(self):
         return self.elements
-        
+
     def to_html(self, save_path: str | None = None) -> str:
         # Forward additional rendering options (e.g., fill_missing) and ensure title
         html = super().to_html(title=self.title, _style=self.style)

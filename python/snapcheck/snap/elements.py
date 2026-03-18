@@ -18,7 +18,7 @@ class AbstractElement(BaseModel, HTMLRenderable):
 
     def get_html_content(self):
         return "?"
-        
+
     def to_html(self):
         return super().to_html(_style=self.style)
 
@@ -116,8 +116,9 @@ class FileElement(AbstractElement):
                 target_dir = op.join(root_dir, subdir)
                 if not op.exists(target_dir):
                     from os import makedirs
+
                     makedirs(target_dir, exist_ok=True)
-                
+
                 fname = op.basename(self.src)
                 abs_target = op.join(root_dir, subdir, fname)
                 i = 1

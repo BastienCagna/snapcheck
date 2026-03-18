@@ -20,5 +20,8 @@ docs/_autosummary/
 docs/generated/
 docs/frontend-docs/
 
+node_modules/
+package-lock.json
+dist/
 
 snapcheck-front/src/lepton/api-client

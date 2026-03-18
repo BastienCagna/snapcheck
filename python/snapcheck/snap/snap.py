@@ -127,7 +127,7 @@ class Snap(LObject):
             + "To also save the boards content, use the save() method"
         )
         return super().to_json()
-    
+
     def save(self, path: str = None):
         # By default keep the same path
         if path is None:
@@ -193,7 +193,7 @@ class Snap(LObject):
             with open(board_links[b], "w") as f:
                 f.write(board_html)
 
-        # Save home page        
+        # Save home page
         home_html = f"""<html><head><title>{self.title}</title></head><body>"""
         home_html += header
         home_html += "<h2>Boards</h2><ul>"
@@ -266,3 +266,10 @@ def load_snap(path: str) -> Snap:
 def save_snap(snap: Snap, path: str):
     """Save a Snap object to a JSON file"""
     snap.save(path)
+
+
+def new_snap(path: str) -> Snap:
+    """Create a new Snap object with default values."""
+    snap = Snap()
+    snap._path = path
+    return snap

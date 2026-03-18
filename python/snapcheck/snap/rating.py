@@ -16,7 +16,7 @@ class RatingScale(BaseModel):
     def check(self):
         """Verify the object content integrity.
 
-            Note names and values must be unique.
+        Note names and values must be unique.
         """
         names = []
         values = []
@@ -31,19 +31,20 @@ class RatingScale(BaseModel):
 
 class Rating(BaseModel):
     """
-        A rating with a scale for quality control.
-        Attributes:
-            id: Unique identifier for the rating.
-            name: Name of the rating.
-            description: Description of the rating.
-            scale: Scale used for the rating, which can be a NoteScale object.
-            is_boolean: If True, the rating is a boolean (pass/fail).
-            allow_comment: If True, allows adding comments to the rating.
-            value: Value of the rating based on the scale.
-            comment: Optional comment for additional information.
+    A rating with a scale for quality control.
+    Attributes:
+        id: Unique identifier for the rating.
+        name: Name of the rating.
+        description: Description of the rating.
+        scale: Scale used for the rating, which can be a NoteScale object.
+        is_boolean: If True, the rating is a boolean (pass/fail).
+        allow_comment: If True, allows adding comments to the rating.
+        value: Value of the rating based on the scale.
+        comment: Optional comment for additional information.
 
-        Scale can be leaved None if only comment will be used.
+    Scale can be leaved None if only comment will be used.
     """
+
     id: Optional[str] = None
     name: str = ""
     description: str = ""
@@ -55,10 +56,9 @@ class Rating(BaseModel):
     value: Optional[int] = None
     comment: Optional[str] = None
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def generate_id(self):
         if self.id is None and self.name:
             # If not provided, generate an ID from the name
             self.id = self.name.lower().replace(" ", "_")
         return self
-
