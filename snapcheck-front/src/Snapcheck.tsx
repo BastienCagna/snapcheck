@@ -1,15 +1,16 @@
 import Sidebar from './lepton/pages/main/sidebar/sidebar';
 import MainContent from './lepton/pages/main/main';
 import Modal from './lepton/components/lib/modal/modal';
-import { useSnapSession } from './lepton/contexts/SnapSessionContext';
 import TopBar from './lepton/pages/main/topbar/topbar';
 import { useEffect } from 'react';
+import { useLObjectSession } from '@lepton/core/contexts/SessionContext';
 import './Snapcheck.css'
 
 
 const ShortCuts: React.FC<{
 }> = () => {
-    const { snap, toggleShowSidebar } = useSnapSession();
+    // const { snap, toggleShowSidebar } = useSnapSession();
+    const {currentObject: snap} = useLObjectSession();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -27,7 +28,9 @@ const ShortCuts: React.FC<{
 }
 
 function SnapCheck() {
-    const { showSidebar } = useSnapSession();
+    // const { showSidebar } = useSnapSession();
+
+    const {session, openLObject, currentLObjectPath} = useLObjectSession();
     return (
         <div className='app'>
             <ShortCuts />
@@ -35,7 +38,7 @@ function SnapCheck() {
                 <TopBar />
             </div>
             <div className="page-container">
-                <div className='sidebar-container' style={{ display: showSidebar ? "block" : "none" }}>
+                <div className='sidebar-container' style={{ display: false ? "block" : "none" }}>
                     <Sidebar />
                 </div>
                 <div className='main-container'>
