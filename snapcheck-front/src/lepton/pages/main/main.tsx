@@ -18,47 +18,48 @@ const BoardView: React.FC<{ sessionId: string, snapId: string, board: BoardModel
             limitToBounds={false}
             minScale={0.1}
             maxScale={10}
-            panning={{"allowLeftClickPan": false, "allowRightClickPan": false}}
+            panning={{ "allowLeftClickPan": false, "allowRightClickPan": false }}
         >
-            <TransformComponent wrapperStyle={{width: "100%", height: "calc(100vh - 50px)"}} >
+            <TransformComponent wrapperStyle={{ width: "100%", height: "calc(100vh - 50px)" }} >
                 <Board sessionId={sessionId} snapId={snapId} board={board} />
             </TransformComponent>
         </TransformWrapper>
-)};
+    )
+};
 
 
 const MainContent: React.FC<{}> = () => {
-    const { snap, setCurrentBoard, currentBoardIndex, currentBoard, session } = useSnapSession();
+    // const { snap, setCurrentBoard, currentBoardIndex, currentBoard, session } = useSnapSession();
 
-    useEffect(() => {
-        const handleTabKey = (event: KeyboardEvent) => {
-            if (event.key === "Tab") {
-                event.preventDefault();
-                if (snap?.boards && snap.boards.length > 0) {
-                    setCurrentBoard((currentBoardIndex + 1) % snap.boards.length);
-                }
-            }
-        };
-        window.addEventListener("keydown", handleTabKey);
-        return () => {
-            window.removeEventListener("keydown", handleTabKey);
-        };
-    }, [currentBoardIndex, snap, setCurrentBoard]);
+    // useEffect(() => {
+    //     const handleTabKey = (event: KeyboardEvent) => {
+    //         if (event.key === "Tab") {
+    //             event.preventDefault();
+    //             if (snap?.boards && snap.boards.length > 0) {
+    //                 setCurrentBoard((currentBoardIndex + 1) % snap.boards.length);
+    //             }
+    //         }
+    //     };
+    //     window.addEventListener("keydown", handleTabKey);
+    //     return () => {
+    //         window.removeEventListener("keydown", handleTabKey);
+    //     };
+    // }, [currentBoardIndex, snap, setCurrentBoard]);
 
-    if (!snap) {
-        return <div className="vertical-center">
+    // if (!snap) {
+    //     return <div className="vertical-center">
 
-            <Viewer3D>
+    //         <Viewer3D>
 
-            </Viewer3D>
-            {/* <p className='default-text'>Nothing to show.</p> */}
-        </div>
-    }
+    //         </Viewer3D>
+    //         {/* <p className='default-text'>Nothing to show.</p> */}
+    //     </div>
+    // }
 
     return (
         <div>
             <div className="main-header">
-                {
+                {/* {
                     snap?.boards?.length && (
                         <ul className='board-list'>
                             {snap.boards.map((board: BoardModel, index) => (
@@ -69,7 +70,7 @@ const MainContent: React.FC<{}> = () => {
                         </ul>
                     )
                 }
-                <span>{snap?.title}</span>
+                <span>{snap?.title}</span> */}
             </div>
             {/* <BoardView
                 sessionId={session?.id || ""}

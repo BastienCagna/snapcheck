@@ -1,10 +1,10 @@
-import Menu from "../../../components/lib/menu/menu";
-import ServerContent from "../../../components/lib/serverContent";
-import { useAppData } from "../../../contexts/AppDataContext";
-import { useModal } from "../../../contexts/ModalContext";
-import { useSnapSession } from "../../../contexts/SnapSessionContext";
-import DebugPage from "../../debug/debug";
-import SettingsPage from "../../settings/settings";
+// import Menu from "../../../components/lib/menu/menu";
+// import ServerContent from "../../../components/lib/serverContent";
+// import { useAppData } from "../../../contexts/AppDataContext";
+// import { useModal } from "../../../contexts/ModalContext";
+// import { useSnapSession } from "../../../contexts/SnapSessionContext";
+// import DebugPage from "../../debug/debug";
+// import SettingsPage from "../../settings/settings";
 import { Close, FilterNone, Maximize, Minimize } from "@mui/icons-material";
 import { SnapSelector } from "../snapSelector";
 import { useEffect, useRef } from "react";
@@ -17,9 +17,9 @@ declare const QWebChannel: any;
 
 const TopBar: React.FC<{
 }> = () => {
-    const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards, saveSnap, saveSnapAs } = useSnapSession();
-    const { showModal } = useModal();
-    const { history } = useAppData();
+    // const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards, saveSnap, saveSnapAs } = useSnapSession();
+    // const { showModal } = useModal();
+    // const { history } = useAppData();
 
     // Variables pour gérer le double-clic
     const dragTimer = useRef<number | null>(null);
@@ -55,7 +55,7 @@ const TopBar: React.FC<{
                 // reader.onload = (event) => { ... };
                 // reader.readAsText(file);
                 console.log("user selected:", file.path, file)
-                openSnap(file.path);
+                // openSnap(file.path);
             }
         };
         input.click();
@@ -150,7 +150,7 @@ const TopBar: React.FC<{
         onDoubleClick={handleDoubleClick}
     >
         <div>
-            <img src="assets/icon-32.png" className="app-logo" />
+            {/* <img src="assets/icon-32.png" className="app-logo" />
             <Menu items={[
                 {
                     label: "File", children: [
@@ -197,7 +197,7 @@ const TopBar: React.FC<{
                         { label: "Debug", onClick: () => { showModal(<DebugPage />) } },
                     ]
                 },
-            ]} />
+            ]} /> */}
         </div>
         <div className="snap-selector-container">
             <SnapSelector />

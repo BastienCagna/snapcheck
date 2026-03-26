@@ -9,8 +9,8 @@ const ImageElementComponent = React.lazy(() => import('../../components/elements
 
 const renderElement = (sessionId: string, snapId: string, element: any) => {
     console.log("render", element);
-    if(!element?.type) {
-        if(!element?.content) return element;
+    if (!element?.type) {
+        if (!element?.content) return element;
         return element.content;
     }
 
@@ -43,31 +43,31 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
 };
 
 
-const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardModel, element: any}> = ({ sessionId, snapId, board, element }) => {
-    const { updateFieldDebounced } = useSnapSessionActions();
+const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardModel, element: any }> = ({ sessionId, snapId, board, element }) => {
+    // const { updateFieldDebounced } = useSnapSessionActions();
 
     const allIntendedRatings = board.elements?.flatMap(el => el.intended_ratings || []) || [];
 
     const menuItems: any[] = [
-        {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')},
-        ...allIntendedRatings.map(rating => ({
-            label: rating.name,
-            items: [
-                ...(rating.scale?.ratings.map((rate, index) => ({
-                    label: rate.name,
-                    onClick: () => updateFieldDebounced(snapId, `ratings.{id:${rating.id}}.value`, rate.value),
-                    style:{ backgroundColor: rate.color || "" }
-                })) || []),
-                { label: "Comment", onClick: () => console.log('Comment clicked') },
-                { label: "Infos", onClick: () => console.log('Infos clicked') },
-            ]
-        }))
+        // {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')},
+        // ...allIntendedRatings.map(rating => ({
+        //     label: rating.name,
+        //     items: [
+        //         ...(rating.scale?.ratings.map((rate, index) => ({
+        //             label: rate.name,
+        //             onClick: () => updateFieldDebounced(snapId, `ratings.{id:${rating.id}}.value`, rate.value),
+        //             style:{ backgroundColor: rate.color || "" }
+        //         })) || []),
+        //         { label: "Comment", onClick: () => console.log('Comment clicked') },
+        //         { label: "Infos", onClick: () => console.log('Infos clicked') },
+        //     ]
+        // }))
     ];
 
     return (
         <ContextualMenu parentClass="board" items={[]}>
             <div className="board-element">
-                    {renderElement(sessionId, snapId, element)}
+                {renderElement(sessionId, snapId, element)}
             </div>
         </ContextualMenu>
     );

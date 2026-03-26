@@ -13,15 +13,15 @@ const Modal: React.FC<ModalProps> = () => {
     const [isDraggingWidth, setIsDraggingWidth] = useState<boolean>(false);
 
     return <div className="modal" style={{ width, visibility: content !== null ? "visible" : "hidden" }}>
-        <div 
-            className="modal-separator" 
+        <div
+            className="modal-separator"
             onMouseDown={() => setIsDraggingWidth(true)}
             onMouseUp={() => setIsDraggingWidth(false)}
-            onMouseMove={(e) => { 
-                if (!isDraggingWidth) return 
+            onMouseMove={(e) => {
+                if (!isDraggingWidth) return
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
                 const dist = e.clientX - rect.right
-                setWidth(width + dist) 
+                setWidth(width + dist)
             }}
             onMouseLeave={(e) => {
                 const rect = (e.target as HTMLElement).getBoundingClientRect();
@@ -32,7 +32,7 @@ const Modal: React.FC<ModalProps> = () => {
             }}
         />
         <div className="modal-content">
-            <div style={{ textAlign: "right" }} onClick={() => hideModal()}><Close className='fb-item-icon'/></div>
+            <div style={{ textAlign: "right" }} onClick={() => hideModal()}><Close className='fb-item-icon' /></div>
             {content}
         </div>
     </div>

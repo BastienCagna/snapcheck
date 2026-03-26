@@ -5,12 +5,13 @@ import TopBar from './lepton/pages/main/topbar/topbar';
 import { useEffect } from 'react';
 import { useLObjectSession } from '@lepton/core/contexts/SessionContext';
 import './Snapcheck.css'
+import { useAppUIState } from './contexts/AppUIStateContext';
 
 
 const ShortCuts: React.FC<{
 }> = () => {
     // const { snap, toggleShowSidebar } = useSnapSession();
-    const {currentObject: snap} = useLObjectSession();
+    const { currentObject: snap } = useLObjectSession();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,9 +29,8 @@ const ShortCuts: React.FC<{
 }
 
 function SnapCheck() {
-    // const { showSidebar } = useSnapSession();
-
-    const {session, openLObject, currentLObjectPath} = useLObjectSession();
+    // const { session, openLObject, currentLObjectPath } = useLObjectSession();
+    const { showSidebar } = useAppUIState();
     return (
         <div className='app'>
             <ShortCuts />
@@ -38,18 +38,19 @@ function SnapCheck() {
                 <TopBar />
             </div>
             <div className="page-container">
-                <div className='sidebar-container' style={{ display: false ? "block" : "none" }}>
+                <div className='sidebar-container' style={{ display: showSidebar ? "block" : "none" }}>
                     <Sidebar />
                 </div>
                 <div className='main-container'>
                     <div className="board-container">
                         <MainContent />
                     </div>
-                    <div className='modal-container'>
+                    {/* <div className='modal-container'>
                         <Modal />
-                    </div>
+                    </div> */}
                 </div>
             </div>
+
         </div>
     )
 }

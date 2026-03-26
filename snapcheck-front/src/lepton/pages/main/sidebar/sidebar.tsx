@@ -27,19 +27,19 @@ function boardHasRating(board: BoardModel, rating: RatingModel) {
 const FilesControl: React.FC<{
 }> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
-    const { openSnap } = useSnapSession();
+    // const { openSnap } = useSnapSession();
 
     return <FilesBrowser
-            path={currentPath}
-            onPathChange={(p) => setCurrentPath(p)}
-            onFileSelect={openSnap}
-            extensions={[".snpk"]}
-        />
+        path={currentPath}
+        onPathChange={(p) => setCurrentPath(p)}
+        // onFileSelect={openSnap}
+        extensions={[".snpk"]}
+    />
 }
 
 const SnapControl: React.FC<{}> = () => {
-    const { snap, currentBoard } = useSnapSession();
-    const { updateFieldDebounced } = useSnapSessionActions();
+    // const { snap, currentBoard } = useSnapSession();
+    // const { updateFieldDebounced } = useSnapSessionActions();
     const [showAllratings, setShowAllRatings] = React.useState(true);
 
     return <div className="snap-control-panel">
@@ -53,13 +53,13 @@ const SnapControl: React.FC<{}> = () => {
         </div>
 
         <div className="ratings-list">
-            {snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
+            {/* {snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
                 <RatingInput
                     key={rating.id}
                     rating={rating}
-                    onChange={(id, field, value) => { updateFieldDebounced(snap.id, `ratings.{id:${id}}.${field}`, value);}}
+                    onChange={(id, field, value) => { updateFieldDebounced(snap.id, `ratings.{id:${id}}.${field}`, value); }}
                     highlight={(showAllratings && currentBoard && boardHasRating(currentBoard, rating)) || false} />
-            ))}
+            ))} */}
         </div>
     </div>
 }
@@ -75,12 +75,12 @@ const MetadataControl: React.FC<{
 }
 
 const Sidebar: React.FC<{}> = ({ }) => {
-    const { snap: snap } = useSnapSession();
+    // const { snap: snap } = useSnapSession();
 
     const menuItems: StackSection[] = [
         { id: "files", title: "Files", content: <FilesControl /> },
         { id: "snap", title: "Ratings", content: <SnapControl /> },
-        { id: "metadata", title: "Metadata", content: <MetadataControl snap={snap} /> },
+        // { id: "metadata", title: "Metadata", content: <MetadataControl snap={snap} /> },
     ];
 
     return (
