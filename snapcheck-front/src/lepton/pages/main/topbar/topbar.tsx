@@ -1,4 +1,4 @@
-// import Menu from "../../../components/lib/menu/menu";
+import Menu from "../../../components/lib/menu/menu";
 // import ServerContent from "../../../components/lib/serverContent";
 // import { useAppData } from "../../../contexts/AppDataContext";
 // import { useModal } from "../../../contexts/ModalContext";
@@ -9,6 +9,8 @@ import { Close, FilterNone, Maximize, Minimize } from "@mui/icons-material";
 import { SnapSelector } from "../snapSelector";
 import { useEffect, useRef } from "react";
 import "./topbar.css";
+import { useAppUIState } from "../../../../contexts/AppUIStateContext";
+import { useLObjectSession } from "@lepton/core/contexts/SessionContext";
 
 
 // Declare missing globals and types
@@ -20,6 +22,8 @@ const TopBar: React.FC<{
     // const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards, saveSnap, saveSnapAs } = useSnapSession();
     // const { showModal } = useModal();
     // const { history } = useAppData();
+    const { showSidebar, setState } = useAppUIState();
+    const { currentObject: snap, saveLObject, saveLObjectAs, openLObject } = useLObjectSession();
 
     // Variables pour gérer le double-clic
     const dragTimer = useRef<number | null>(null);
@@ -55,7 +59,7 @@ const TopBar: React.FC<{
                 // reader.onload = (event) => { ... };
                 // reader.readAsText(file);
                 console.log("user selected:", file.path, file)
-                // openSnap(file.path);
+                openLObject(file.path);
             }
         };
         input.click();
@@ -150,54 +154,54 @@ const TopBar: React.FC<{
         onDoubleClick={handleDoubleClick}
     >
         <div>
-            {/* <img src="assets/icon-32.png" className="app-logo" />
+            <img src="assets/icon-32.png" className="app-logo" />
             <Menu items={[
                 {
                     label: "File", children: [
                         { label: "Open file...", onClick: openFile },
-                        {
-                            label: "Open recent...",
-                            children: history && history.length > 0
-                                ? history.map(file => ({
-                                    label: file.length > 20 ? `...${file.slice(-20)}` : file,
-                                    onClick: () => openSnap(file)
-                                }))
-                                : [{ label: "No recent files", disabled: true }]
-                        },
+                        // {
+                        //     label: "Open recent...",
+                        //     children: history && history.length > 0
+                        //         ? history.map(file => ({
+                        //             label: file.length > 20 ? `...${file.slice(-20)}` : file,
+                        //             onClick: () => openSnap(file)
+                        //         }))
+                        //         : [{ label: "No recent files", disabled: true }]
+                        // },
                         { type: "separator" },
-                        { label: "Reload", onClick: openSnap, disabled: !snap },
-                        { label: "Save", onClick: () => { snap?.id && saveSnap(snap.id) }, disabled: !snap?.has_changed },
-                        { label: "Save As...", onClick: () => { snap?.id && saveSnapAs(snap.id, "newPath") }, disabled: !snap?.has_changed },
-                        { label: "Close", onClick: closeCurrentSnap, disabled: !snap },
-                        { label: "Close All", onClick: () => { }, disabled: !snap },
+                        // { label: "Reload", onClick: openSnap, disabled: !snap },
+                        { label: "Save", onClick: () => { snap?.id && saveLObject(snap.id) }, disabled: !snap?.has_changed },
+                        { label: "Save As...", onClick: () => { snap?.id && saveLObjectAs(snap.id, "newPath") }, disabled: !snap?.has_changed },
+                        // { label: "Close", onClick: closeCurrentSnap, disabled: !snap },
+                        // { label: "Close All", onClick: () => { }, disabled: !snap },
                         { type: "separator" },
                         { label: "Export to PDF", onClick: () => { }, disabled: !snap },
                         { label: "Export to HTML", onClick: () => { }, disabled: !snap },
-                        { type: "separator" },
-                        { label: "Settings...", onClick: () => { showModal(<SettingsPage />) } },
+                        // { type: "separator" },
+                        // { label: "Settings...", onClick: () => { showModal(<SettingsPage />) } },
                         { type: "separator" },
                         { label: "Quit", onClick: close }
                     ]
                 },
                 {
                     label: "Edit", children: [
-                        { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
-                        { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
+                        // { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
+                        // { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
                     ]
                 },
                 {
                     label: "View", children: [
-                        { label: "Show Sidebar", onClick: toggleShowSidebar },
-                        { label: "Sync boards", onClick: toggleSyncBoards, disabled: !snap || !currentBoard }
+                        { label: "Show Sidebar", onClick: () => setState({ showSidebar: !showSidebar }), checked: showSidebar },
+                        // { label: "Sync boards", onClick: toggleSyncBoards, disabled: !snap || !currentBoard }
                     ]
                 },
                 {
                     label: "More", children: [
-                        { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) } },
-                        { label: "Debug", onClick: () => { showModal(<DebugPage />) } },
+                        // { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) } },
+                        // { label: "Debug", onClick: () => { showModal(<DebugPage />) } },
                     ]
                 },
-            ]} /> */}
+            ]} />
         </div>
         <div className="snap-selector-container">
             <SnapSelector />

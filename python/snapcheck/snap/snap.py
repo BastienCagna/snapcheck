@@ -74,52 +74,42 @@ class Snap(LObject):
             else:
                 raise ValueError(f"Note with ID '{ratingId}' not found.")
 
-    def to_dict(self, validate=False, compress=True, clean=False) -> None:
-        """Return the object as dict (optionally after validation)"""
-        # Validate before saving
-        if validate:
-            self._validate()
+    # def _compress(self, data: dict) -> dict:
+    #     # List all the scale to save them and use references in ratings
+    #     scales = {}
+    #     ser_scales = []
+    #     for real_rating, ser_rating in zip(self.ratings, data["ratings"]):
+    #         if real_rating is None or real_rating.scale is None:
+    #             continue
+    #         if len(scales) == 0 or real_rating.scale not in scales.values():
+    #             id = f"@._scales#{len(scales)}"
+    #             scales[id] = real_rating.scale
+    #             ser_scales.append(ser_rating["scale"])
+    #         else:
+    #             for id, scale in scales.items():
+    #                 if scale == real_rating.scale:
+    #                     break
+    #             else:
+    #                 raise KeyError(f"Cannot found scale {scale}")
+    #         ser_rating["scale"] = id
 
-        data = super().to_dict(clean=clean)
+    #     # Replace intended_ratings of each board to their references
+    #     # TODO: do it recursively in elements
+    #     for item in data["boards"]:
+    #         ref_intended_ratings = []
+    #         for el in item["elements"]:
+    #             for rating in el["intended_ratings"]:
+    #                 rating_id = rating["id"]
+    #                 for n, rating in enumerate(data["ratings"]):
+    #                     if rating["id"] == rating_id:
+    #                         ref_intended_ratings.append(f"@.ratings#{n}")
+    #                         break
+    #         item["intended_ratings"] = ref_intended_ratings
 
-        if not compress:
-            return data
+    #     # List all the ratings to use references (ids) in boards
+    #     data["_scales"] = ser_scales
 
-        # List all the scale to save them and use references in ratings
-        scales = {}
-        ser_scales = []
-        for real_rating, ser_rating in zip(self.ratings, data["ratings"]):
-            if real_rating is None or real_rating.scale is None:
-                continue
-            if len(scales) == 0 or real_rating.scale not in scales.values():
-                id = f"@._scales#{len(scales)}"
-                scales[id] = real_rating.scale
-                ser_scales.append(ser_rating["scale"])
-            else:
-                for id, scale in scales.items():
-                    if scale == real_rating.scale:
-                        break
-                else:
-                    raise KeyError(f"Cannot found scale {scale}")
-            ser_rating["scale"] = id
-
-        # Replace intended_ratings of each board to their references
-        # TODO: do it recursively in elements
-        for item in data["boards"]:
-            ref_intended_ratings = []
-            for el in item["elements"]:
-                for rating in el["intended_ratings"]:
-                    rating_id = rating["id"]
-                    for n, rating in enumerate(data["ratings"]):
-                        if rating["id"] == rating_id:
-                            ref_intended_ratings.append(f"@.ratings#{n}")
-                            break
-            item["intended_ratings"] = ref_intended_ratings
-
-        # List all the ratings to use references (ids) in boards
-        data["_scales"] = ser_scales
-
-        return data
+    #     return data
 
     def to_json(self, path: str):
         warn(
@@ -131,9 +121,9 @@ class Snap(LObject):
     def save(self, path: str = None):
         # By default keep the same path
         if path is None:
-            if self._path is None:
+            if self._filepath is None:
                 raise ValueError("No path provided to save the Snap object.")
-            path = self._path
+            path = self._filepath
 
         # Create the content directory
         fname = op.basename(path).split(".")[-2]
@@ -165,7 +155,7 @@ class Snap(LObject):
         archive_path = shutil.make_archive(base_name=base_name, format="zip", root_dir=tmp_dir.name)
         # If the extension is not .snap, rename the archive
         rename(archive_path, path)
-        self._path = path
+        self._filepath = path
 
         self._has_changed = False
 
@@ -245,7 +235,7 @@ def load_snap(path: str) -> Snap:
     # Find the JSON file at the root of the archive
     json_files = [f for f in listdir(tmp_dir.name) if f.endswith(".json")]
     if not json_files:
-        raise FileNotFoundError("No JSON file found at the root of the archive.")
+        raise FileNotFoundError(f"{path} is an invalid Snap. No JSON file found at the root of the archive.")
     json_path = op.join(tmp_dir.name, json_files[0])
     js_path = json_path
 
@@ -253,8 +243,7 @@ def load_snap(path: str) -> Snap:
         data = json.load(f)
 
     snap = Snap.from_dict(data)
-    snap._path = path
-    del snap._scales
+    snap._filepath = path
     snap._dir = tmp_dir
 
     # Validate the loaded object
@@ -271,5 +260,5 @@ def save_snap(snap: Snap, path: str):
 def new_snap(path: str) -> Snap:
     """Create a new Snap object with default values."""
     snap = Snap()
-    snap._path = path
+    snap._filepath = path
     return snap

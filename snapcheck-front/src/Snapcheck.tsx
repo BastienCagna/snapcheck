@@ -10,20 +10,19 @@ import { useAppUIState } from './contexts/AppUIStateContext';
 
 const ShortCuts: React.FC<{
 }> = () => {
-    // const { snap, toggleShowSidebar } = useSnapSession();
-    const { currentObject: snap } = useLObjectSession();
+    const { showSidebar, setState } = useAppUIState();
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // ctrl+b toggle sidebar
             if (e.ctrlKey && e.key.toLowerCase() === "b") {
                 e.preventDefault();
-                toggleShowSidebar();
+                setState({ showSidebar: !showSidebar });
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [snap]);
+    });
 
     return <></>
 }

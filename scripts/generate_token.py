@@ -1,5 +1,5 @@
 from lepton.auth import TokenData
-from snapserve.main import app
+from snapserve import app
 import sys
 
 

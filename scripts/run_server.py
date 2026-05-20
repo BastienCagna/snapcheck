@@ -1,5 +1,5 @@
 from lepton.app import DEFAULT_HOST, DEFAULT_PORT
-from snapserve.main import app
+from snapserve import app
 import argparse
 
 

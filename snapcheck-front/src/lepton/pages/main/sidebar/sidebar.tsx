@@ -11,6 +11,7 @@ import './sidebar.css';
 import { useSnapSession, useSnapSessionActions } from '../../../contexts/SnapSessionContext';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 import VerticalStackLayout, { type StackSection } from '../../../components/lib/layouts/verticalStackLayout';
+import { useLObjectSession } from '@lepton/core/contexts/SessionContext';
 
 
 function boardHasRating(board: BoardModel, rating: RatingModel) {
@@ -27,12 +28,12 @@ function boardHasRating(board: BoardModel, rating: RatingModel) {
 const FilesControl: React.FC<{
 }> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
-    // const { openSnap } = useSnapSession();
+    const { openLObject } = useLObjectSession();
 
     return <FilesBrowser
         path={currentPath}
         onPathChange={(p) => setCurrentPath(p)}
-        // onFileSelect={openSnap}
+        onFileSelect={openLObject}
         extensions={[".snpk"]}
     />
 }

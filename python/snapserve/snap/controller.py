@@ -1,6 +1,7 @@
 from typing import List, Optional, Any
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from lepton.session.controller import get_session_from_token
 from snapserve.snap.models import SnapModel, SnapCheckSessionModel
 from fastapi.responses import FileResponse
 import os.path as op
@@ -30,41 +31,41 @@ class LightweightResponse(BaseModel):
     timestamp: float
 
 
-@router.get("/{sid}/open/{path:path}", response_model=SnapModel)
-def open_snap(sid: str, path: str):
-    # TODO: implent and also use sid
-    item = snap_store.open(sid, path)
-    APP_DATA.add_to_history(path)
-    if not item:
-        raise HTTPException(status_code=404, detail="Snap not found")
-    return item.to_dict(clean=True)
+# @router.get("/{sid}/open/{path:path}", response_model=SnapModel)
+# def open_snap(path: str, session=Depends(get_session_from_token)):
+#     # TODO: implent and also use sid
+#     item = snap_store.open(sid, path)
+#     APP_DATA.add_to_history(path)
+#     if not item:
+#         raise HTTPException(status_code=404, detail="Snap not found")
+#     return item.to_dict(clean=True)
 
 
-@router.get("/{sid}/{snapid}/close", response_model=None)
-def close_snap(sid: str, snapid: str):
-    item = snap_store.get_by_id(snapid)
-    if not item:
-        raise HTTPException(status_code=404, detail="Snap not found")
-    snap_store.close(sid, snapid)
-    return None
+# @router.get("/{sid}/{snapid}/close", response_model=None)
+# def close_snap(sid: str, snapid: str):
+#     item = snap_store.get_by_id(snapid)
+#     if not item:
+#         raise HTTPException(status_code=404, detail="Snap not found")
+#     snap_store.close(sid, snapid)
+#     return None
 
 
-@router.get("/{sid}/{snapid}/save", response_model=SnapModel)
-def save_snap(sid: str, snapid: str):
-    item = snap_store.get_by_id(snapid)
-    if not item:
-        raise HTTPException(status_code=404, detail="Snap not found")
-    item.snap.save()
-    return item.to_dict(clean=True)
+# @router.get("/{sid}/{snapid}/save", response_model=SnapModel)
+# def save_snap(sid: str, snapid: str):
+#     item = snap_store.get_by_id(snapid)
+#     if not item:
+#         raise HTTPException(status_code=404, detail="Snap not found")
+#     item.snap.save()
+#     return item.to_dict(clean=True)
 
 
-@router.get("/{sid}/{snapid}/saveas", response_model=SnapModel)
-def save_snap_as(sid: str, snapid: str, path: str):
-    item = snap_store.get_by_id(snapid)
-    if not item:
-        raise HTTPException(status_code=404, detail="Snap not found")
-    item.snap.save(path)
-    return item.to_dict(clean=True)
+# @router.get("/{sid}/{snapid}/saveas", response_model=SnapModel)
+# def save_snap_as(sid: str, snapid: str, path: str):
+#     item = snap_store.get_by_id(snapid)
+#     if not item:
+#         raise HTTPException(status_code=404, detail="Snap not found")
+#     item.snap.save(path)
+#     return item.to_dict(clean=True)
 
 
 @router.get("/{sid}/{snapid}/image/{src:path}")

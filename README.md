@@ -117,7 +117,7 @@ Set the ```SNAP_UNSAFE``` environment variable to 1 to disable API security chec
 ## Install
 
 ### For development
-The project use [Pixi](https://pixi.sh/latest/) (Conda) to manage depencies and build.
+The project use [Pixi](https://pixi.sh/latest/) (Conda) to manage dependencies and build.
 
 ```
 pixi shell
