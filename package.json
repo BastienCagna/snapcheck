@@ -19,7 +19,8 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "react-zoom-pan-pinch": "^3.7.0",
-    "@lepton/core": "../lepton/dist"
+    "@lepton/core": "../lepton/dist",
+    "@lepton/api-client": "../lepton/node_modules/@lepton/api-client"
   },
   "devDependencies": {
     "openapi-typescript-codegen": "^0.29.0",
