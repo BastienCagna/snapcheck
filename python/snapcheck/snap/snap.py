@@ -74,43 +74,6 @@ class Snap(LObject):
             else:
                 raise ValueError(f"Note with ID '{ratingId}' not found.")
 
-    # def _compress(self, data: dict) -> dict:
-    #     # List all the scale to save them and use references in ratings
-    #     scales = {}
-    #     ser_scales = []
-    #     for real_rating, ser_rating in zip(self.ratings, data["ratings"]):
-    #         if real_rating is None or real_rating.scale is None:
-    #             continue
-    #         if len(scales) == 0 or real_rating.scale not in scales.values():
-    #             id = f"@._scales#{len(scales)}"
-    #             scales[id] = real_rating.scale
-    #             ser_scales.append(ser_rating["scale"])
-    #         else:
-    #             for id, scale in scales.items():
-    #                 if scale == real_rating.scale:
-    #                     break
-    #             else:
-    #                 raise KeyError(f"Cannot found scale {scale}")
-    #         ser_rating["scale"] = id
-
-    #     # Replace intended_ratings of each board to their references
-    #     # TODO: do it recursively in elements
-    #     for item in data["boards"]:
-    #         ref_intended_ratings = []
-    #         for el in item["elements"]:
-    #             for rating in el["intended_ratings"]:
-    #                 rating_id = rating["id"]
-    #                 for n, rating in enumerate(data["ratings"]):
-    #                     if rating["id"] == rating_id:
-    #                         ref_intended_ratings.append(f"@.ratings#{n}")
-    #                         break
-    #         item["intended_ratings"] = ref_intended_ratings
-
-    #     # List all the ratings to use references (ids) in boards
-    #     data["_scales"] = ser_scales
-
-    #     return data
-
     def to_json(self, path: str):
         warn(
             "Using to_json() method on Snap object will only save metadata.\n"
