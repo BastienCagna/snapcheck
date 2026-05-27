@@ -25,7 +25,7 @@ class AbstractElement(BaseModel, HTMLRenderable):
 
 class Element(AbstractElement):
     type: Literal["default"] = "default"
-    content: Union[str, "Element", None] = None
+    content: Union[str, "ElementUnion", None, List[Union["ElementUnion", str, None]]] = None
 
     def get_html_content(self) -> str:
         return self.content
@@ -34,7 +34,7 @@ class Element(AbstractElement):
 class RowElement(Element):
     type: Literal["row"] = "row"
     style: dict = field(default_factory=lambda: {"display": "flex"})
-    content: list = field(default_factory=list)
+    content: List[Union[str, "ElementUnion", None, List[Union["ElementUnion", str, None]]]] = field(default_factory=list)
 
     def __len__(self):
         return len(self.content)

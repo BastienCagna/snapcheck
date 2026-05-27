@@ -8,10 +8,25 @@ const DefaultElementComponent = React.lazy(() => import('../../components/elemen
 const ImageElementComponent = React.lazy(() => import('../../components/elements/image'));
 
 const renderElement = (snapId: string, element: any) => {
-    console.log("render", element);
+    if (element == null) {
+        return null;
+    }
+
+    if (Array.isArray(element)) {
+        return element.map((child, index) => (
+            <React.Fragment key={index}>{renderElement(snapId, child)}</React.Fragment>
+        ));
+    }
+
+    if (typeof element !== 'object') {
+        return element;
+    }
+
     if (!element?.type) {
-        if (!element?.content) return element;
-        return element.content;
+        if (Object.prototype.hasOwnProperty.call(element, 'content')) {
+            return renderElement(snapId, element.content);
+        }
+        return null;
     }
 
     switch (element.type) {
@@ -28,7 +43,8 @@ const renderElement = (snapId: string, element: any) => {
         //       </Suspense>
         //     );
         case "row":
-            return <div style={{ display: 'flex', flexDirection: 'row', ...element.style }}>
+            // TODO: use style from element
+            return <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', ...element.style }}>
                 {element.content?.map((child: any, index: number) => (
                     <div key={index} style={{ marginRight: index < element.content.length - 1 ? '8px' : '0' }}>
                         {renderElement(snapId, child)}
