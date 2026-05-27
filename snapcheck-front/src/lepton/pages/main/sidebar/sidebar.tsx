@@ -28,12 +28,12 @@ function boardHasRating(board: BoardModel, rating: RatingModel) {
 const FilesControl: React.FC<{
 }> = () => {
     const [currentPath, setCurrentPath] = React.useState<string | null>(null);
-    const { openLObject } = useLObjectSession();
+    const { openLObject, setCurrentLObject, setLObjectSetting } = useLObjectSession();
 
     return <FilesBrowser
         path={currentPath}
         onPathChange={(p) => setCurrentPath(p)}
-        onFileSelect={openLObject}
+        onFileSelect={(path: string) => {openLObject(path); setCurrentLObject(path); setLObjectSetting("currentBoard", 0, path);}}
         extensions={[".snpk"]}
     />
 }

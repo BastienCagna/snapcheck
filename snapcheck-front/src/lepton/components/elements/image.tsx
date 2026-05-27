@@ -2,11 +2,10 @@ import React, { useEffect } from 'react';
 import { OpenAPI } from '@lepton/api-client';
 
 const ImageElementComponent: React.FC<{
-    sessionId: string;
     snapId: string;
     src: string;
     style?: React.CSSProperties;
-}> = ({ sessionId, snapId, src, style }) => {
+}> = ({ snapId, src, style }) => {
 
     const [imageUrl, setImageUrl] = React.useState<string | null>(null);
 
@@ -15,7 +14,7 @@ const ImageElementComponent: React.FC<{
         const fetchImage = async () => {
             try {
                 const response = await fetch(
-                    `${OpenAPI.BASE}/snap/${sessionId}/${snapId}/image/${src}`,
+                    `${OpenAPI.BASE}/objects/${snapId}/image/${src}`,
                     {
                         method: 'GET',
                         headers: OpenAPI.HEADERS || {}
@@ -37,7 +36,7 @@ const ImageElementComponent: React.FC<{
                 URL.revokeObjectURL(url);
             }
         };
-    }, [sessionId, snapId, src]);
+    }, [snapId, src]);
 
     return imageUrl ? (
         <img src={imageUrl} alt={src} style={style} />

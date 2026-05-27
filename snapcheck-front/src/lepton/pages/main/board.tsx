@@ -7,7 +7,7 @@ import { useSnapSession, useSnapSessionActions } from '../../contexts/SnapSessio
 const DefaultElementComponent = React.lazy(() => import('../../components/elements/default'));
 const ImageElementComponent = React.lazy(() => import('../../components/elements/image'));
 
-const renderElement = (sessionId: string, snapId: string, element: any) => {
+const renderElement = (snapId: string, element: any) => {
     console.log("render", element);
     if (!element?.type) {
         if (!element?.content) return element;
@@ -18,7 +18,7 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
         case 'image':
             return (
                 <Suspense fallback={<div>Loading...</div>}>
-                    <ImageElementComponent sessionId={sessionId} snapId={snapId} src={element.src} style={element.style} />
+                    <ImageElementComponent snapId={snapId} src={element.src} style={element.style} />
                 </Suspense>
             );
         //   case '3d':
@@ -31,19 +31,19 @@ const renderElement = (sessionId: string, snapId: string, element: any) => {
             return <div style={{ display: 'flex', flexDirection: 'row', ...element.style }}>
                 {element.content?.map((child: any, index: number) => (
                     <div key={index} style={{ marginRight: index < element.content.length - 1 ? '8px' : '0' }}>
-                        {renderElement(sessionId, snapId, child)}
+                        {renderElement(snapId, child)}
                     </div>
                 ))}
             </div>;
         case "default":
-            return <DefaultElementComponent style={element.style} content={renderElement(sessionId, snapId, element.content)} />
+            return <DefaultElementComponent style={element.style} content={renderElement(snapId, element.content)} />
         default:
             return <p className='error-text'>Unsupported element type: {element.type}</p>;
     }
 };
 
 
-const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardModel, element: any }> = ({ sessionId, snapId, board, element }) => {
+const BoardElement: React.FC<{ snapId: string, board: BoardModel, element: any }> = ({ snapId, board, element }) => {
     // const { updateFieldDebounced } = useSnapSessionActions();
 
     const allIntendedRatings = board.elements?.flatMap(el => el.intended_ratings || []) || [];
@@ -67,13 +67,13 @@ const BoardElement: React.FC<{ sessionId: string, snapId: string, board: BoardMo
     return (
         <ContextualMenu parentClass="board" items={[]}>
             <div className="board-element">
-                {renderElement(sessionId, snapId, element)}
+                {renderElement(snapId, element)}
             </div>
         </ContextualMenu>
     );
 }
 
-const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> = ({ sessionId, snapId, board }) => {
+const Board: React.FC<{ snapId: string, board: BoardModel }> = ({ snapId, board }) => {
     const [boardElements, setBoardElements] = useState<any[]>([]);
 
     useEffect(() => {
@@ -85,7 +85,7 @@ const Board: React.FC<{ sessionId: string, snapId: string, board: BoardModel }> 
     return (
         <div className="board">
             {board.description && <p>{board.description}</p>}
-            {boardElements.map((element, index) => <BoardElement key={index} sessionId={sessionId} snapId={snapId} board={board} element={element} />)}
+            {boardElements.map((element, index) => <BoardElement key={index} snapId={snapId} board={board} element={element} />)}
         </div>
     );
 };

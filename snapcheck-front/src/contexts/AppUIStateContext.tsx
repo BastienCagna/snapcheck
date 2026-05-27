@@ -1,4 +1,4 @@
-import { createUIStateContext } from '@lepton/core/contexts/UIStateContext';
+import { createLStateContext } from '@lepton/core/contexts/LStateContext';
 
 
 const AppUIState = {
@@ -6,10 +6,10 @@ const AppUIState = {
 };
 
 export const {
-    UIStateProvider: AppUIStateProvider,
-    useUIState: useAppUIState,
-    useUIStateValue: useAppUIStateValue,
-    useUIStateActions: useAppUIStateActions
-} = createUIStateContext(AppUIState);
+    LStateProvider: AppUIStateProvider,
+    useLState: useAppUIState,
+    useLStateValue: useAppUIStateValue,
+    useLStateActions: useAppUIStateActions
+} = createLStateContext(AppUIState);
 
 
