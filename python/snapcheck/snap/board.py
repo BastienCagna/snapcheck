@@ -29,8 +29,29 @@ class Board(Serializable, HTMLRenderable):
         return list_elements(self.elements)
 
     # HTML Rendering
-    def get_html_content(self):
-        return self.elements
+    def _generate_board_html_sidebar(self) -> str:
+        sidebar = f"""<div class='snap-sidebar'>
+            <h3>Ratings</h3>
+            <table class="snap-sidebar-table">"""
+        for rating in self.all_intended_ratings:
+            sidebar += f"<tr><th>{rating.name} </th><td>{rating.value}</td></tr>"
+        sidebar += "</table></div>"
+        return sidebar
+
+    def get_html_content(self) -> str:
+        content_html = "".join(
+            item.to_html() if isinstance(item, HTMLRenderable) else str(item)
+            for item in self.elements
+        )
+        html =  f"""
+            <div class="snap-board">
+                {self._generate_board_html_sidebar()}
+                <div class="snap-board-content">
+                    {content_html}
+                </div>
+            </div>
+        """
+        return html
 
     def to_html(self, save_path: str | None = None) -> str:
         # Forward additional rendering options (e.g., fill_missing) and ensure title
@@ -40,3 +61,4 @@ class Board(Serializable, HTMLRenderable):
             with open(save_path, "w") as f:
                 f.write(html)
         return html
+

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, List
 from os import makedirs, mkdir, rename, listdir
 import json
@@ -9,6 +10,7 @@ from warnings import warn
 import os.path as op
 from xhtml2pdf import pisa
 from pypdf import PdfWriter
+from bs4 import BeautifulSoup as bs
 
 from lepton_common import LObject
 from snapcheck.snap.board import AbstractElement, Board
@@ -20,6 +22,10 @@ def html_to_pdf(html_string, output_path):
     with open(output_path, "w+b") as pdf_file:
         pisa.CreatePDF(html_string, dest=pdf_file)
 
+def prettify_html(html_string: str) -> str:
+    """Prettify the HTML string for better readability."""
+    soup = bs(html_string, "html.parser")
+    return soup.prettify()
 
 @dataclass
 class Snap(LObject):
@@ -122,6 +128,22 @@ class Snap(LObject):
 
         self._has_changed = False
 
+
+    def _generate_board_html_header(self, board_index: int) -> str:
+        header = f"""<div class='snap-header'>
+            <div class='snap-title'>
+                <a href='00_INDEX.html'>{self.title}</a>
+            </div>
+            <nav class='snap-nav'>
+                <ul>"""
+        for b, board in enumerate(self.boards):
+            header += f"<li><a href='board_{b}.html'"
+            if b == board_index:
+                header += " class='active'"
+            header += f">{board.title}</a></li>"
+        header += "</ul></nav></div>"
+        return header
+
     def export_to_html(self, save_path: str | None = None):
         # Create the ouput directory
         makedirs(save_path, exist_ok=True)
@@ -130,25 +152,26 @@ class Snap(LObject):
         boards = list(board.to_html() for board in self.boards)
         board_links = list(op.join(save_path, f"board_{b}.html") for b in range(len(self.boards)))
 
-        # Header
-        header = f"""<div class='snap-header'><div class='snap-title'>{self.title}</div><nav class='snap-nav'><ul>"""
-        header += "<li><a href='00_INDEX.html'>Home</a></li>"
+            # Save each board
         for b, board in enumerate(self.boards):
-            header += f"<li><a href='board_{b}.html'>{board.title}</a></li>"
-        header += "</ul></nav></div>"
-
-        # Save each board
-        for b, board in enumerate(self.boards):
-            board_html = f"""<html><head><title>{self.title} - {self.boards[b].title}</title></head><body>"""
-            board_html += header
+            board_html = f"""<html>
+            <head>
+                <title>{self.title} - {self.boards[b].title}</title>
+                <link rel="stylesheet" href="index/style.css">
+            </head><body>"""
+            board_html += self._generate_board_html_header(b)
             board_html += boards[b]
             board_html += "</body></html>"
             with open(board_links[b], "w") as f:
-                f.write(board_html)
+                f.write(prettify_html(board_html))
 
         # Save home page
-        home_html = f"""<html><head><title>{self.title}</title></head><body>"""
-        home_html += header
+        home_html = f"""<html>
+        <head>
+            <title>{self.title}</title>
+            <link rel="stylesheet" href="index/style.css">
+        </head><body>"""
+        home_html += self._generate_board_html_header(-1)
         home_html += "<h2>Boards</h2><ul>"
         for b, board in enumerate(self.boards):
             home_html += f"<li><a href='board_{b}.html'>{board.title}</a></li>"
@@ -156,14 +179,20 @@ class Snap(LObject):
         home_html += "</body></html>"
         home_path = op.join(save_path, "00_INDEX.html")
         with open(home_path, "w") as f:
-            f.write(home_html)
+            f.write(prettify_html(home_html))
+
+        # Copy css
+        css_src = Path(__file__).parent / "export_style.css"
+        index_dir = Path(save_path) / "index"
+        index_dir.mkdir(exist_ok=True)
+        shutil.copy(css_src, index_dir / "style.css")
 
         # Copy the content
-        ...
-        # shutil.copytree(
-        #     "./.local/"
-        #     dirs_exist_ok=True,
-        # )
+        shutil.copytree(
+            Path(self._dir.name) / "content",
+            Path(save_path) / "content",
+            dirs_exist_ok=True,
+        )
 
     def export_to_pdf(self, path: str):
         """Export the Snap object to a PDF file."""

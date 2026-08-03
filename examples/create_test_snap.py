@@ -39,12 +39,12 @@ first_board = Board(
     description=".",
     elements=[
         ImageElement(
-            title="Axial View", 
+            title="Axial View",
             src="./examples/test_data/mni_axial.png",
             intended_ratings=[Rating(id="coronal", name="Coronal", description="Quality of coronal view", scale=generic_scale)]
         ),
         ImageElement(
-            title="Coronal View", 
+            title="Coronal View",
             src="./examples/test_data/mni_coronal.png",
             intended_ratings=[Rating(id="axial", name="Axial", description="Quality of axial view", scale=generic_scale)]
         ),
@@ -55,7 +55,7 @@ first_board = Board(
 # Sagittal board #
 ##################
 sag = ImageElement(
-    title="Sagittal View", 
+    title="Sagittal View",
     src="./examples/test_data/mni_lightbox.png",
     intended_ratings=[Rating(id="sagittal", name="Sagittal", description="Quality of sagittal view", scale=generic_scale)]
 )
@@ -87,6 +87,6 @@ qc.save(f)
 qc_r = load_snap(f)
 
 qc_r.save(f)  # to test saving again
-pass
-# qc_r.export_to_html(".local/mni_html_report")
-# qc_r.export_to_pdf(".local/mni.pdf")
+
+qc_r.export_to_html(".local/demo_html_report")
+qc_r.export_to_pdf(".local/demo.pdf")

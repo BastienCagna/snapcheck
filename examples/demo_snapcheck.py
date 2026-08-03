@@ -136,8 +136,8 @@ metrics_board = Board(
     title="Cartes de métriques",
     description="Vérifiez la qualité des cartes de métriques.",
     elements=[
-        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png", intended_ratings=[fa_rating]),
-        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png", intended_ratings=[md_rating])
+        ImageElement(title="Carte de FA", src=".examples/tracts/test_data/CST_FA_and_bundles_masks.png", intended_ratings=[fa_rating]),
+        ImageElement(title="Carte de MD", src=".examples/tracts/test_data/CST_MD_and_bundles_masks.png", intended_ratings=[md_rating])
     ]
 )
 
@@ -163,3 +163,6 @@ f = ".local/demo.snpk"
 qc.save(f)
 
 qc_r = load_snap(f)
+
+qc_r.export_to_html(".local/demo_html_report")
+qc_r.export_to_pdf(".local/demo.pdf")
