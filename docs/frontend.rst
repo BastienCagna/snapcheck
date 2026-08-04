@@ -27,7 +27,6 @@ The frontend follows a component-based architecture with:
   
   - ``AppDataContext``: Application-level data
   - ``ModalContext``: Modal dialog management
-  - ``SnapSessionContext``: Snap session state
   - ``SettingsContext``: User settings
 
 - **Pages**: Top-level page components

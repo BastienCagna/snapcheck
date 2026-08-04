@@ -145,7 +145,7 @@ class Snap(LObject):
         header += "</ul></nav></div>"
         return header
 
-    def export_to_html(self, save_path: str | None = None):
+    def export_to_html(self, save_path: str | None = None, compress: bool =False):
         # Create the ouput directory
         makedirs(save_path, exist_ok=True)
 
@@ -194,6 +194,13 @@ class Snap(LObject):
             Path(save_path) / "content",
             dirs_exist_ok=True,
         )
+
+        if compress:
+            # Compress the directory into a zip file
+            zip_path = str(save_path) + ".zip"
+            shutil.make_archive(base_name=save_path, format="zip", root_dir=save_path)
+            return zip_path
+        return save_path
 
     def export_to_pdf(self, path: str):
         """Export the Snap object to a PDF file."""

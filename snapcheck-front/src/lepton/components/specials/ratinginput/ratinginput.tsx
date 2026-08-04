@@ -1,12 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { RatingModel, RatingScaleItem } from '@lepton/api-client';
-import { InfoOutline } from '@mui/icons-material';
-import { useModal } from '../../../contexts/ModalContext';
 
 import './ratinginput.css';
 interface RatingInputProps {
     rating: RatingModel;
-    onChange?: (rating: RatingModel, field: string, value: any) => void;
+    onChange?: (ratingId: RatingModel['id'], field: string, value: any) => void;
     highlight?: boolean;
 }
 
@@ -16,6 +14,14 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
     const commentInputRef = useRef<HTMLInputElement>(null);
 
     // const { showModal } = useModal();
+
+    useEffect(() => {
+        setSelectedValue(rating.value);
+    }, [rating.id, rating.value]);
+
+    useEffect(() => {
+        setComment(rating.comment || '');
+    }, [rating.id, rating.comment]);
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedValue(Number(event.target.value));

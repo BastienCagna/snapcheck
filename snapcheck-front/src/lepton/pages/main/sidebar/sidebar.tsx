@@ -7,7 +7,6 @@ import DictionaryTable from '../../../components/lib/table/dictTable';
 import type { BoardModel, RatingModel, SnapModel } from '@lepton/api-client';
 import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
-import { useSnapSession, useSnapSessionActions } from '../../../contexts/SnapSessionContext';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 import VerticalStackLayout, { type StackSection } from '../../../components/lib/layouts/verticalStackLayout';
 import { useLObjectSession, useSessionActions } from '@lepton/core/contexts/SessionContext';
@@ -33,13 +32,13 @@ const FilesControl: React.FC<{
     return <FilesBrowser
         path={currentPath}
         onPathChange={(p) => setCurrentPath(p)}
-        onFileSelect={(path: string) => {openLObject(path); setCurrentLObject(path); setLObjectSetting("currentBoard", 0, path);}}
+        onFileSelect={(path: string) => { openLObject(path); setCurrentLObject(path); setLObjectSetting("currentBoard", 0, path); }}
         extensions={[".snpk"]}
     />
 }
 
 const SnapControl: React.FC<{}> = () => {
-    const {currentObject: snap, setLObjectSetting, currentObjectSettings, session, updateFieldDebounced} = useLObjectSession();
+    const { currentObject: snap, setLObjectSetting, currentObjectSettings, session, updateFieldDebounced } = useLObjectSession();
     const currentBoardIndex = currentObjectSettings.currentBoard || 0;
     const currentBoard = snap?.boards ? snap.boards[currentBoardIndex] : null;
     const [showAllratings, setShowAllRatings] = React.useState(true);

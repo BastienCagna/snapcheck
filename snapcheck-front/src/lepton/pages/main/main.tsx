@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { BoardModel } from "@lepton/api-client";
 import Board from "./board";
-import { useSnapSession } from "../../contexts/SnapSessionContext";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import Viewer3D from "../../components/elements/viewer3d";
 import { useLObjectSession } from "@lepton/core/contexts/SessionContext";
@@ -32,7 +31,7 @@ const BoardView: React.FC<{ snapId: string, board: BoardModel | null }> = ({ sna
 
 const MainContent: React.FC<{}> = () => {
     // const { snap, setCurrentBoard, currentBoardIndex, currentBoard, session } = useSnapSession();
-    const {currentObject: snap, setLObjectSetting, currentObjectSettings, session} = useLObjectSession();
+    const { currentObject: snap, setLObjectSetting, currentObjectSettings, session } = useLObjectSession();
     const currentBoardIndex = currentObjectSettings.currentBoard || 0;
     const currentBoard = snap?.boards ? snap.boards[currentBoardIndex] : null;
 

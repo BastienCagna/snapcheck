@@ -1,17 +1,18 @@
 import Menu from "../../../components/lib/menu/menu";
-// import ServerContent from "../../../components/lib/serverContent";
-// import { useAppData } from "../../../contexts/AppDataContext";
-// import { useModal } from "../../../contexts/ModalContext";
-// import { useSnapSession } from "../../../contexts/SnapSessionContext";
-// import DebugPage from "../../debug/debug";
-// import SettingsPage from "../../settings/settings";
+import ServerContent from "../../../components/lib/serverContent";
+import { useAppData } from "../../../contexts/AppDataContext";
+import { useModal } from "../../../contexts/ModalContext";
+import DebugPage from "../../debug/debug";
+import SettingsPage from "../../settings/settings";
 import { Close, FilterNone, Maximize, Minimize } from "@mui/icons-material";
 import { SnapSelector } from "../snapSelector";
 import { useEffect, useRef } from "react";
 import "./topbar.css";
 import { useAppUIState } from "../../../../contexts/AppUIStateContext";
 import { useLObjectSession } from "@lepton/core/contexts/SessionContext";
-
+import { ObjectsService } from '@lepton/api-client';
+import FilesBrowser from "../../../components/files/browser/browser";
+import ExportHTMLPage from "../../exportHTML/exportHTML";
 
 // Declare missing globals and types
 declare const QWebChannel: any;
@@ -19,8 +20,7 @@ declare const QWebChannel: any;
 
 const TopBar: React.FC<{
 }> = () => {
-    // const { snap, openSnap, currentBoard, closeCurrentSnap, toggleShowSidebar, toggleSyncBoards, saveSnap, saveSnapAs } = useSnapSession();
-    // const { showModal } = useModal();
+    const { showModal } = useModal();
     // const { history } = useAppData();
     const { showSidebar, setState } = useAppUIState();
     const { currentObject: snap, saveLObject, saveLObjectAs, openLObject } = useLObjectSession();
@@ -148,6 +148,46 @@ const TopBar: React.FC<{
         }
     };
 
+    const exportToHTML = () => {
+        if (!snap || !snap.id) return;
+        //     ObjectsService.exportAsHtml(snap.id).then((zip_file) => {
+        //         const zipBlob = new Blob([zip_file], { type: "application/zip" });
+        //         const url = window.URL.createObjectURL(zipBlob);
+        //         const zipDownload = document.createElement("a");
+
+        //         zipDownload.href = url;
+        //         zipDownload.download = `${snap.title || 'export'}.zip`;
+        //         document.body.appendChild(zipDownload);
+        //         zipDownload.click();
+        showModal(<ExportHTMLPage onSubmit={(path: string) => {
+            if (!snap || !snap.id) return "No snap to export.";
+            return ObjectsService.exportAsHtml(snap.id, path).then((result) => {
+                if (result.success) {
+                    return false; // No error
+                } else {
+                    return result.error || "An error occurred while exporting.";
+                }
+            }).catch((error) => {
+                console.error("Export failed:", error);
+                return "An error occurred while exporting.";
+            });
+        }} />);
+    }
+
+    const exportToPDF = () => {
+        if (!snap || !snap.id) return;
+        ObjectsService.exportAsPdf(snap.id).then((zip_file) => {
+            const zipBlob = new Blob([zip_file], { type: "application/pdf" });
+            const url = window.URL.createObjectURL(zipBlob);
+            const zipDownload = document.createElement("a");
+
+            zipDownload.href = url;
+            zipDownload.download = `${snap.title || 'export'}.pdf`;
+            document.body.appendChild(zipDownload);
+            zipDownload.click();
+        });
+    }
+
 
     return <div className="topbar"
         onMouseDown={handleMouseDown}
@@ -175,8 +215,8 @@ const TopBar: React.FC<{
                         // { label: "Close", onClick: closeCurrentSnap, disabled: !snap },
                         // { label: "Close All", onClick: () => { }, disabled: !snap },
                         { type: "separator" },
-                        { label: "Export to PDF", onClick: () => { }, disabled: !snap },
-                        { label: "Export to HTML", onClick: () => { }, disabled: !snap },
+                        // { label: "Export to PDF", onClick: () => { snap?.id && ObjectsService.exportAsPdf(snap.id) }, disabled: !snap },
+                        { label: "Export to HTML", onClick: exportToHTML, disabled: !snap },
                         // { type: "separator" },
                         // { label: "Settings...", onClick: () => { showModal(<SettingsPage />) } },
                         { type: "separator" },
@@ -197,7 +237,7 @@ const TopBar: React.FC<{
                 },
                 {
                     label: "More", children: [
-                        // { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) } },
+                        { label: "About", onClick: () => { showModal(<ServerContent path="about.html" />) } },
                         // { label: "Debug", onClick: () => { showModal(<DebugPage />) } },
                     ]
                 },

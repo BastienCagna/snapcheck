@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import type { BoardModel } from '@lepton/api-client';
 import { ContextualMenu } from '../../components/lib/contextualMenu/contextualMenu';
-import { useSnapSession, useSnapSessionActions } from '../../contexts/SnapSessionContext';
+import { useLObjectSession } from '@lepton/core/contexts/SessionContext';
 
 
 const DefaultElementComponent = React.lazy(() => import('../../components/elements/default'));
@@ -60,28 +60,28 @@ const renderElement = (snapId: string, element: any) => {
 
 
 const BoardElement: React.FC<{ snapId: string, board: BoardModel, element: any }> = ({ snapId, board, element }) => {
-    // const { updateFieldDebounced } = useSnapSessionActions();
+    const { updateFieldDebounced } = useLObjectSession();
 
     const allIntendedRatings = board.elements?.flatMap(el => el.intended_ratings || []) || [];
 
     const menuItems: any[] = [
-        // {label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked')},
-        // ...allIntendedRatings.map(rating => ({
-        //     label: rating.name,
-        //     items: [
-        //         ...(rating.scale?.ratings.map((rate, index) => ({
-        //             label: rate.name,
-        //             onClick: () => updateFieldDebounced(snapId, `ratings.{id:${rating.id}}.value`, rate.value),
-        //             style:{ backgroundColor: rate.color || "" }
-        //         })) || []),
-        //         { label: "Comment", onClick: () => console.log('Comment clicked') },
-        //         { label: "Infos", onClick: () => console.log('Infos clicked') },
-        //     ]
-        // }))
+        { label: "Show this board in all files", onClick: () => console.log('Show this board in all views clicked') },
+        ...allIntendedRatings.map(rating => ({
+            label: rating.name,
+            items: [
+                ...(rating.scale?.ratings?.map((rate, index) => ({
+                    label: rate.name,
+                    onClick: () => updateFieldDebounced(snapId, `ratings.{id:${rating.id}}.value`, rate.value),
+                    style: { backgroundColor: rate.color || "" }
+                })) || []),
+                { label: "Comment", onClick: () => console.log('Comment clicked') },
+                { label: "Infos", onClick: () => console.log('Infos clicked') },
+            ]
+        }))
     ];
 
     return (
-        <ContextualMenu parentClass="board" items={[]}>
+        <ContextualMenu parentClass="board" items={menuItems}>
             <div className="board-element">
                 {renderElement(snapId, element)}
             </div>

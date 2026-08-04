@@ -25,7 +25,7 @@ const ShortCuts: React.FC<{
             // ctrl+s to save snap
             if (e.ctrlKey && e.key.toLowerCase() === "s") {
                 e.preventDefault();
-                if(currentObject && currentObject.id) {
+                if (currentObject && currentObject.id) {
                     saveLObject(currentObject.id);
                 }
             }
@@ -33,9 +33,9 @@ const ShortCuts: React.FC<{
             // ctrl+shift+s to save snap as
             if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "s") {
                 e.preventDefault();
-                if(currentObject && currentObject.id) {
+                if (currentObject && currentObject.id) {
                     const newName = prompt("Enter the save path:");
-                    if(newName) {
+                    if (newName) {
                         saveLObjectAs(currentObject.id, newName);
                     }
                 }
@@ -44,9 +44,9 @@ const ShortCuts: React.FC<{
             // ctrl+w to close snap
             if (e.ctrlKey && e.key.toLowerCase() === "w") {
                 e.preventDefault();
-                if(currentObject && currentObject.id) {
+                if (currentObject && currentObject.id) {
                     const confirmClose = confirm("Are you sure you want to close the snap? Unsaved changes will be lost.");
-                    if(confirmClose) {
+                    if (confirmClose) {
                         closeLObject(currentObject.id);
                     }
                 }
@@ -54,7 +54,7 @@ const ShortCuts: React.FC<{
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
+    }, [showSidebar]);
 
     return <></>
 }
@@ -63,8 +63,7 @@ function SnapCheck() {
     // const { session, openLObject, currentLObjectPath } = useLObjectSession();
     const { showSidebar } = useAppUIState();
     return (
-        <ModalProvider>
-            <div className='app'>
+        <div className='app'>
             <ShortCuts />
             <div className='app-topbar'>
                 <TopBar />
@@ -77,14 +76,12 @@ function SnapCheck() {
                     <div className="board-container">
                         <MainContent />
                     </div>
-                    {/* <div className='modal-container'>
+                    <div className='modal-container'>
                         <Modal />
-                    </div> */}
+                    </div>
                 </div>
             </div>
-
         </div>
-        </ModalProvider>
     );
 }
 

@@ -30,9 +30,13 @@ generic_scale = RatingScale(
     description="Generic Scale",
     ratings=[
         RatingScaleItem(name="Bad", value=0, description="Too bad data", color="red"),
-        RatingScaleItem(name="Ok", value=1, description="Good enough data", color="lightgreen"),
-        RatingScaleItem(name="Excellent", value=2, description="Outstanding sample", color="green")
-    ]
+        RatingScaleItem(
+            name="Ok", value=1, description="Good enough data", color="lightgreen"
+        ),
+        RatingScaleItem(
+            name="Excellent", value=2, description="Outstanding sample", color="green"
+        ),
+    ],
 )
 ```
 
@@ -44,13 +48,13 @@ fa_rating = Rating(
     id="tracto_fa",
     name="Carte de FA",
     description="Qualité de la carte de FA",
-    scale=generic_scale
+    scale=generic_scale,
 )
 md_rating = Rating(
     id="tracto_md",
     name="Carte de MD",
     description="Qualité de la carte de MD",
-    scale=generic_scale
+    scale=generic_scale,
 )
 ```
 
@@ -62,11 +66,18 @@ metrics_board = Board(
     title="Cartes de métriques",
     description="Vérifiez la qualité des cartes de métriques.",
     elements=[
-        ImageElement(title="Carte de FA", src=".local/demo_sources/CST_FA_and_bundles_masks.png", intended_ratings=[fa_rating]),
-        ImageElement(title="Carte de MD", src=".local/demo_sources/CST_MD_and_bundles_masks.png", intended_ratings=[md_rating])
-    ]
+        ImageElement(
+            title="Carte de FA",
+            src=".local/demo_sources/CST_FA_and_bundles_masks.png",
+            intended_ratings=[fa_rating],
+        ),
+        ImageElement(
+            title="Carte de MD",
+            src=".local/demo_sources/CST_MD_and_bundles_masks.png",
+            intended_ratings=[md_rating],
+        ),
+    ],
 )
-
 ```
 
 
@@ -78,14 +89,20 @@ qc = Snap(
     title="Tractométrie",
     description=f"Tractométrie du CST (Corticospinal Tract) pour le sujet {visit.subject}/{visit.visit}",
     metadata=visit.__dict__,
-    ratings=[subject_observations, b0_rating, mni_registration_rating, fa_rating, md_rating] + bundles_ratings,
+    ratings=[
+        subject_observations,
+        b0_rating,
+        mni_registration_rating,
+        fa_rating,
+        md_rating,
+    ]
+    + bundles_ratings,
     boards=[preproc_board, cst_board, metrics_board],
 )
 
 f = ".local/demo.snpk"
 # qc.to_json(f)
 qc.save(f)
-
 ```
 
 
@@ -152,6 +169,8 @@ Snap
 * pouvoir ajouter des notes à un board voir un snap
 * implémenter les notes booléenne et avac/sans commentaires
 * ajouter un commentaire global
+* note par défaut avec un flag qui dit si la valeur a été changée
+* flag pour identifier si le snap est a été complété
 
 Back
 ~~~~
@@ -173,5 +192,4 @@ GUI
 * clear le champs de recherche du broswer lorsqu'on change de fichier
 * bien gérer le has_changed lorsqu'on modofie dans la sidebar
 * afficher la nouvelle valeur lorsqu'on modifie la note via le menu contextuel
-* implémenter saveas
 * férer la fermeture des snap correctement

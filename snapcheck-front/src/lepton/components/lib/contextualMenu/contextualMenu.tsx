@@ -10,10 +10,10 @@ type ContextualMenuItemProps = {
     style?: React.CSSProperties;
 };
 
-export const ContextualMenuItem: React.FC<ContextualMenuItemProps> = ({ label, icon, onClick, items, style}) => {
+export const ContextualMenuItem: React.FC<ContextualMenuItemProps> = ({ label, icon, onClick, items, style }) => {
     const [submenuVisible, setSubmenuVisible] = useState(false);
 
-    return  <div
+    return <div
         className="contextual-menu-item"
         onMouseEnter={() => { if (items && items.length > 0) setSubmenuVisible(true); }}
         onMouseLeave={() => { if (items && items.length > 0) setSubmenuVisible(false); }}
@@ -63,10 +63,10 @@ export const ContextualMenu: React.FC<ContextualMenuProps> = ({ items, children,
     const handleContextMenu = (event: React.MouseEvent) => {
         event.preventDefault();
         let rect = null;
-        if(parentClass) {
+        if (parentClass) {
             rect = (event.target as HTMLElement).closest(`.${parentClass}`)?.getBoundingClientRect();
         }
-        if(!rect) {
+        if (!rect) {
             rect = (event.target as HTMLElement).getBoundingClientRect();
         }
         setPosition({ x: event.pageX - rect.left, y: event.pageY - rect.top });
@@ -75,12 +75,13 @@ export const ContextualMenu: React.FC<ContextualMenuProps> = ({ items, children,
 
     const handleMouseLeave = (e: React.MouseEvent) => {
         const menu = menuRef.current;
+        const d = 30; // tolerance
         if (menu) {
             const rect = menu.getBoundingClientRect();
             const mouseX = e.clientX;
             const mouseY = e.clientY;
-            const withinX = mouseX >= rect.left - 10 && mouseX <= rect.right + 10;
-            const withinY = mouseY >= rect.top - 10 && mouseY <= rect.bottom + 10;
+            const withinX = mouseX >= rect.left - d && mouseX <= rect.right + d;
+            const withinY = mouseY >= rect.top - d && mouseY <= rect.bottom + d;
             if (withinX && withinY) {
                 return;
             }

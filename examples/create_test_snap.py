@@ -72,7 +72,7 @@ second_board = Board(
 ##########################
 qc = Snap(
     title="MNI Quality Check",
-    description=f"",
+    description="",
     ratings=first_board.all_intended_ratings + second_board.all_intended_ratings,
     boards=[first_board, second_board],
     metadata={
