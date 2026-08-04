@@ -7,11 +7,11 @@ import DictionaryTable from '../../../components/lib/table/dictTable';
 import type { BoardModel, RatingModel, SnapModel } from '@lepton/api-client';
 import InlineToggle from '../../../components/lib/inlineToggle';
 import FilesBrowser from '../../../components/files/browser/browser';
-import './sidebar.css';
 import { useSnapSession, useSnapSessionActions } from '../../../contexts/SnapSessionContext';
 import RatingInput from '../../../components/specials/ratinginput/ratinginput';
 import VerticalStackLayout, { type StackSection } from '../../../components/lib/layouts/verticalStackLayout';
-import { useLObjectSession } from '@lepton/core/contexts/SessionContext';
+import { useLObjectSession, useSessionActions } from '@lepton/core/contexts/SessionContext';
+import './sidebar.css';
 
 
 function boardHasRating(board: BoardModel, rating: RatingModel) {
@@ -39,10 +39,15 @@ const FilesControl: React.FC<{
 }
 
 const SnapControl: React.FC<{}> = () => {
-    // const { snap, currentBoard } = useSnapSession();
-    // const { updateFieldDebounced } = useSnapSessionActions();
+    const {currentObject: snap, setLObjectSetting, currentObjectSettings, session, updateFieldDebounced} = useLObjectSession();
+    const currentBoardIndex = currentObjectSettings.currentBoard || 0;
+    const currentBoard = snap?.boards ? snap.boards[currentBoardIndex] : null;
     const [showAllratings, setShowAllRatings] = React.useState(true);
 
+    const updateRatingField = (id: string, field: string, value: any) => {
+        console.log("Updating rating field", id, field, value);
+        updateFieldDebounced(snap?.id || "", `ratings.{id:${id}}.${field}`, value);
+    };
     return <div className="snap-control-panel">
         <div className="panel-header">
             <div>
@@ -54,13 +59,13 @@ const SnapControl: React.FC<{}> = () => {
         </div>
 
         <div className="ratings-list">
-            {/* {snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
+            {snap?.id && (snap?.ratings?.filter((rating) => currentBoard && (showAllratings || boardHasRating(currentBoard, rating))).map((rating) => (
                 <RatingInput
                     key={rating.id}
                     rating={rating}
-                    onChange={(id, field, value) => { updateFieldDebounced(snap.id, `ratings.{id:${id}}.${field}`, value); }}
+                    onChange={updateRatingField}
                     highlight={(showAllratings && currentBoard && boardHasRating(currentBoard, rating)) || false} />
-            ))} */}
+            )))}
         </div>
     </div>
 }

@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup as bs
 
 from lepton_common import LObject
 from snapcheck.snap.board import AbstractElement, Board
-from snapcheck.snap.elements import FileElement
+from snapcheck.snap.elements import FileElement, ImageElement
 from snapcheck.snap.rating import Rating
 
 
@@ -34,6 +34,7 @@ class Snap(LObject):
     metadata: dict[str, Any] = field(default_factory=dict)
     ratings: List[Rating] = field(default_factory=list)
     boards: List[Board] = field(default_factory=list)
+    global_comment: str = ""
 
     _dir: tempfile.TemporaryDirectory | None = None
     _path: str | None = None
@@ -218,28 +219,59 @@ class Snap(LObject):
         merger.close()
 
 
+
+def new_infered_snap(path: str) -> Snap:
+    """Create a new Snap object with default values."""
+    # Check if the path is an image file (jpg, png, gif, bmp, tiff)
+    image_extensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".svg", ".webp"]
+    if any(path.lower().endswith(ext) for ext in image_extensions):
+        el = ImageElement(src=path)
+    else:
+        raise IOError(f"File format not supported for Snap creation: {path}")
+        # el = FileElement(src=path)
+
+    board = Board(
+        title="Board 1",
+        description="",
+        elements=[el],
+    )
+
+    snap = Snap(
+        title = "Untitled Snap",
+        description = "",
+        boards = [board]
+    )
+
+    return snap
+
+
 def load_snap(path: str) -> Snap:
     """Load a Snap object from a JSON file"""
-    tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_load_", delete=False)
-    with zipfile.ZipFile(path, "r") as zip_ref:
-        zip_ref.extractall(tmp_dir.name)
+    try:
+        tmp_dir = tempfile.TemporaryDirectory(prefix="snapcheck_snap_load_", delete=False)
+        with zipfile.ZipFile(path, "r") as zip_ref:
+            zip_ref.extractall(tmp_dir.name)
 
-    # Find the JSON file at the root of the archive
-    json_files = [f for f in listdir(tmp_dir.name) if f.endswith(".json")]
-    if not json_files:
-        raise FileNotFoundError(f"{path} is an invalid Snap. No JSON file found at the root of the archive.")
-    json_path = op.join(tmp_dir.name, json_files[0])
-    js_path = json_path
+        # Find the JSON file at the root of the archive
+        json_files = [f for f in listdir(tmp_dir.name) if f.endswith(".json")]
+        if not json_files:
+            raise FileNotFoundError(f"{path} is an invalid Snap. No JSON file found at the root of the archive.")
+        json_path = op.join(tmp_dir.name, json_files[0])
+        js_path = json_path
 
-    with open(js_path, "r") as f:
-        data = json.load(f)
+        with open(js_path, "r") as f:
+            data = json.load(f)
 
-    snap = Snap.from_dict(data)
-    snap._filepath = path
-    snap._dir = tmp_dir
+        snap = Snap.from_dict(data)
+        snap._filepath = path
+        snap._dir = tmp_dir
 
-    # Validate the loaded object
-    snap._validate()
+        # Validate the loaded object
+        snap._validate()
+    except Exception as e:
+        # If loading failed, it can be beacause it is not yet a snap file,
+        # If  so, create a new snap with a unique board containing the file
+        snap = new_infered_snap(path)
 
     return snap
 

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import type { BoardModel } from "@lepton/api-client";
 import Board from "./board";
-import "./main.css"
 import { useSnapSession } from "../../contexts/SnapSessionContext";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import Viewer3D from "../../components/elements/viewer3d";
 import { useLObjectSession } from "@lepton/core/contexts/SessionContext";
+import "./main.css"
+
 
 const BoardView: React.FC<{ snapId: string, board: BoardModel | null }> = ({ snapId, board }) => {
     if (!board) {
@@ -78,7 +79,6 @@ const MainContent: React.FC<{}> = () => {
                 <span>{snap?.title}</span>
             </div>
             <BoardView
-                sessionId={session || ""}
                 snapId={snap?.id || ""}
                 board={currentBoard}
             />

@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import type { RatingModel, RatingScaleItem } from '@lepton/api-client';
-import './ratinginput.css';
 import { InfoOutline } from '@mui/icons-material';
 import { useModal } from '../../../contexts/ModalContext';
 
+import './ratinginput.css';
 interface RatingInputProps {
     rating: RatingModel;
     onChange?: (rating: RatingModel, field: string, value: any) => void;
@@ -15,7 +15,7 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
     const [comment, setComment] = useState<string>(rating.comment || '');
     const commentInputRef = useRef<HTMLInputElement>(null);
 
-    const { showModal } = useModal();
+    // const { showModal } = useModal();
 
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedValue(Number(event.target.value));
@@ -46,6 +46,12 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
                     className="rating-select"
                     value={(selectedValue == undefined || isNaN(selectedValue)) ? undefined : selectedValue}
                     onChange={handleSelectChange}
+                    onBlur={(event: React.FocusEvent<HTMLSelectElement>) => {
+                        const newValue = Number(event.target.value);
+                        if (newValue !== rating.value) {
+                            onChange?.(rating.id, "value", newValue);
+                        }
+                    }}
                     disabled={rating.scale == undefined}
                     style={(selectedRatingScale && selectedRatingScale.color) ? { backgroundColor: selectedRatingScale.color } : {}}
                 >
@@ -64,9 +70,9 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
                 </select>
             </div>
             <div className='rating-second-line'>
-                <div className='rating-infos-btn' onClick={()=>showModal(<div><h1>{name}</h1><p>{rating.description}</p></div>)}>
+                {/* <div className='rating-infos-btn' onClick={()=>showModal(<div><h1>{name}</h1><p>{rating.description}</p></div>)}>
                     <InfoOutline fontSize='xxsmall' />
-                </div>
+                </div> */}
                 <input
                     type="text"
                     className='rating-comment'
@@ -74,6 +80,12 @@ const RatingInput: React.FC<RatingInputProps> = ({ rating, onChange, highlight }
                     placeholder="No comment"
                     value={comment}
                     onChange={handleCommentChange}
+                    onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+                        const newComment = event.target.value;
+                        if (newComment !== rating.comment) {
+                            onChange?.(rating.id, "comment", newComment);
+                        }
+                    }}
                 />
             </div>
         </div>
