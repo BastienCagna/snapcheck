@@ -1,0 +1,81 @@
+/* Reset */
+body, h1, h2, h3, h4, h5, h6, p, span, a, ul, li, ol, table, tr, th, td, div {
+    margin: 0px;
+    padding: 0px;
+}
+
+/* Global */
+
+body {
+    margin: 0px;
+    padding: 0px;
+    background-color: black;
+    color: #f0f0f0;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* HEADER */
+.snap-header {
+    display: flex;
+    margin: 0px;
+    padding: 0px;
+}
+.snap-title {
+    padding: 0.5em;
+    color: #d4d4d4;
+    font-weight: bold;
+    font-size: 16pt;
+}
+.snap-nav {
+    list-style-type: none;
+}
+.snap-nav ul{
+    list-style-type: none;
+    display: flex;
+}
+.snap-nav li{
+    background-color: #1d1d1d;
+}
+.snap-nav li a {
+    padding: .5em;
+    color: white;
+    text-decoration: none;
+}
+.snap-nav a.active{
+    background-color: #d6d332;
+}
+.snap-nav a:not(.active):hover{
+    animation: hover 0.1s ease-in-out;
+    background-color: #f0ed39;
+}
+@keyframes hover {
+    0% { background-color: #1d1d1d; }
+    100% { background-color: #f0ed39; }
+}
+
+
+/* BOARD */
+.snap-board {
+    display: flex;
+}
+.snap-sidebar {
+  width: 20%;
+  max-width: 300px;
+  border: 1px solid #353535;
+}
+.snap-sidebar-table {
+  width: 100%;
+}
+.snap-sidebar-table th, .snap-sidebar-table td {
+    padding: .2em;
+}
+.snap-sidebar-table th {
+  background-color: #353535;
+}
+.snap-sidebar-table td {
+  background-color: #252525;
+}
