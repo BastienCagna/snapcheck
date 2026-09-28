@@ -126,6 +126,11 @@ Even if the SnapCheck GUI can be displayed by any web browser, a Qt based client
 
 
 ### Run the GUI
+Start the backend and the Qt client (which serves the frontend):
+```shell
+snapcheck --backend-port 8000 --frontend-port 3000 --gen-secret
+```
+See ```snapcheck --help``` for all the options.
 
 #### Dev and Debugging
 Set the ```SNAP_UNSAFE``` environment variable to 1 to disable API security checks.
@@ -156,7 +161,7 @@ cd ../
 ```
 pixi run client
 // or
-python python/snapclient/main.py
+python -m snapclient
 ```
 
 

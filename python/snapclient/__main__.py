@@ -4,7 +4,9 @@ import time
 import atexit
 import requests
 import argparse
+import os
 import os.path as op
+import signal
 
 import PyQt5.QtWidgets as qw
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
@@ -284,36 +286,39 @@ class MainWindow(qw.QMainWindow):
 
 def vite_commandline(port):
     """Return the command line to start the Vite development server."""
-    return f"npm run dev -- --port {str(port)}"
+    return ["npm", "run", "dev", "--", "--port", str(port), "--strictPort"]
 
 
-def start_vite_server(port) -> subprocess.Popen:
-    """Start the Vite development server."""
+def start_vite_server(port, api_url: str = None) -> subprocess.Popen:
+    """Start the Vite development server. If api_url is given, the frontend will use it as backend URL."""
+    env = os.environ.copy()
+    if api_url:
+        env["VITE_API_URL"] = api_url
     try:
-        return subprocess.Popen(vite_commandline(port).split(" "), cwd=FRONT_PATH)
+        # Use a dedicated process group so that npm and its vite child can be stopped together
+        return subprocess.Popen(vite_commandline(port), cwd=FRONT_PATH, env=env, start_new_session=True)
     except Exception as e:
         print(f"Failed to start Vite server: {e}")
 
 
-def stop_vite_server(process: subprocess.Popen, port: int):
+def stop_vite_server(process: subprocess.Popen):
     """Stop the Vite development server."""
     try:
-        process.terminate()
+        os.killpg(process.pid, signal.SIGTERM)
         process.wait()
-        # Kill Vite server instance
-        cmd = ["pkill", "-f", f"node {op.join(FRONT_PATH, 'node_modules', '.bin', 'vite')} --port {port}"]
-        subprocess.run(cmd, check=True)
     except Exception as e:
         print(f"Failed to stop Vite server: {e}")
 
 
-def main():
-    port = DEFAULT_PORT
-    url = f"http://{DEFAULT_URL}:{port}"
-
+def main(argv: list[str] = None):
     parser = argparse.ArgumentParser(description="SnapClient Application")
     parser.add_argument("--jwt", type=str, default=None, help="Authentification token.")
-    args = parser.parse_args()
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port of the frontend (Vite) server.")
+    parser.add_argument("--api-url", type=str, default=None, help="URL of the backend (ex: http://127.0.0.1:8000).")
+    args = parser.parse_args(argv)
+
+    port = args.port
+    url = f"http://{DEFAULT_URL}:{port}"
 
     # Launch the PyQt application
     app = qw.QApplication(sys.argv)
@@ -327,9 +332,9 @@ def main():
     # Process events to ensure the splash screen is displayed
     # app.processEvents()
     # Start the Vite server
-    process = start_vite_server(port=port)
+    process = start_vite_server(port=port, api_url=args.api_url)
     # Close the server when exiting the program
-    atexit.register(lambda: stop_vite_server(process, port))
+    atexit.register(lambda: stop_vite_server(process))
 
     # Wait for the Vite server to be ready
     for i in range(100):

@@ -194,7 +194,7 @@ const TopBar: React.FC<{
         onDoubleClick={handleDoubleClick}
     >
         <div>
-            <img src="assets/icon-32.png" className="app-logo" />
+            <img src="/assets/icon-32.png" className="app-logo" />
             <Menu items={[
                 {
                     label: "File", children: [
@@ -223,12 +223,12 @@ const TopBar: React.FC<{
                         { label: "Quit", onClick: close }
                     ]
                 },
-                {
-                    label: "Edit", children: [
-                        // { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
-                        // { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
-                    ]
-                },
+                // {
+                //     label: "Edit", children: [
+                //         // { label: "Cancel", onClick: () => { }, disabled: !snap?.is_cancellable },
+                //         // { label: "Redo", onClick: () => { }, disabled: !snap?.is_redoable }
+                //     ]
+                // },
                 {
                     label: "View", children: [
                         { label: "Show Sidebar", onClick: () => setState({ showSidebar: !showSidebar }), checked: showSidebar },

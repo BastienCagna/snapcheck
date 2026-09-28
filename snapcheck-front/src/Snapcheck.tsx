@@ -23,7 +23,7 @@ const ShortCuts: React.FC<{
             }
 
             // ctrl+s to save snap
-            if (e.ctrlKey && e.key.toLowerCase() === "s") {
+            if (e.ctrlKey && !e.shiftKey && e.key.toLowerCase() === "s") {
                 e.preventDefault();
                 if (currentObject && currentObject.id) {
                     saveLObject(currentObject.id);
@@ -54,7 +54,7 @@ const ShortCuts: React.FC<{
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [showSidebar]);
+    }, [showSidebar, currentObject, saveLObject, saveLObjectAs, closeLObject, setState]);
 
     return <></>
 }

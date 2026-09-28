@@ -9,14 +9,15 @@ def make_icon(path: str) -> QIcon:
     return icon
 
 
-FRONT_PATH = op.abspath(op.join(op.dirname(__file__), "..", "..", "snapcheck-front"))
-DEFAULT_PORT = 3000
+# Vite project root (where package.json and index.html are)
+FRONT_PATH = op.abspath(op.join(op.dirname(__file__), "..", ".."))
+DEFAULT_PORT = 3050
 DEFAULT_URL = "127.0.0.1"
 
 ASSETS_PATH = op.abspath(op.join(op.dirname(__file__), "assets"))
 SPLASH_PATH = op.join(ASSETS_PATH, "splash.jpg")
 
-APP_ICON = icon_path = op.join(ASSETS_PATH, "icon.svg") 
+APP_ICON = icon_path = op.join(ASSETS_PATH, "icon.svg")
 MINIMIZE_ICON = op.join(ASSETS_PATH, "minimize.svg")
 NORMAL_ICON = op.join(ASSETS_PATH, "normal.svg")
 CLOSE_ICON = op.join(ASSETS_PATH, "close.svg")

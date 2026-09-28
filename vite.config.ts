@@ -8,6 +8,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Static files are served at the root path (ex: /assets/icon-32.png)
+  publicDir: 'snapcheck-front/public',
+  // The local pixi environment is huge and would exhaust the file watchers.
+  server: {
+    watch: {
+      ignored: ['**/.pixi/**'],
+    },
+  },
   // Keep symlinked packages resolved from workspace node_modules.
   // This avoids jumping to sibling repo node_modules for transitive deps.
   resolve: {
