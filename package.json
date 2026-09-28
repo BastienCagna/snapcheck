@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build_api": "python ../lepton/scripts/build_api.py ./python/snapserve/__main__.py:app ."
+    "sass": "sass --no-source-map snapcheck-front/src:snapcheck-front/src",
+    "build": "npm run sass && vite build",
+    "build_api": "python -m lepton.build_api ./python/snapserve/__main__.py:app ."
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "openapi-typescript-codegen": "^0.29.0",
+    "sass": "^1.89.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "@vitejs/plugin-react": "^4.5.1",

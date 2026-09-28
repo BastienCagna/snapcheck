@@ -7,6 +7,10 @@ import argparse
 import os
 import os.path as op
 import signal
+import threading
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import urlencode
 
 import PyQt5.QtWidgets as qw
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
@@ -14,7 +18,7 @@ from PyQt5.QtCore import QUrl, Qt, QTimer, QObject, pyqtSlot
 from PyQt5.QtGui import QPixmap, QCursor, QIcon
 from PyQt5.QtWebChannel import QWebChannel
 
-from snapclient.constants import APP_ICON, FRONT_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
+from snapclient.constants import APP_ICON, FRONT_PATH, FRONTEND_BUILD_PATH, DEFAULT_PORT, DEFAULT_URL, SPLASH_PATH
 
 
 class BottomBar(qw.QWidget):
@@ -289,14 +293,11 @@ def vite_commandline(port):
     return ["npm", "run", "dev", "--", "--port", str(port), "--strictPort"]
 
 
-def start_vite_server(port, api_url: str = None) -> subprocess.Popen:
-    """Start the Vite development server. If api_url is given, the frontend will use it as backend URL."""
-    env = os.environ.copy()
-    if api_url:
-        env["VITE_API_URL"] = api_url
+def start_vite_server(port) -> subprocess.Popen:
+    """Start the Vite development server."""
     try:
         # Use a dedicated process group so that npm and its vite child can be stopped together
-        return subprocess.Popen(vite_commandline(port), cwd=FRONT_PATH, env=env, start_new_session=True)
+        return subprocess.Popen(vite_commandline(port), cwd=FRONT_PATH, start_new_session=True)
     except Exception as e:
         print(f"Failed to start Vite server: {e}")
 
@@ -310,15 +311,31 @@ def stop_vite_server(process: subprocess.Popen):
         print(f"Failed to stop Vite server: {e}")
 
 
+class QuietHTTPRequestHandler(SimpleHTTPRequestHandler):
+    """A request handler that suppresses logging messages."""
+    def log_message(self, format, *args):
+        pass
+
+
+def start_static_server(port) -> ThreadingHTTPServer:
+    """Serve the built frontend (installed package) in a background thread."""
+    handler = partial(QuietHTTPRequestHandler, directory=FRONTEND_BUILD_PATH)
+    server = ThreadingHTTPServer((DEFAULT_URL, port), handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server
+
+
 def main(argv: list[str] = None):
     parser = argparse.ArgumentParser(description="SnapClient Application")
     parser.add_argument("--jwt", type=str, default=None, help="Authentification token.")
-    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port of the frontend (Vite) server.")
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Port of the frontend server.")
     parser.add_argument("--api-url", type=str, default=None, help="URL of the backend (ex: http://127.0.0.1:8000).")
     args = parser.parse_args(argv)
 
     port = args.port
     url = f"http://{DEFAULT_URL}:{port}"
+    # The frontend reads the backend URL from the query string
+    page_url = f"{url}/?{urlencode({'api': args.api_url})}" if args.api_url else url
 
     # Launch the PyQt application
     app = qw.QApplication(sys.argv)
@@ -331,12 +348,19 @@ def main(argv: list[str] = None):
 
     # Process events to ensure the splash screen is displayed
     # app.processEvents()
-    # Start the Vite server
-    process = start_vite_server(port=port, api_url=args.api_url)
-    # Close the server when exiting the program
-    atexit.register(lambda: stop_vite_server(process))
+    if op.isfile(op.join(FRONT_PATH, "package.json")):
+        # Sources: start the Vite development server
+        process = start_vite_server(port=port)
+        # Close the server when exiting the program
+        atexit.register(lambda: stop_vite_server(process))
+    elif op.isdir(FRONTEND_BUILD_PATH):
+        # Installed package: serve the built frontend
+        server = start_static_server(port)
+        atexit.register(server.shutdown)
+    else:
+        sys.exit(f"Frontend not found in {FRONTEND_BUILD_PATH}")
 
-    # Wait for the Vite server to be ready
+    # Wait for the frontend server to be ready
     for i in range(100):
         try:
             response = requests.get(url)
@@ -351,7 +375,7 @@ def main(argv: list[str] = None):
         print(f"Server dind't start in time.")
         sys.exit(1)
 
-    window = MainWindow(url, jwt=args.jwt)
+    window = MainWindow(page_url, jwt=args.jwt)
     splash.finish(window)
     window.show()
     sys.exit(app.exec_())

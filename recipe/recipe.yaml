@@ -1,0 +1,111 @@
+# Conda packages of SnapCheck, built with rattler-build:
+#  - snapcheck: the core python package, to create and read snap files (no GUI)
+#  - snapclient: the local application (Qt client + snapserve backend + built frontend),
+#    started with the "snapcheck" command
+context:
+  # Keep in sync with pyproject.toml
+  version: "0.1.0"
+
+recipe:
+  name: snapcheck-split
+  version: ${{ version }}
+
+source:
+  path: ..
+  use_gitignore: false
+  filter:
+    exclude:
+      - .git/**
+      - recipe/**
+      - output/**
+      - .pixi/**
+      - .local/**
+      - node_modules/**
+      - package-lock.json
+      - dist/**
+      - python/snapclient/frontend/**
+      - build/**
+      - docs/**
+      - "**/*.egg-info/**"
+      - "**/__pycache__/**"
+
+build:
+  number: 0
+
+outputs:
+  - package:
+      name: snapcheck
+    build:
+      noarch: python
+      script:
+        - mkdir -p "$SP_DIR"
+        - cp -r python/snapcheck "$SP_DIR/"
+    requirements:
+      host:
+        - python >=3.12
+      run:
+        - python >=3.12
+        - lepton-common
+        - pydantic >=2
+        - beautifulsoup4
+        - pypdf
+        # >=0.2.17 needs python-bidi >=0.5, not available on conda-forge for python 3.14
+        - xhtml2pdf >=0.2.16,<0.2.17
+    tests:
+      - python:
+          imports:
+            - snapcheck
+            - snapcheck.snap
+          pip_check: false
+
+  - package:
+      name: snapclient
+    build:
+      noarch: python
+      python:
+        entry_points:
+          - snapcheck = snapclient.launcher:main
+      script:
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        content: |
+          # Build the frontend against the @lepton/core library installed with lepton
+          npm pkg set "dependencies.@lepton/core=file:$PREFIX/share/lepton/core"
+          npm install
+          PYTHONPATH=python python -m lepton.build_api python/snapserve/__main__.py:app .
+          npm run build
+
+          mkdir -p "$SP_DIR"
+          cp -r python/snapserve python/snapclient "$SP_DIR/"
+          cp -r dist "$SP_DIR/snapclient/frontend"
+    requirements:
+      build:
+        # Tools needed for the frontend build
+        - nodejs
+      host:
+        # Dependencies needed to build
+        - python >=3.12
+        - ${{ pin_subpackage("snapcheck", exact=True) }}
+        - lepton-app
+      run:
+        # Dependencies needed at runtime
+        - python >=3.12
+        - ${{ pin_subpackage("snapcheck", exact=True) }}
+        - lepton-app
+        - lepton-common
+        - fastapi
+        - pydantic >=2
+        - requests
+        - pyqtwebengine >=5,<6
+    tests:
+      - python:
+          imports:
+            - snapserve
+          pip_check: false
+      - script:
+          - python -c "import os, snapclient; assert os.path.isfile(os.path.join(os.path.dirname(snapclient.__file__), 'frontend', 'index.html'))"
+          - snapcheck --help
+
+about:
+  summary: Make visual checking and annotation using HTML boards.
+  license: CECILL-B

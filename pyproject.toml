@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "snapcheck"
 version = "0.1.0"
@@ -16,12 +20,28 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Natural Language :: English",
 ]
+# Core package only, see the "client" extra for the GUI application
+dependencies = [
+    "lepton_common",
+    "pydantic>=2",
+    "beautifulsoup4",
+    "pypdf",
+    "xhtml2pdf>=0.2.16",
+]
 
 
 [project.scripts]
 snapcheck = "snapclient.launcher:main"
 
 [project.optional-dependencies]
+# GUI application (snapclient + snapserve), started with the "snapcheck" command
+client = [
+    "lepton-app",
+    "fastapi>=0.115",
+    "requests",
+    "PyQt5>=5.15,<6",
+    "PyQtWebEngine>=5.15,<6",
+]
 doc = ["sphinx >=1.0", "sphinx-rtd-theme"]
 
 [project.urls]
@@ -30,6 +50,8 @@ repository = "https://github.com/brainvisa/snapcheck"
 
 [tool.setuptools.package-data]
 "*" = ["*.html", "*.css", "*.js"]
+# The built frontend is copied in snapclient/frontend before building the wheel
+snapclient = ["assets/*", "frontend/**/*"]
 
 [tool.pixi.workspace]
 channels = ["https://repo.prefix.dev/conda-forge"]
@@ -39,10 +61,17 @@ platforms = ["linux-64"]
 snapcheck="python -m snapclient.launcher"
 server="python -m snapserve"
 client="python -m snapclient"
+# Conda packages in ./output, published in a local forge: pixi run publish-conda FORGE (or set LEPTON_FORGE)
+build-conda = "bash scripts/conda.sh build"
+publish-conda = "bash scripts/conda.sh publish"
+# Wheel (pip / uv) in ./output/wheels: pixi run build-wheel FORGE (or set LEPTON_FORGE),
+# the frontend is built with lepton-app from the local forge
+build-wheel = "bash scripts/build_wheel.sh"
 
 [tool.pixi.dependencies]
 py2puml = ">=0.9.1,<0.10"
-xhtml2pdf = ">=0.2.16,<0.3"
+# >=0.2.17 needs python-bidi >=0.5, not available on conda-forge for python 3.14
+xhtml2pdf = ">=0.2.16,<0.2.17"
 pypdf = ">=6.6.0,<7"
 
 # For the tests
@@ -63,6 +92,8 @@ asgi-correlation-id = ">=5.0.1,<6"
 
 [tool.pixi.pypi-dependencies]
 snapcheck = { path = ".", editable = true }
+# lepton_common is not on PyPI
+lepton_common = { git = "https://github.com/cati-neuroimaging/lepton-common.git" }
 
 [tool.setuptools.packages.find]
 where = ["python"]

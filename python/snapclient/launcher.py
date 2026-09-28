@@ -10,10 +10,14 @@ import subprocess
 import sys
 import time
 
-import requests
+try:
+    import requests
 
-from snapclient.constants import DEFAULT_PORT, DEFAULT_URL
-from snapclient.__main__ import main as client_main
+    from snapclient.constants import DEFAULT_PORT, DEFAULT_URL
+    from snapclient.__main__ import main as client_main
+except ImportError as e:
+    # The GUI dependencies are optional with pip (snapcheck[client] extra)
+    sys.exit(f'The SnapCheck client is not installed ({e}).\nInstall it with: pip install "snapcheck[client]"')
 
 DEFAULT_BACKEND_PORT = 8050
 

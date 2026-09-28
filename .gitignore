@@ -23,5 +23,8 @@ docs/frontend-docs/
 node_modules/
 package-lock.json
 dist/
+python/snapclient/frontend/
 
 snapcheck-front/src/lepton/api-client
+# Built packages (scripts/conda.sh, scripts/build_wheel.sh)
+output/
